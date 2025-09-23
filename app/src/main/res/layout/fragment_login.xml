@@ -2,16 +2,17 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegisterActivity">
+    tools:context=".ui.login.LoginFragment">
 
     <TextView
-        android:id="@+id/tvRegisterTitle"
+        android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create New Account"
-        android:textSize="24sp"
+        android:text="Hello, Welcome Back"
+        android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,46 +20,14 @@
         android:layout_marginTop="48dp"/>
 
     <TextView
-        android:id="@+id/tvName"
+        android:id="@+id/tvSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Full Name"
-        app:layout_constraintTop_toBottomOf="@id/tvRegisterTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"/>
-    <EditText
-        android:id="@+id/etName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Your Full Name"
-        app:layout_constraintTop_toBottomOf="@id/tvName"
+        android:text="Please login to continue"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginTop="8dp"/>
-
-    <TextView
-        android:id="@+id/tvPhone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Phone Number"
-        app:layout_constraintTop_toBottomOf="@id/etName"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"/>
-    <EditText
-        android:id="@+id/etPhone"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Your Phone Number"
-        android:inputType="phone"
-        app:layout_constraintTop_toBottomOf="@id/tvPhone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
         android:layout_marginTop="8dp"/>
 
     <TextView
@@ -66,16 +35,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Email"
-        app:layout_constraintTop_toBottomOf="@id/etPhone"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="32dp"/>
+
     <EditText
         android:id="@+id/etEmail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Your Email"
         android:inputType="textEmailAddress"
+        android:fontFamily="sans-serif-italic"
         app:layout_constraintTop_toBottomOf="@id/tvEmail"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -88,16 +60,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Password"
+        android:textSize="14sp"
         app:layout_constraintTop_toBottomOf="@id/etEmail"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"/>
+
     <EditText
         android:id="@+id/etPassword"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Your Password"
         android:inputType="textPassword"
+        android:fontFamily="sans-serif-italic"
         app:layout_constraintTop_toBottomOf="@id/tvPassword"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -106,58 +81,36 @@
         android:layout_marginTop="8dp"/>
 
     <TextView
-        android:id="@+id/tvConfirmPassword"
+        android:id="@+id/tvForgotPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Confirm Password"
+        android:text="Forgot Password?"
+        android:textColor="@android:color/holo_blue_dark"
         app:layout_constraintTop_toBottomOf="@id/etPassword"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"/>
-    <EditText
-        android:id="@+id/etConfirmPassword"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Re-enter Password"
-        android:inputType="textPassword"
-        app:layout_constraintTop_toBottomOf="@id/tvConfirmPassword"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginTop="8dp"/>
-
-    <CheckBox
-        android:id="@+id/cbTerms"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Saya menerima Syarat dan Ketentuan yang berlaku"
-        app:layout_constraintTop_toBottomOf="@id/etConfirmPassword"
-        app:layout_constraintStart_toStartOf="@id/etConfirmPassword"
-        app:layout_constraintEnd_toEndOf="@id/etConfirmPassword"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"/>
 
     <Button
-        android:id="@+id/btnRegister"
+        android:id="@+id/btnLogin"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Register"
-        app:layout_constraintTop_toBottomOf="@id/cbTerms"  app:layout_constraintStart_toStartOf="parent"
+        android:text="Login"
+        app:layout_constraintTop_toBottomOf="@id/tvForgotPassword"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginTop="24dp"/>
 
     <TextView
-        android:id="@+id/tvLoginRedirect"
+        android:id="@+id/tvRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Kembali ke Login"
-        android:textColor="?attr/colorPrimary"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/btnRegister"
+        android:text="Create New Account? Register Now"
+        android:textColor="@android:color/holo_blue_dark"
+        app:layout_constraintTop_toBottomOf="@id/btnLogin"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

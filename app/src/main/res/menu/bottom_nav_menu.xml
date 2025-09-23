@@ -2,18 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/homeFragment"
-        android:icon="@drawable/ic_home"
-        android:title="Beranda" />
+        android:title="Home"
+        android:icon="@drawable/ic_home" />
     <item
         android:id="@+id/savingsFragment"
-        android:icon="@drawable/ic_wallet"
-        android:title="Simpanan" />
+        android:title="Savings"
+        android:icon="@drawable/ic_wallet" />
     <item
         android:id="@+id/loansFragment"
-        android:icon="@drawable/ic_loans"
-        android:title="Pinjaman" />
+        android:title="Loans"
+        android:icon="@drawable/ic_loans" />
     <item
-        android:id="@+id/accountFragment"
-        android:icon="@drawable/ic_person"
-        android:title="Akun" />
+        android:id="@+id/profileFragment"
+        android:title="Profile"
+        android:icon="@drawable/ic_person" />
 </menu>
