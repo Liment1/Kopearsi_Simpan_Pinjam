@@ -35,6 +35,8 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+
 }
 
 dependencies {
@@ -48,9 +50,9 @@ dependencies {
     // RecyclerView (for “Aktifitas Terakhir”)
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
+    implementation(libs.material)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
