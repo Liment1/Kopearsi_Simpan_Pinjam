@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFC107"> <!-- Warna kuning biar nyambung status waiting -->
+
+    <!-- Ikon jam pasir (hourglass) -->
+    <path
+        android:fillColor="@android:color/black"
+        android:pathData="M6,2h12v2c0,2.76 -2.24,5 -5,5v2c2.76,0 5,2.24 5,5v2H6v-2c0,-2.76 2.24,-5 5,-5v-2c-2.76,0 -5,-2.24 -5,-5V2zM8,4v0c0,1.66 1.34,3 3,3h2c1.66,0 3,-1.34 3,-3V4H8zM16,20v0c0,-1.66 -1.34,-3 -3,-3h-2c-1.66,0 -3,1.34 -3,3v0H16z"/>
+</vector>

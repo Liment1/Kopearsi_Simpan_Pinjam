@@ -1,5 +1,6 @@
 package com.example.project_map
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import com.example.project_map.R
@@ -8,9 +9,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.example.project_map.databinding.ActivityMainBinding
-
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
+    lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

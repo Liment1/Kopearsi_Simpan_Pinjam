@@ -9,7 +9,7 @@
         android:title="Savings"
         android:icon="@drawable/ic_wallet" />
     <item
-        android:id="@+id/loansFragment"
+        android:id="@+id/pinjamanFragment"
         android:title="Loans"
         android:icon="@drawable/ic_loans" />
     <item

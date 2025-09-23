@@ -15,19 +15,28 @@
         android:id="@+id/savingsFragment"
         android:name="com.example.project_map.ui.savings.SavingsFragment"
         android:label="Simpanan"
-      />
+        tools:layout="@layout/fragment_savings" />
 
     <fragment
         android:id="@+id/loansFragment"
         android:name="com.example.project_map.ui.loans.LoansFragment"
+        android:label="Pengajuan Pinjaman"
+        tools:layout="@layout/fragment_loans" />
+
+    <fragment
+        android:id="@+id/pinjamanFragment"
+        android:name="com.example.project_map.ui.loans.PinjamanFragment"
         android:label="Pinjaman"
-    />
+        tools:layout="@layout/fragment_pinjaman">
+        <action
+            android:id="@+id/action_pinjamanFragment_to_loansFragment"
+            app:destination="@id/loansFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/accountFragment"
         android:name="com.example.project_map.ui.account.AccountFragment"
-        android:label="Akun"
- />
+        android:label="Akun" />
 
     <fragment
         android:id="@+id/loginFragment"
@@ -65,4 +74,5 @@
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
+
 </navigation>

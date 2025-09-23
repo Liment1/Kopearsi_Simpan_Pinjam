@@ -2,91 +2,185 @@
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#F0F0F0"
+    tools:context=".ui.home.HomeFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Welcome -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="16dp"
-            android:padding="16dp">
+            app:cardBackgroundColor="#57B362"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_koperasi_logo"
+                        android:contentDescription="Koperasi Logo"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Koperasi Web"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="@android:color/white"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PT. Zarata Digital Teknologi"
+                            android:textSize="12sp"
+                            android:textColor="@android:color/white"/>
+                    </LinearLayout>
+
+<!--                    <ImageView-->
+<!--                        android:layout_width="32dp"-->
+<!--                        android:layout_height="32dp"-->
+<!--                        android:src="@drawable/ic_user_profile"-->
+<!--                        android:background="@drawable/circle_background"-->
+<!--                        android:padding="4dp"-->
+<!--                        android:contentDescription="User Profile"/>-->
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvWelcome"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Selamat Datang," />
+                    android:text="Selamat Datang,"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"/>
 
                 <TextView
                     android:id="@+id/tvWelcomeName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="Muhammad Abdullah Said"
                     android:textStyle="bold"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"
+                    android:textColor="@android:color/white"
+                    android:layout_marginBottom="12dp"/>
 
-                <!-- Balance Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    app:cardCornerRadius="16dp">
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#FFB300">
 
-                    <LinearLayout
+                    <RelativeLayout
                         android:padding="16dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/imgKoperasiLogoSmall"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:src="@drawable/ic_koperasi_logo"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            app:tint="@android:color/white"
+                            android:contentDescription="Small Koperasi Logo"/>
+
+                        <TextView
+                            android:id="@+id/tvAngNumber"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ANG-003-2023-001"
+                            android:textColor="@android:color/white"
+                            android:textSize="12sp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentTop="true"/>
 
                         <TextView
                             android:id="@+id/tvSaldoLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Saldo Simpanan Pokok" />
+                            android:layout_below="@id/imgKoperasiLogoSmall"
+                            android:layout_marginTop="12dp"
+                            android:text="Saldo Simpanan Pokok"
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp" />
 
                         <TextView
                             android:id="@+id/tvSaldo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Rp 0"
+                            android:layout_below="@id/tvSaldoLabel"
+                            android:text="Rp 15.450.000"
                             android:textStyle="bold"
-                            android:textSize="22sp" />
+                            android:textSize="22sp"
+                            android:textColor="@android:color/white" />
 
                         <TextView
                             android:id="@+id/tvSimpananWajib"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Simpanan Wajib Rp 0"
-                            android:textSize="12sp" />
+                            android:layout_below="@id/tvSaldo"
+                            android:text="Simpanan Wajib Rp 50.000"
+                            android:textSize="12sp"
+                            android:textColor="@android:color/white"
+                            android:layout_marginBottom="12dp"/>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnPengajuanPenarikan"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_below="@id/tvSimpananWajib"
                             android:text="Pengajuan Penarikan Simpanan"
-                            style="@style/Widget.Material3.Button.TonalButton"/>
-                    </LinearLayout>
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:textColor="@android:color/white"
+                            android:backgroundTint="@android:color/transparent"
+                            app:strokeColor="@android:color/white"
+                            app:strokeWidth="1dp"
+                            app:cornerRadius="8dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:gravity="start|center_vertical"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"/>
+                    </RelativeLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Limit Pinjaman -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardCornerRadius="12dp">
+            app:cardCornerRadius="12dp"
+            android:elevation="2dp">
 
             <LinearLayout
                 android:padding="16dp"
@@ -97,22 +191,26 @@
                 <TextView
                     android:text="Limit Pinjaman"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:textColor="#333333"/>
 
                 <TextView
                     android:id="@+id/tvLimitPinjamanValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"/>
+                    android:text="Rp 100.000.000"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="#000000"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Pinjaman Terpakai -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            app:cardCornerRadius="12dp">
+            app:cardCornerRadius="12dp"
+            android:elevation="2dp">
 
             <LinearLayout
                 android:padding="16dp"
@@ -123,17 +221,20 @@
                 <TextView
                     android:text="Pinjaman Terpakai"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:textColor="#333333"/>
 
                 <TextView
                     android:id="@+id/tvPinjamanTerpakaiValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"/>
+                    android:text="Rp 5.000.000"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="#000000"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Aktif & Lunas -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -144,7 +245,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:cardCornerRadius="12dp">
+                app:cardCornerRadius="12dp"
+                android:elevation="2dp">
 
                 <LinearLayout
                     android:padding="16dp"
@@ -155,12 +257,16 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pinjaman Aktif"/>
+                        android:text="Pinjaman Aktif"
+                        android:textColor="#333333"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/tvPinjamanAktifValue"
-                        android:textStyle="bold"/>
+                        android:text="3"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="#000000"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -170,7 +276,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:cardCornerRadius="12dp">
+                app:cardCornerRadius="12dp"
+                android:elevation="2dp">
 
                 <LinearLayout
                     android:padding="16dp"
@@ -181,24 +288,28 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pinjaman Lunas"/>
+                        android:text="Pinjaman Lunas"
+                        android:textColor="#333333"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/tvPinjamanLunasValue"
-                        android:textStyle="bold"/>
+                        android:text="3"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="#000000"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- Recent -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Aktifitas Terakhir"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="#333333"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerRecent"

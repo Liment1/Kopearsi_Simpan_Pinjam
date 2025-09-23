@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="jenis_pinjaman">
+        <item>Pilih Jenis Pinjaman</item>
+        <item>Konsumtif</item>
+        <item>Produktif</item>
+    </string-array>
+
+    <string-array name="peruntukan_pinjaman">
+        <item>Pilih Peruntukan Pinjaman</item>
+        <item>Pernikahan</item>
+        <item>Renovasi</item>
+        <item>Pendidikan</item>
+    </string-array>
+
+    <string-array name="tenor_pinjaman">
+        <item>HARI</item>
+        <item>BULAN</item>
+        <item>TAHUN</item>
+    </string-array>
+</resources>
