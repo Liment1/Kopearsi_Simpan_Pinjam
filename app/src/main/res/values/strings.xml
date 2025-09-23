@@ -1,3 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Project_MAP</string>
+    <string name="app_name">Project Map</string>
+
+    <!-- Judul -->
+    <string name="title_pengajuan">Pengajuan Pinjaman</string>
+
+    <!-- Labels -->
+    <string name="label_keperluan">Keperluan Pinjaman</string>
+    <string name="label_nominal">Nominal Pinjaman</string>
+    <string name="hint_nominal">Masukkan Nominal Pinjaman</string>
+    <string name="limit_tersedia">Limit Tersedia Rp 16.000.000</string>
+
+    <string name="label_tenor">Tenor</string>
+    <string name="hint_waktu_pinjaman">Jangka Waktu Pinjaman</string>
+    <string name="hint_jatuh_tempo">Jatuh Tempo Tanggal</string>
+
+    <!-- Ringkasan -->
+    <string name="label_ringkasan">Ringkasan</string>
+    <string name="jasa_pinjaman">Jasa Pinjaman: %s</string>
+    <string name="provisi_kredit">Provisi Kredit: %s</string>
+    <string name="biaya_lain">Total Biaya Lain: %s</string>
+    <string name="total_dana_diterima">Total Dana Diterima: %s</string>
+
+    <!-- Tombol -->
+    <string name="btn_ajukan">Ajukan Pinjaman</string>
+
+    <!-- Pesan -->
+    <string name="pengajuan_dikirim">Pengajuan Pinjaman Dikirim!</string>
+    <string name="label_jasa_pinjaman">Jasa Pinjaman: Rp 0</string>
+    <string name="label_provisi_pinjaman">Provisi Kredit: Rp 0</string>
+    <string name="label_biaya_lain">Total Biaya Lain: Rp 0</string>
+    <string name="label_total_dana">Total Dana Yang Diterima: Rp 0</string>
+
 </resources>

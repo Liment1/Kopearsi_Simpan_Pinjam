@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/beranda"
+        android:title="Beranda" />
+
+    <item
+        android:id="@+id/simpanan"
+        android:title="Simpanan" />
+
+    <item
+        android:id="@+id/pinjaman"
+        android:title="Pinjaman" />
+
+    <item
+        android:id="@+id/akun"
+        android:title="Akun" />
+
+</menu>

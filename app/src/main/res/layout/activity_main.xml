@@ -1,19 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:padding="16dp"
+    android:background="#F5F5F5">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="vertical">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Kartu Limit Pinjaman -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/tvLimitTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Limit Pinjaman Kamu"
+                    android:textColor="#4CAF50"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvLimitTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rp 20.000.000"
+                    android:textColor="#212121"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"/>
+
+                <TextView
+                    android:id="@+id/tvLimitDetail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tersedia Rp 16.000.000 | Terpakai Rp 4.000.000"
+                    android:textColor="#757575"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp"/>
+
+                <Button
+                    android:id="@+id/btnPengajuan"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Pengajuan Pinjaman"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/rounded_button"
+                    android:padding="12dp" />
+
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Riwayat Pinjaman -->
+        <TextView
+            android:id="@+id/tvRiwayatTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Riwayat Pinjaman"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#212121"
+            android:layout_marginTop="24dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp">
+
+            <!-- Menunggu Persetujuan -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Menunggu Persetujuan - Rp 6.000.000 - 2 Bulan"
+                android:textColor="#FF9800"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:background="@drawable/history_item_bg"
+                android:layout_marginBottom="6dp"/>
+
+            <!-- Pinjaman Berjalan -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pinjaman Berjalan - Rp 6.000.000 - 3 Tahun"
+                android:textColor="#4CAF50"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:background="@drawable/history_item_bg"
+                android:layout_marginBottom="6dp"/>
+
+            <!-- Ditolak -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ditolak - Rp 1.000.000 - 2 Bulan"
+                android:textColor="#F44336"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:background="@drawable/history_item_bg"
+                android:layout_marginBottom="6dp"/>
+
+            <!-- Lunas -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lunas - Rp 6.000.000 - 20 Hari"
+                android:textColor="#2196F3"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:background="@drawable/history_item_bg"
+                android:layout_marginBottom="6dp"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
