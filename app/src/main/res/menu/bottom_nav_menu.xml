@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/ic_home"
+        android:title="Beranda" />
+    <item
+        android:id="@+id/savingsFragment"
+        android:icon="@drawable/ic_wallet"
+        android:title="Simpanan" />
+    <item
+        android:id="@+id/loansFragment"
+        android:icon="@drawable/ic_loans"
+        android:title="Pinjaman" />
+    <item
+        android:id="@+id/accountFragment"
+        android:icon="@drawable/ic_person"
+        android:title="Akun" />
+</menu>
