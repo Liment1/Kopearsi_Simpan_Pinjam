@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardTransaction"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="@android:color/white">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -23,15 +27,18 @@
                 android:id="@+id/tvTanggal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tanggal"
-                android:textSize="14sp" />
+                android:text="2025-09-01"
+                android:textColor="#666666"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tvKeterangan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="Keterangan"
-                android:textSize="16sp"
+                android:textColor="#333333"
+                android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -39,8 +46,8 @@
             android:id="@+id/tvJumlah"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Jumlah"
-            android:textSize="16sp"
+            android:text="+ Rp 1.000.000"
+            android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
 
