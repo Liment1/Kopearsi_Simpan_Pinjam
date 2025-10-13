@@ -32,10 +32,18 @@ class TransactionAdapter(
         holder.tvKeterangan.text = item.keterangan
         holder.tvJumlah.text = item.jumlah
 
-        if (item.imageUri.isNullOrEmpty()) {
-            holder.ivProof.setImageResource(R.drawable.placeholder_image)
+        // Cek apakah jenis simpanan adalah "Simpanan Sukarela"
+        if (item.keterangan == "Simpanan Sukarela") {
+            // Jika ya, buat ImageView terlihat dan atur gambarnya
+            holder.ivProof.visibility = View.VISIBLE
+            if (item.imageUri.isNullOrEmpty()) {
+                holder.ivProof.setImageResource(R.drawable.placeholder_image)
+            } else {
+                holder.ivProof.setImageURI(Uri.parse(item.imageUri))
+            }
         } else {
-            holder.ivProof.setImageURI(Uri.parse(item.imageUri))
+            // Jika bukan (Pokok atau Wajib), sembunyikan ImageView
+            holder.ivProof.visibility = View.GONE
         }
 
         holder.itemView.setOnClickListener { onClick(item) }

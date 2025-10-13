@@ -216,10 +216,18 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
         tvDate.text = "Tanggal: $date"
         tvTime.text = "Jam: $time"
 
-        if (transaction.imageUri.isNullOrEmpty()) {
-            ivBukti.setImageResource(R.drawable.placeholder_image)
+        // Cek apakah jenis simpanan adalah "Simpanan Sukarela"
+        if (transaction.keterangan == "Simpanan Sukarela") {
+            // Jika ya, tampilkan ImageView dan atur gambarnya
+            ivBukti.visibility = View.VISIBLE
+            if (transaction.imageUri.isNullOrEmpty()) {
+                ivBukti.setImageResource(R.drawable.placeholder_image)
+            } else {
+                ivBukti.setImageURI(Uri.parse(transaction.imageUri))
+            }
         } else {
-            ivBukti.setImageURI(Uri.parse(transaction.imageUri))
+            // Jika bukan, sembunyikan ImageView
+            ivBukti.visibility = View.GONE
         }
 
         AlertDialog.Builder(requireContext())
