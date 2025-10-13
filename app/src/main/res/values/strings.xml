@@ -34,4 +34,14 @@
     <string name="label_biaya_lain">Total Biaya Lain: Rp 0</string>
     <string name="label_total_dana">Total Dana Yang Diterima: Rp 0</string>
 
+    <!-- Spinner -->
+    <string-array name="filter_options">
+        <item>Semua</item>
+        <item>Simpanan Pokok</item>
+        <item>Simpanan Wajib</item>
+        <item>Simpanan Sukarela</item>
+        <item>Penarikan</item>
+    </string-array>
+
+
 </resources>
