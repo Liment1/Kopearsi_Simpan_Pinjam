@@ -1,0 +1,44 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialogRoot"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white">
+
+    <TextView
+        android:id="@+id/txtDetailNama"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nama" />
+
+    <TextView
+        android:id="@+id/txtDetailJumlah"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Jumlah" />
+
+    <TextView
+        android:id="@+id/txtDetailStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status" />
+
+    <TextView
+        android:id="@+id/txtDetailBunga"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bunga" />
+
+    <TextView
+        android:id="@+id/txtDetailDenda"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Denda" />
+
+    <TextView
+        android:id="@+id/txtDetailTotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total" />
+</LinearLayout>

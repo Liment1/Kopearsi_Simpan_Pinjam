@@ -1,0 +1,77 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cardRoot"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:layout_marginBottom="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <!-- Info pinjaman -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/txtNamaPinjaman"
+                android:text="Nama"
+                android:textStyle="bold"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/txtJumlahPinjaman"
+                android:text="Jumlah"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/txtStatusPinjaman"
+                android:text="Status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Buttons Setuju/Tolak Outline -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/btnSetuju"
+                android:text="✓"
+                android:textColor="@color/green_primary"
+                android:background="@drawable/button_outline"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:padding="0dp"
+                android:clipToOutline="true"
+                android:backgroundTint="@color/green_primary"
+                android:drawablePadding="0dp" />
+
+            <Button
+                android:id="@+id/btnTolak"
+                android:text="✗"
+                android:textColor="@color/red"
+                android:background="@drawable/button_outline_tolak"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="0dp"
+                android:clipToOutline="true"
+                android:backgroundTint="@color/red" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
