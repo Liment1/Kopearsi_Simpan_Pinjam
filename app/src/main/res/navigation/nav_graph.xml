@@ -51,6 +51,11 @@
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_adminFragment"
+            app:destination="@id/adminFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -73,6 +78,16 @@
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_profileFragment_to_adminFragment"
+            app:destination="@id/adminFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/adminFragment"
+        android:name="com.example.project_map.AdminFragment"
+        android:label="Admin"
+        tools:layout="@layout/fragment_admin" />
+
 
 </navigation>
