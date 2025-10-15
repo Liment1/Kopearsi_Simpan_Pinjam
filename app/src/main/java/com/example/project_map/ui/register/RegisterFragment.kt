@@ -1,7 +1,5 @@
 package com.example.project_map.ui.register
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,10 +12,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.project_map.R
+import com.example.project_map.data.UserDatabase
+import com.example.project_map.data.UserData
 
 class RegisterFragment : Fragment() {
-
-    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,8 +27,6 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedPreferences = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE)
-
         val etName = view.findViewById<EditText>(R.id.etName)
         val etPhone = view.findViewById<EditText>(R.id.etPhone)
         val etEmail = view.findViewById<EditText>(R.id.etEmail)
@@ -41,42 +37,68 @@ class RegisterFragment : Fragment() {
         val tvLoginRedirect = view.findViewById<TextView>(R.id.tvLoginRedirect)
 
         btnRegister.setOnClickListener {
-            val name = etName.text.toString()
-            val phone = etPhone.text.toString()
-            val email = etEmail.text.toString()
+            val name = etName.text.toString().trim()
+            val phone = etPhone.text.toString().trim()
+            val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString()
             val confirmPassword = etConfirmPassword.text.toString()
 
+            // --- VALIDASI ---
             if (name.isEmpty() || phone.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                Toast.makeText(requireContext(), "All fields must be filled", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Semua kolom harus diisi", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
-            if (!cbTerms.isChecked) {
-                Toast.makeText(requireContext(), "You must accept the Terms and Conditions", Toast.LENGTH_SHORT).show()
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(requireContext(), "Format email tidak valid", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
+            if (UserDatabase.allUsers.any { it.email == email }) {
+                Toast.makeText(requireContext(), "Email sudah terdaftar", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             if (password != confirmPassword) {
-                Toast.makeText(requireContext(), "Passwords do not match", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Password tidak cocok", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (!cbTerms.isChecked) {
+                Toast.makeText(requireContext(), "Anda harus menyetujui Syarat dan Ketentuan", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val editor = sharedPreferences.edit()
-            editor.putString("NAME", name)
-            editor.putString("PHONE", phone)
-            editor.putString("EMAIL", email)
-            editor.putString("PASSWORD", password)
-            editor.apply()
+            // --- LOGIKA PENYIMPANAN BARU ---
 
-            Toast.makeText(requireContext(), "Register successful!", Toast.LENGTH_SHORT).show()
+            // 1. Buat ID baru yang berurutan (sama seperti di AdminFragment)
+            val lastUser = UserDatabase.allUsers.lastOrNull()
+            var lastNumber = 0
+            if (lastUser != null) {
+                lastNumber = lastUser.id.substring(3).toInt()
+            }
+            val newNumber = lastNumber + 1
+            val newId = "AGT" + String.format("%04d", newNumber)
 
-            // Navigate back to the login fragment
+            // 2. Buat objek UserData baru dengan status default "Calon Anggota"
+            val newUser = UserData(
+                id = newId,
+                name = name,
+                phone = phone,
+                email = email,
+                pass = password,
+                isAdmin = false,
+                status = "Calon Anggota" // Status default untuk pendaftar baru
+            )
+
+            // 3. Tambahkan pengguna baru ke database terpusat
+            UserDatabase.allUsers.add(newUser)
+
+            // --- Logika lama yang menyimpan ke SharedPreferences dihapus ---
+
+            Toast.makeText(requireContext(), "Registrasi berhasil!", Toast.LENGTH_SHORT).show()
+
+            // Kembali ke halaman login
             findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
         }
 
         tvLoginRedirect.setOnClickListener {
-            // Navigate back to the login fragment
             findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
         }
     }

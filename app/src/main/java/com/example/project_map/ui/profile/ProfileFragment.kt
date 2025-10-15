@@ -2,6 +2,8 @@ package com.example.project_map.ui.profile
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,29 +30,41 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ▼▼▼ AMBIL DATA DARI SHaredPreferences ▼▼▼
         val sharedPreferences = requireActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE)
-        // Jika tidak ada data, gunakan nilai default "Guest" atau "-"
-        val name = sharedPreferences.getString("USER_NAME", "Guest")
-        val email = sharedPreferences.getString("USER_EMAIL", "-")
+        val name = sharedPreferences.getString("USER_NAME", "Guest") ?: "Guest"
+        val email = sharedPreferences.getString("USER_EMAIL", "-") ?: "-"
         val isAdmin = sharedPreferences.getBoolean("IS_ADMIN", false)
-        // ▲▲▲ ---------------------------------- ▲▲▲
+        val status = sharedPreferences.getString("USER_STATUS", "Tidak Aktif") ?: "Tidak Aktif"
 
+        // Inisialisasi semua view
         val tvName = view.findViewById<TextView>(R.id.tvName)
         val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
+        val tvStatus = view.findViewById<TextView>(R.id.tvStatus)
         val btnDetailProfile = view.findViewById<RelativeLayout>(R.id.btnDetailProfile)
         val btnLaporanBulanan = view.findViewById<RelativeLayout>(R.id.btnLaporanBulanan)
         val btnSyaratKetentuan = view.findViewById<RelativeLayout>(R.id.btnSyaratKetentuan)
-        val btnAdminMenu = view.findViewById<RelativeLayout>(R.id.btnAdminMenu)
         val btnKeluar = view.findViewById<Button>(R.id.btnKeluar)
+        // ▼▼▼ Inisialisasi view baru untuk menu admin ▼▼▼
+        val btnAdminMenu = view.findViewById<RelativeLayout>(R.id.btnAdminMenu)
+        val btnLaporanKeuangan = view.findViewById<RelativeLayout>(R.id.btnLaporanKeuangan)
+        val dividerAdmin = view.findViewById<View>(R.id.dividerAdmin)
+        val dividerLaporan = view.findViewById<View>(R.id.dividerLaporan)
+
 
         // Set data yang sudah diambil ke tampilan
         tvName.text = name
         tvEmail.text = email
+        tvStatus.text = status
 
-        // Sembunyikan menu admin jika user bukan admin
+        val statusBackground = tvStatus.background as GradientDrawable
+        statusBackground.setColor(getStatusColor(status))
+
+        // Sembunyikan menu-menu admin jika user bukan admin
         if (!isAdmin) {
             btnAdminMenu.visibility = View.GONE
+            btnLaporanKeuangan.visibility = View.GONE
+            dividerAdmin.visibility = View.GONE
+            dividerLaporan.visibility = View.GONE
         }
 
         btnDetailProfile.setOnClickListener {
@@ -68,18 +82,33 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
         }
 
+        // ▼▼▼ Tambahkan listener untuk tombol-tombol admin ▼▼▼
         btnAdminMenu.setOnClickListener {
-            findNavController().navigate(R.id.action_profileFragment_to_adminFragment)
+            // Mengarah ke halaman kelola anggota (nama fragment lama tidak masalah)
+            findNavController().navigate(R.id.action_profileFragment_to_adminDataAnggotaFragment)
+        }
+
+        btnLaporanKeuangan.setOnClickListener {
+            // Mengarah ke halaman laporan keuangan yang baru
+            findNavController().navigate(R.id.action_profileFragment_to_adminLaporanKeuanganFragment)
         }
 
         btnKeluar.setOnClickListener {
-            // ▼▼▼ KOSONGKAN SharedPreferences SAAT LOGOUT ▼▼▼
             val editor = sharedPreferences.edit()
-            editor.clear() // Hapus semua data (nama, email, dll)
+            editor.clear()
             editor.apply()
-
-            // Arahkan kembali ke halaman login
             findNavController().navigate(R.id.action_profileFragment_to_loginFragment)
+        }
+    }
+
+    private fun getStatusColor(status: String): Int {
+        return when (status) {
+            "Anggota Aktif" -> Color.parseColor("#1E8E3E") // Hijau
+            "Calon Anggota" -> Color.parseColor("#F9AB00") // Kuning
+            "Anggota Tidak Aktif" -> Color.parseColor("#5F6368") // Abu-abu
+            "Diblokir Sementara" -> Color.parseColor("#E67C73") // Oranye
+            "Dikeluarkan" -> Color.parseColor("#D93025") // Merah
+            else -> Color.LTGRAY
         }
     }
 }

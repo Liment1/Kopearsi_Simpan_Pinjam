@@ -7,17 +7,22 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.project_map.R
+import com.example.project_map.data.UserDatabase // <-- Pastikan import ini ada
 import com.example.project_map.data.UserData
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.textfield.TextInputEditText
 
 class DetailProfileActivity : AppCompatActivity() {
 
+    // ▼▼▼ BAGIAN INI DIHAPUS KARENA SUDAH PINDAH KE UserDatabase.kt ▼▼▼
+    /*
     private val allUsers = listOf(
         UserData("0825012", "admin@gmail.com", "admin", "Administrator Utama", "081234567890", true),
         UserData("1025045", "user@gmail.com", "user", "Budi Santoso", "087654321098"),
         UserData("1125077", "siti@gmail.com", "siti123", "Siti Aminah", "089988776655")
     )
+    */
+    // ▲▲▲ -------------------------------------------------------- ▲▲▲
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,12 +33,11 @@ class DetailProfileActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val sharedPreferences = getSharedPreferences("UserData", Context.MODE_PRIVATE)
-        val name = sharedPreferences.getString("USER_NAME", "-")
         val id = sharedPreferences.getString("USER_ID", "-")
+        val name = sharedPreferences.getString("USER_NAME", "-")
         val email = sharedPreferences.getString("USER_EMAIL", "-")
         val phone = sharedPreferences.getString("USER_PHONE", "-")
 
-        // Inisialisasi semua View, termasuk yang dikembalikan
         val tvNama = findViewById<TextView>(R.id.tvNama)
         val tvKodePegawai = findViewById<TextView>(R.id.tvKodePegawai)
         val tvEmailDetail = findViewById<TextView>(R.id.tvEmailDetail)
@@ -43,7 +47,6 @@ class DetailProfileActivity : AppCompatActivity() {
         val etKonfirmasiPasswordBaru = findViewById<TextInputEditText>(R.id.etKonfirmasiPasswordBaru)
         val btnSimpan = findViewById<Button>(R.id.btnSimpan)
 
-        // Tampilkan semua data statis
         tvNama.text = name
         tvKodePegawai.text = id
         tvEmailDetail.text = email
@@ -52,12 +55,15 @@ class DetailProfileActivity : AppCompatActivity() {
         btnSimpan.setOnClickListener {
             val passBaru = etPasswordBaru.text.toString()
             val konfirmasiPassBaru = etKonfirmasiPasswordBaru.text.toString()
-            val passLama = etPasswordLama.text.toString() // Urutan diubah sesuai layout baru
+            val passLama = etPasswordLama.text.toString()
 
-            val currentUser = allUsers.firstOrNull { it.id == id }
-            val passwordAsli = currentUser?.pass
+            // ▼▼▼ DIUBAH AGAR MENGAMBIL DARI UserDatabase.allUsers ▼▼▼
+            val userFromList = UserDatabase.allUsers.firstOrNull { it.id == id }
+            // ▲▲▲ ----------------------------------------------- ▲▲▲
 
-            // VALIDASI LENGKAP
+            val credentialsPrefs = getSharedPreferences("UserCredentials", Context.MODE_PRIVATE)
+            val correctOldPassword = credentialsPrefs.getString(userFromList?.id, userFromList?.pass)
+
             when {
                 passBaru.isBlank() || konfirmasiPassBaru.isBlank() || passLama.isBlank() -> {
                     Toast.makeText(this, "Semua kolom password harus diisi!", Toast.LENGTH_SHORT).show()
@@ -65,16 +71,11 @@ class DetailProfileActivity : AppCompatActivity() {
                 passBaru != konfirmasiPassBaru -> {
                     Toast.makeText(this, "Password baru dan konfirmasi tidak cocok!", Toast.LENGTH_SHORT).show()
                 }
-                passLama != passwordAsli -> {
+                passLama != correctOldPassword -> {
                     Toast.makeText(this, "Password lama salah!", Toast.LENGTH_SHORT).show()
                 }
                 else -> {
-                    // ▼▼▼ BAGIAN PENTING: SIMPAN PASSWORD BARU ▼▼▼
-                    // Kita gunakan SharedPreferences khusus untuk menyimpan kredensial yang ter-update
-                    val credentialsPrefs = getSharedPreferences("UserCredentials", Context.MODE_PRIVATE)
                     val editor = credentialsPrefs.edit()
-
-                    // Simpan password baru dengan Kunci berupa ID pengguna
                     editor.putString(id, passBaru)
                     editor.apply()
 
