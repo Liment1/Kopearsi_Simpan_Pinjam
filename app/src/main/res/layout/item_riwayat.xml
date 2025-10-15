@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp">
+
+    <TextView
+        android:id="@+id/tvRiwayatTanggal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="15 Okt"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tvRiwayatDeskripsi"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="16dp"
+        android:text="Simpanan Wajib"/>
+
+    <TextView
+        android:id="@+id/tvRiwayatJumlah"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+ Rp 100.000"
+        android:textStyle="bold"/>
+</LinearLayout>

@@ -44,4 +44,14 @@
     </string-array>
 
 
+    <!--  Admin  -->
+    <string-array name="status_array">
+        <item>Anggota Aktif</item>
+        <item>Calon Anggota</item>
+        <item>Anggota Tidak Aktif</item>
+        <item>Diblokir Sementara</item>
+        <item>Mengundurkan Diri</item>
+        <item>Dikeluarkan</item>
+    </string-array>
+
 </resources>

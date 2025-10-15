@@ -51,6 +51,11 @@
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_adminFragment"
+            app:destination="@id/adminDataAnggotaFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -73,6 +78,24 @@
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_profileFragment_to_adminDataAnggotaFragment"
+            app:destination="@id/adminDataAnggotaFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_adminLaporanKeuanganFragment"
+            app:destination="@id/adminLaporanKeuanganFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/adminDataAnggotaFragment"
+        android:name="com.example.project_map.ui.admin.AdminDataAnggotaFragment"
+        android:label="Data Anggota"
+        tools:layout="@layout/fragment_admin_data_anggota" />
+
+    <fragment
+        android:id="@+id/adminLaporanKeuanganFragment"
+        android:name="com.example.project_map.ui.admin.AdminLaporanKeuanganFragment"
+        android:label="Laporan Keuangan"
+        tools:layout="@layout/fragment_admin_laporan_keuangan" />
 
 </navigation>
