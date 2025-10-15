@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
         NavigationUI.setupWithNavController(binding.bottomNav, navController)
 
-        // Set up the listener to hide/show the bottom navigation bar
+        // hide/show the bottom navbar
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.loginFragment, R.id.registerFragment -> {

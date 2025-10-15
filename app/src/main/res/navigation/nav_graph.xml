@@ -31,7 +31,18 @@
         <action
             android:id="@+id/action_pinjamanFragment_to_loansFragment"
             app:destination="@id/loansFragment" />
+        <!-- NEW ACTION TO PAYMENT HISTORY FRAGMENT -->
+        <action
+            android:id="@+id/action_pinjamanFragment_to_paymentHistoryFragment"
+            app:destination="@id/paymentHistoryFragment" />
     </fragment>
+
+    <!-- NEW FRAGMENT DESTINATION ADDED HERE -->
+    <fragment
+        android:id="@+id/paymentHistoryFragment"
+        android:name="com.example.project_map.ui.loans.PaymentHistoryFragment"
+        android:label="Riwayat Angsuran"
+        tools:layout="@layout/fragment_payment_history" />
 
     <fragment
         android:id="@+id/accountFragment"
