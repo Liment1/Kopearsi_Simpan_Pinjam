@@ -1,201 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <!-- ONE direct child only -->
+    <!-- HEADER FIXED -->
     <LinearLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:fitsSystemWindows="true">
+        android:layout_height="80dp"
+        android:background="#00796B"
+        android:orientation="horizontal"
+        android:paddingTop="36dp"
+        android:paddingBottom="12dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:elevation="4dp">
 
-        <!-- Judul -->
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_revert"
+            app:tint="@android:color/white"
+            android:contentDescription="Kembali" />
+
         <TextView
-            android:id="@+id/tvTitlePengajuan"
+            android:id="@+id/tvHeaderTitle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="@string/title_pengajuan"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="Ajukan Pinjaman Baru"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginStart="12dp" />
+    </LinearLayout>
 
-        <!-- Keperluan Pinjaman -->
+    <!-- ISI FORM -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="100dp"
+        android:padding="16dp">
+
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@android:color/white"
-            android:elevation="2dp"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
+            <!-- Jenis Peminjaman -->
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="@string/label_keperluan"
-                android:textStyle="bold"/>
-
-            <Spinner
-                android:id="@+id/spinnerJenis"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <Spinner
-                android:id="@+id/spinnerPeruntukan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"/>
-        </LinearLayout>
+                android:text="Jenis Peminjaman"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
 
-        <!-- Nominal Pinjaman -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@android:color/white"
-            android:elevation="2dp"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_nominal"
-                android:textStyle="bold"/>
-
-            <com.google.android.material.textfield.TextInputLayout
+            <EditText
+                android:id="@+id/edtJenisPinjaman"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_nominal">
+                android:hint="Contoh: Modal Usaha" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edtNominal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
+            <!-- Keperluan -->
             <TextView
-                android:id="@+id/tvLimitTersedia"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/limit_tersedia"/>
-        </LinearLayout>
+                android:text="Keperluan Peminjaman"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
-        <!-- Tenor -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@android:color/white"
-            android:elevation="2dp"
-            android:orientation="vertical"
-            android:padding="12dp">
+            <EditText
+                android:id="@+id/edtPeruntukan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Contoh: Beli perlengkapan usaha" />
 
+            <!-- Tenor -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_tenor"
-                android:textStyle="bold"/>
+                android:text="Tenor Peminjaman"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-                <com.google.android.material.textfield.TextInputLayout
+                <EditText
+                    android:id="@+id/edtLamaPinjaman"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="@string/hint_waktu_pinjaman">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/edtJangkaWaktu"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number"/>
-                </com.google.android.material.textfield.TextInputLayout>
+                    android:hint="Masukkan lama pinjaman (angka)"
+                    android:inputType="number" />
 
                 <Spinner
-                    android:id="@+id/spinnerTenor"
+                    android:id="@+id/spinnerSatuan"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"/>
+                    android:entries="@array/satuan_tenor"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            <!-- Nominal -->
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="@string/hint_jatuh_tempo">
+                android:text="Nominal Peminjaman (Rp)"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edtJatuhTempo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="date"/>
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-
-        <!-- Ringkasan -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@android:color/white"
-            android:elevation="2dp"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
+            <EditText
+                android:id="@+id/edtNominal"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_ringkasan"
-                android:textStyle="bold"/>
+                android:hint="Masukkan nominal"
+                android:inputType="number" />
 
+            <!-- Foto KTP -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Foto KTP (jaminan)"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="4dp" />
+
+            <ImageView
+                android:id="@+id/imgKtpPreview"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:scaleType="centerCrop"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnUploadKtp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Unggah atau Ambil Foto KTP"
+                android:backgroundTint="#00796B"
+                android:textColor="@android:color/white" />
+
+            <!-- Info Hitungan -->
             <TextView
                 android:id="@+id/txtJasa"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/label_jasa_pinjaman"/>
+                android:layout_marginTop="16dp"
+                android:text="Jasa Pinjaman (5%): Rp 0" />
 
             <TextView
-                android:id="@+id/txtProvisi"
-                android:layout_width="wrap_content"
+                android:id="@+id/txtTotalPengembalian"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/label_provisi_pinjaman"/>
+                android:text="Total Pengembalian: Rp 0" />
 
             <TextView
-                android:id="@+id/txtLain"
-                android:layout_width="wrap_content"
+                android:id="@+id/txtDanaDiterima"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/label_biaya_lain"/>
+                android:text="Total Dana Diterima: Rp 0" />
 
-            <TextView
-                android:id="@+id/txtTotal"
-                android:layout_width="wrap_content"
+            <!-- Tombol Ajukan -->
+            <Button
+                android:id="@+id/btnAjukan"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/label_total_dana"
-                android:textStyle="bold"/>
+                android:layout_marginTop="24dp"
+                android:text="Kirim Pengajuan Pinjaman"
+                android:backgroundTint="#388E3C"
+                android:textColor="@android:color/white" />
+
         </LinearLayout>
-
-        <!-- Button -->
-        <Button
-            android:id="@+id/btnAjukan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/holo_orange_light"
-            android:text="@string/btn_ajukan"/>
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

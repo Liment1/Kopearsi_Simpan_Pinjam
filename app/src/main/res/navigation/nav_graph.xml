@@ -5,74 +5,176 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/loginFragment">
 
+    <!-- 🏠 Beranda -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.project_map.ui.home.HomeFragment"
         android:label="Beranda"
         tools:layout="@layout/fragment_home" />
 
+    <!-- 💰 Simpanan -->
     <fragment
         android:id="@+id/savingsFragment"
         android:name="com.example.project_map.ui.savings.SavingsFragment"
         android:label="Simpanan"
         tools:layout="@layout/fragment_savings" />
 
-    <fragment
-        android:id="@+id/loansFragment"
-        android:name="com.example.project_map.ui.loans.LoansFragment"
-        android:label="Pengajuan Pinjaman"
-        tools:layout="@layout/fragment_loans" />
-
+    <!-- 💳 Halaman Utama Pinjaman -->
     <fragment
         android:id="@+id/pinjamanFragment"
         android:name="com.example.project_map.ui.loans.PinjamanFragment"
         android:label="Pinjaman"
         tools:layout="@layout/fragment_pinjaman">
+
         <action
             android:id="@+id/action_pinjamanFragment_to_loansFragment"
             app:destination="@id/loansFragment" />
+
+        <action
+            android:id="@+id/action_pinjamanFragment_to_loanHistoryFragment"
+            app:destination="@id/loanHistoryFragment" />
     </fragment>
 
+    <!-- 🧾 Form Pengajuan Pinjaman -->
+    <fragment
+        android:id="@+id/loansFragment"
+        android:name="com.example.project_map.ui.loans.LoansFragment"
+        android:label="Pengajuan Pinjaman"
+        tools:layout="@layout/fragment_loans">
+
+        <action
+            android:id="@+id/action_loansFragment_to_loanHistoryFragment"
+            app:destination="@id/loanHistoryFragment" />
+
+        <action
+            android:id="@+id/action_loansFragment_to_pinjamanFragment"
+            app:destination="@id/pinjamanFragment" />
+    </fragment>
+
+    <!-- 📜 Riwayat Pinjaman -->
+    <fragment
+        android:id="@+id/loanHistoryFragment"
+        android:name="com.example.project_map.ui.loans.LoanHistoryFragment"
+        android:label="Riwayat Pinjaman"
+        tools:layout="@layout/fragment_blank_container">
+
+        <action
+            android:id="@+id/action_loanHistoryFragment_to_pinjamanFragment"
+            app:destination="@id/pinjamanFragment" />
+
+        <!-- ✅ Action ke Detail -->
+        <action
+            android:id="@+id/action_loanHistoryFragment_to_loanDetailFragment"
+            app:destination="@id/loanDetailFragment" />
+    </fragment>
+
+    <!-- 🔎 Detail Pinjaman -->
+    <fragment
+        android:id="@+id/loanDetailFragment"
+        android:name="com.example.project_map.ui.loans.LoanDetailFragment"
+        android:label="Detail Pinjaman"
+        tools:layout="@layout/fragment_loan_detail" />
+
+    <!-- 👤 Akun -->
     <fragment
         android:id="@+id/accountFragment"
         android:name="com.example.project_map.ui.account.AccountFragment"
         android:label="Akun" />
 
+    <!-- 🔐 Login -->
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.project_map.ui.login.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login">
+
         <action
             android:id="@+id/action_loginFragment_to_homeFragment"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
+
+        <!-- ✅ Ini yang kita pindahkan ke tempat yang benar -->
+        <action
+            android:id="@+id/action_loginFragment_to_adminDashboardFragment"
+            app:destination="@id/adminDashboardFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
+    <!-- 📝 Register -->
     <fragment
         android:id="@+id/registerFragment"
         android:name="com.example.project_map.ui.register.RegisterFragment"
         android:label="fragment_register"
-        tools:layout="@layout/fragment_register" >
+        tools:layout="@layout/fragment_register">
+
         <action
             android:id="@+id/action_registerFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
     </fragment>
 
+    <!-- 👤 Profile -->
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.project_map.ui.profile.ProfileFragment"
         android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" >
+        tools:layout="@layout/fragment_profile">
+
         <action
             android:id="@+id/action_profileFragment_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
+
+    <!-- 🧩 Fragment Admin -->
+    <fragment
+        android:id="@+id/adminDashboardFragment"
+        android:name="com.example.project_map.ui.loans.AdminDashboardFragment"
+        android:label="Dashboard Admin"
+        tools:layout="@layout/fragment_admin_dashboard">
+
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminLoanListFragment"
+            app:destination="@id/adminLoanListFragment" />
+
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminCashFlowFragment"
+            app:destination="@id/adminCashFlowFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminLoanListFragment"
+        android:name="com.example.project_map.ui.loans.AdminLoanListFragment"
+        android:label="Daftar Pinjaman"
+        tools:layout="@layout/fragment_admin_loan_list">
+
+        <action
+            android:id="@+id/action_adminLoanListFragment_to_adminPaymentFragment"
+            app:destination="@id/adminPaymentFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminPaymentFragment"
+        android:name="com.example.project_map.ui.loans.AdminPaymentFragment"
+        android:label="Pembayaran"
+        tools:layout="@layout/fragment_admin_payment" />
+
+    <fragment
+        android:id="@+id/adminCashFlowFragment"
+        android:name="com.example.project_map.ui.loans.AdminCashFlowFragment"
+        android:label="Kas Koperasi"
+        tools:layout="@layout/fragment_admin_cash_flow" />
+
+    <action
+        android:id="@+id/action_loginFragment_to_adminDashboardFragment"
+        app:destination="@id/adminDashboardFragment"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
 
 </navigation>

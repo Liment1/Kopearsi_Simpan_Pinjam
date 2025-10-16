@@ -34,6 +34,14 @@
     <string name="label_biaya_lain">Total Biaya Lain: Rp 0</string>
     <string name="label_total_dana">Total Dana Yang Diterima: Rp 0</string>
 
+    <string-array name="satuan_tenor">
+        <item>Hari</item>
+        <item>Bulan</item>
+        <item>Tahun</item>
+    </string-array>
+    <string name="foto_ktp">Foto KTP</string>
+
+
     <!-- Spinner -->
     <string-array name="filter_options">
         <item>Semua</item>

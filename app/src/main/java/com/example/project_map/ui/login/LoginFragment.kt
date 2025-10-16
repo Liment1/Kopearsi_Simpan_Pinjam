@@ -19,7 +19,6 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_login, container, false)
     }
 
@@ -35,14 +34,20 @@ class LoginFragment : Fragment() {
             val email = etEmail.text.toString()
             val password = etPassword.text.toString()
 
-            val sharedPreferences = requireContext().getSharedPreferences("UserData",
-                Context.MODE_PRIVATE
-            )
+            // 🔒 Cek apakah login sebagai admin
+            if (email == "admin" && password == "admin123") {
+                findNavController().navigate(R.id.action_loginFragment_to_adminDashboardFragment)
+                return@setOnClickListener
+            }
+
+            // 📦 Ambil data user dari SharedPreferences
+            val sharedPreferences = requireContext()
+                .getSharedPreferences("UserData", Context.MODE_PRIVATE)
             val savedEmail = sharedPreferences.getString("EMAIL", "")
             val savedPassword = sharedPreferences.getString("PASSWORD", "")
 
+            // 👥 Cek apakah login sebagai user biasa
             if (email == savedEmail && password == savedPassword) {
-                // Navigate to the profile fragment instead of starting a new activity
                 findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
             } else {
                 Toast.makeText(requireContext(), "Invalid email or password", Toast.LENGTH_SHORT).show()
@@ -50,7 +55,6 @@ class LoginFragment : Fragment() {
         }
 
         tvRegister.setOnClickListener {
-            // Navigate to the register fragment
             findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
     }
