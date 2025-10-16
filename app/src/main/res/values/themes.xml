@@ -23,4 +23,10 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+
+    <style name="Theme.Project_map.NoActionBar" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- You can customize the admin theme here if needed -->
+        <!-- For example, to change the color of the toolbar -->
+        <!-- <item name="colorPrimary">@color/purple_700</item> -->
+    </style>
 </resources>

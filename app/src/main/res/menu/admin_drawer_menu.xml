@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <!-- Dashboard is now the first item -->
+        <item
+            android:id="@+id/adminDashboardFragment"
+            android:icon="@drawable/ic_dashboard"
+            android:title="Dashboard" />
+        <item
+            android:id="@+id/adminDataAnggotaFragment"
+            android:icon="@drawable/ic_group"
+            android:title="Data Anggota" />
+        <item
+            android:id="@+id/fragmentPinjamanAdmin"
+            android:icon="@drawable/ic_loan"
+            android:title="Pengajuan Pinjaman" />
+        <item
+            android:id="@+id/fragmentTransaksiSimpanan"
+            android:icon="@drawable/ic_savings"
+            android:title="Transaksi Simpanan" />
+        <item
+            android:id="@+id/adminLaporanKeuanganFragment"
+            android:icon="@drawable/ic_report"
+            android:title="Laporan Keuangan" />
+    </group>
+
+    <!-- Sub-header for account actions -->
+    <item android:title="Akun">
+        <menu>
+            <!-- The logout button -->
+            <item
+                android:id="@+id/action_logout"
+                android:icon="@drawable/ic_logout"
+                android:title="Logout (Kembali ke Login)" />
+        </menu>
+    </item>
+</menu>
+

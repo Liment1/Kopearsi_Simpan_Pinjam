@@ -7,24 +7,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
+import com.example.project_map.data.KoperasiDatabase
+import com.example.project_map.data.TipeCatatan
 import com.example.project_map.data.UserDatabase
 import com.example.project_map.data.UserData
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputLayout
-import java.util.concurrent.ThreadLocalRandom
+import java.text.NumberFormat
+import java.util.*
 
 class AdminDataAnggotaFragment : Fragment() {
 
     private lateinit var rvAnggota: RecyclerView
     private lateinit var fabTambahAnggota: FloatingActionButton
     private lateinit var anggotaAdapter: AnggotaAdapter
-    private lateinit var toolbar: MaterialToolbar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,31 +36,60 @@ class AdminDataAnggotaFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar = view.findViewById(R.id.toolbarAdmin)
         rvAnggota = view.findViewById(R.id.rvAnggota)
         fabTambahAnggota = view.findViewById(R.id.fabTambahAnggota)
-
-        // Setup Toolbar
-        (activity as AppCompatActivity).setSupportActionBar(toolbar)
 
         setupRecyclerView()
 
         fabTambahAnggota.setOnClickListener {
-            showAnggotaDialog(null)
+            showAnggotaDialog(null) // Pass null for adding a new member
         }
     }
 
     private fun setupRecyclerView() {
         anggotaAdapter = AnggotaAdapter(UserDatabase.allUsers) { anggota ->
-            showAnggotaDialog(anggota)
+            // UPDATED: Show financial summary on click first
+            showFinancialSummaryDialog(anggota)
         }
         rvAnggota.layoutManager = LinearLayoutManager(requireContext())
         rvAnggota.adapter = anggotaAdapter
     }
 
+    // NEW: Function to show financial summary
+    private fun showFinancialSummaryDialog(anggota: UserData) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_financial_summary, null)
+        val tvNamaAnggota = dialogView.findViewById<TextView>(R.id.tvNamaAnggota)
+        val tvTotalSimpanan = dialogView.findViewById<TextView>(R.id.tvTotalSimpananValue)
+        val tvTotalPinjaman = dialogView.findViewById<TextView>(R.id.tvTotalPinjamanValue)
+        val btnEditData = dialogView.findViewById<Button>(R.id.btnEditData)
+
+        tvNamaAnggota.text = anggota.name
+
+        // Calculate financial data for the specific member
+        val memberTransactions = KoperasiDatabase.allTransactions.filter {
+            it.description.contains(anggota.name, ignoreCase = true)
+        }
+        val totalSimpanan = memberTransactions.filter { it.type == TipeCatatan.SIMPANAN }.sumOf { it.amount }
+        val totalPinjaman = memberTransactions.filter { it.type == TipeCatatan.PINJAMAN }.sumOf { it.amount }
+
+        tvTotalSimpanan.text = formatCurrency(totalSimpanan)
+        tvTotalPinjaman.text = formatCurrency(totalPinjaman)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        btnEditData.setOnClickListener {
+            dialog.dismiss()
+            showAnggotaDialog(anggota) // Now open the edit dialog
+        }
+
+        dialog.show()
+    }
+
+
     private fun showAnggotaDialog(anggota: UserData?) {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_form_anggota, null)
-        // Inisialisasi semua view dari dialog
         val etNama = dialogView.findViewById<EditText>(R.id.etNamaForm)
         val etEmail = dialogView.findViewById<EditText>(R.id.etEmailForm)
         val etPhone = dialogView.findViewById<EditText>(R.id.etPhoneForm)
@@ -84,7 +113,6 @@ class AdminDataAnggotaFragment : Fragment() {
             etEmail.setText(it.email)
             etPhone.setText(it.phone)
             spinnerStatus.setSelection(statusAdapter.getPosition(it.status))
-            // Tampilkan kolom password lama HANYA saat mode edit
             layoutPasswordLama.visibility = View.VISIBLE
         }
 
@@ -105,7 +133,6 @@ class AdminDataAnggotaFragment : Fragment() {
                     return@setPositiveButton
                 }
 
-                // Logika untuk Mode TAMBAH
                 if (anggota == null) {
                     if (passBaru.isBlank() || konfirmasiPassBaru.isBlank()) {
                         Toast.makeText(requireContext(), "Password baru tidak boleh kosong", Toast.LENGTH_SHORT).show()
@@ -121,14 +148,12 @@ class AdminDataAnggotaFragment : Fragment() {
                     anggotaAdapter.notifyItemInserted(UserDatabase.allUsers.size - 1)
                     Toast.makeText(requireContext(), "Anggota baru berhasil ditambahkan", Toast.LENGTH_SHORT).show()
                 }
-                // Logika untuk Mode EDIT
                 else {
                     anggota.name = nama
                     anggota.email = email
                     anggota.phone = phone
                     anggota.status = status
 
-                    // Jika admin ingin mengubah password (salah satu kolom password diisi)
                     if (passBaru.isNotBlank() || konfirmasiPassBaru.isNotBlank() || passLama.isNotBlank()) {
                         val credentialsPrefs = requireContext().getSharedPreferences("UserCredentials", Context.MODE_PRIVATE)
                         val correctOldPassword = credentialsPrefs.getString(anggota.id, anggota.pass)
@@ -141,7 +166,6 @@ class AdminDataAnggotaFragment : Fragment() {
                             Toast.makeText(requireContext(), "Password baru dan konfirmasi tidak cocok", Toast.LENGTH_SHORT).show()
                             return@setPositiveButton
                         }
-                        // Update password di database dan SharedPreferences
                         anggota.pass = passBaru
                         credentialsPrefs.edit().putString(anggota.id, passBaru).apply()
                     }
@@ -152,5 +176,12 @@ class AdminDataAnggotaFragment : Fragment() {
             }
             .setNegativeButton("Batal", null)
             .show()
+    }
+
+    private fun formatCurrency(value: Double): String {
+        val localeID = Locale("in", "ID")
+        val format = NumberFormat.getCurrencyInstance(localeID)
+        format.maximumFractionDigits = 0
+        return format.format(value)
     }
 }

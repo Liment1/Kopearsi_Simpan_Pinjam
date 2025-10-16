@@ -50,7 +50,7 @@ class AdminLaporanKeuanganFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews(view)
-        setupToolbar(view)
+//        setupToolbar(view)
         setupListeners()
         // Inisialisasi tampilan awal
         updateUI()
@@ -70,13 +70,13 @@ class AdminLaporanKeuanganFragment : Fragment() {
         barChart = view.findViewById(R.id.barChart)
     }
 
-    private fun setupToolbar(view: View) {
-        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbarLaporan)
-        (activity as AppCompatActivity).setSupportActionBar(toolbar)
-        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        (activity as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
-        toolbar.setNavigationOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
-    }
+//    private fun setupToolbar(view: View) {
+//        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbarLaporan)
+//        (activity as AppCompatActivity).setSupportActionBar(toolbar)
+//        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//        (activity as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
+//        toolbar.setNavigationOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
+//    }
 
     // Fungsi untuk setup semua listener
     private fun setupListeners() {

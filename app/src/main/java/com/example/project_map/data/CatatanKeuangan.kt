@@ -4,10 +4,21 @@ import java.util.Date
 
 // Enum untuk tipe catatan
 enum class TipeCatatan {
-    SIMPANAN, PINJAMAN, ANGSURAN
+    SIMPANAN,
+    ANGSURAN,
+    PINJAMAN,
+    OPERASIONAL; // <-- ADDED: For operational costs like electricity, supplies, etc.
+
+    /**
+     * Helper function to determine if a transaction is income.
+     * Simplifies calculations for financial reports.
+     */
+    fun isPemasukan(): Boolean {
+        return this == SIMPANAN || this == ANGSURAN
+    }
 }
 
-// Data class untuk satu baris catatan keuangan
+// Data class untuk satu baris catatan keuangan (No changes needed here)
 data class CatatanKeuangan(
     val date: Date,
     val description: String,

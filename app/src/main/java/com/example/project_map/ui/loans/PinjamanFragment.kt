@@ -22,9 +22,18 @@ class PinjamanFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val btnAjukanPinjaman = view.findViewById<Button>(R.id.btnAjukanPinjaman)
+        // --- THIS IS THE FIX ---
+        // Find the new button by its ID from the XML layout
+        val btnRiwayatPembayaran = view.findViewById<Button>(R.id.btnRiwayatPembayaran)
 
         btnAjukanPinjaman.setOnClickListener {
             findNavController().navigate(R.id.action_pinjamanFragment_to_loansFragment)
+        }
+
+        // Set the click listener for the history button
+        btnRiwayatPembayaran.setOnClickListener {
+            // It navigates to the PaymentHistoryFragment
+            findNavController().navigate(R.id.action_pinjamanFragment_to_paymentHistoryFragment)
         }
     }
 }

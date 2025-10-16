@@ -1,4 +1,4 @@
-package com.example.project_map.ui.adminhexsel
+package com.example.project_map.ui.admin
 
 import android.app.AlertDialog
 import android.graphics.Canvas
