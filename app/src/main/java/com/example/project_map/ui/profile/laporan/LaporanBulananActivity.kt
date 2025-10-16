@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
-import com.example.project_map.data.CatatanKeuangan // <-- Diubah
-import com.example.project_map.data.TipeCatatan // <-- Diubah
+import com.example.project_map.data.CatatanKeuangan
+import com.example.project_map.data.TipeCatatan
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.card.MaterialCardView
 import java.text.NumberFormat
@@ -19,7 +19,6 @@ import java.util.*
 
 class LaporanBulananActivity : AppCompatActivity() {
 
-    // ... (deklarasi view tetap sama) ...
     private lateinit var tvCurrentMonth: TextView
     private lateinit var tvTotalSimpanan: TextView
     private lateinit var tvTotalPinjaman: TextView
@@ -29,16 +28,14 @@ class LaporanBulananActivity : AppCompatActivity() {
     private lateinit var layoutEmpty: LinearLayout
     private lateinit var cardSummary: MaterialCardView
 
-
-    private lateinit var riwayatAdapter: RiwayatAdapter // <-- Diubah
-    private val allTransactions = mutableListOf<CatatanKeuangan>() // <-- Diubah
+    private lateinit var riwayatAdapter: RiwayatAdapter
+    private val allTransactions = mutableListOf<CatatanKeuangan>()
     private val calendar = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_laporan_bulanan)
 
-        // ... (inisialisasi view dan toolbar tetap sama) ...
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -56,15 +53,14 @@ class LaporanBulananActivity : AppCompatActivity() {
         val btnPreviousMonth = findViewById<ImageButton>(R.id.btnPreviousMonth)
         val btnNextMonth = findViewById<ImageButton>(R.id.btnNextMonth)
 
-        // Setup RecyclerView dengan adapter baru
-        riwayatAdapter = RiwayatAdapter(emptyList()) // <-- Diubah
+        riwayatAdapter = RiwayatAdapter(emptyList())
         rvTransactions.layoutManager = LinearLayoutManager(this)
-        rvTransactions.adapter = riwayatAdapter // <-- Diubah
+        rvTransactions.adapter = riwayatAdapter
 
-        // Buat data dummy
-        createDummyTransactions()
+        // ### THIS IS THE CHANGE ###
+        // Get data from the new data source instead of creating it here.
+        allTransactions.addAll(com.example.project_map.data.LaporanDataSource.getDummyTransactions())
 
-        // ... (listener tombol tetap sama) ...
         btnPreviousMonth.setOnClickListener {
             calendar.add(Calendar.MONTH, -1)
             updateUI()
@@ -78,28 +74,9 @@ class LaporanBulananActivity : AppCompatActivity() {
         updateUI()
     }
 
-    private fun createDummyTransactions() {
-        // Menggunakan CatatanKeuangan dan TipeCatatan
-        allTransactions.add(CatatanKeuangan(getDate(-2, 5), "Simpanan Wajib", 100000.0, TipeCatatan.SIMPANAN)) // <-- Diubah
-        allTransactions.add(CatatanKeuangan(getDate(-2, 15), "Bayar Angsuran #1", 250000.0, TipeCatatan.ANGSURAN)) // <-- Diubah
-        allTransactions.add(CatatanKeuangan(getDate(-1, 5), "Simpanan Wajib", 100000.0, TipeCatatan.SIMPANAN)) // <-- Diubah
-        allTransactions.add(CatatanKeuangan(getDate(-1, 10), "Pinjaman Renovasi", 2000000.0, TipeCatatan.PINJAMAN)) // <-- Diubah
-        allTransactions.add(CatatanKeuangan(getDate(-1, 15), "Bayar Angsuran #2", 250000.0, TipeCatatan.ANGSURAN)) // <-- Diubah
-        allTransactions.add(CatatanKeuangan(getDate(-1, 20), "Simpanan Sukarela", 50000.0, TipeCatatan.SIMPANAN)) // <-- Diubah
-        allTransactions.add(CatatanKeuangan(getDate(0, 5), "Simpanan Wajib", 100000.0, TipeCatatan.SIMPANAN)) // <-- Diubah
-        allTransactions.add(CatatanKeuangan(getDate(0, 10), "Simpanan Sukarela", 150000.0, TipeCatatan.SIMPANAN)) // <-- Diubah
-    }
-
-    private fun getDate(monthOffset: Int, day: Int): Date {
-        // ... (fungsi ini tetap sama) ...
-        val cal = Calendar.getInstance()
-        cal.add(Calendar.MONTH, monthOffset)
-        cal.set(Calendar.DAY_OF_MONTH, day)
-        return cal.time
-    }
+    // REMOVED: createDummyTransactions() and getDate() are now in LaporanDataSource.kt
 
     private fun updateUI() {
-        // ... (logika filter dan update UI tetap sama) ...
         val monthFormat = SimpleDateFormat("MMMM yyyy", Locale("in", "ID"))
         val currentMonthStr = monthFormat.format(calendar.time)
         tvCurrentMonth.text = currentMonthStr
@@ -121,9 +98,9 @@ class LaporanBulananActivity : AppCompatActivity() {
             rvTransactions.visibility = View.VISIBLE
             cardSummary.visibility = View.VISIBLE
 
-            val totalSimpanan = filteredTransactions.filter { it.type == TipeCatatan.SIMPANAN }.sumOf { it.amount } // <-- Diubah
-            val totalPinjaman = filteredTransactions.filter { it.type == TipeCatatan.PINJAMAN }.sumOf { it.amount } // <-- Diubah
-            val totalAngsuran = filteredTransactions.filter { it.type == TipeCatatan.ANGSURAN }.sumOf { it.amount } // <-- Diubah
+            val totalSimpanan = filteredTransactions.filter { it.type == TipeCatatan.SIMPANAN }.sumOf { it.amount }
+            val totalPinjaman = filteredTransactions.filter { it.type == TipeCatatan.PINJAMAN }.sumOf { it.amount }
+            val totalAngsuran = filteredTransactions.filter { it.type == TipeCatatan.ANGSURAN }.sumOf { it.amount }
 
             val format: NumberFormat = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
             format.maximumFractionDigits = 0
@@ -132,7 +109,7 @@ class LaporanBulananActivity : AppCompatActivity() {
             tvTotalPinjaman.text = format.format(totalPinjaman)
             tvTotalAngsuran.text = format.format(totalAngsuran)
 
-            riwayatAdapter.updateData(filteredTransactions.sortedBy { it.date }) // <-- Diubah
+            riwayatAdapter.updateData(filteredTransactions.sortedBy { it.date })
         }
     }
 }

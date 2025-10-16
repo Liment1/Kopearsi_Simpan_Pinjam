@@ -44,7 +44,6 @@ class ProfileFragment : Fragment() {
         val btnLaporanBulanan = view.findViewById<RelativeLayout>(R.id.btnLaporanBulanan)
         val btnSyaratKetentuan = view.findViewById<RelativeLayout>(R.id.btnSyaratKetentuan)
         val btnKeluar = view.findViewById<Button>(R.id.btnKeluar)
-        // ▼▼▼ Inisialisasi view baru untuk menu admin ▼▼▼
         val btnAdminMenu = view.findViewById<RelativeLayout>(R.id.btnAdminMenu)
         val btnLaporanKeuangan = view.findViewById<RelativeLayout>(R.id.btnLaporanKeuangan)
         val dividerAdmin = view.findViewById<View>(R.id.dividerAdmin)
@@ -82,16 +81,6 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
         }
 
-        // ▼▼▼ Tambahkan listener untuk tombol-tombol admin ▼▼▼
-        btnAdminMenu.setOnClickListener {
-            // Mengarah ke halaman kelola anggota (nama fragment lama tidak masalah)
-            findNavController().navigate(R.id.action_profileFragment_to_adminDataAnggotaFragment)
-        }
-
-        btnLaporanKeuangan.setOnClickListener {
-            // Mengarah ke halaman laporan keuangan yang baru
-            findNavController().navigate(R.id.action_profileFragment_to_adminLaporanKeuanganFragment)
-        }
 
         btnKeluar.setOnClickListener {
             val editor = sharedPreferences.edit()

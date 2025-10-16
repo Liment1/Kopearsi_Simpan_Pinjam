@@ -11,9 +11,15 @@
     <color name="teal_200">#FF03DAC5</color>
     <color name="yellow_200">#FFFFEB3B</color>">
     <color name="biru_muda">#81D4FA</color>
+    <color name="red">#FFC62828</color>
+    <color name="loan_lunas_bg">#C8E6C9</color> <!-- hijau muda untuk pinjaman lunas -->
+    <color name="loan_pending_bg">#FFF3CD</color> <!-- kuning untuk pinjaman belum lunas -->
+    <color name="green_100">#C8E6C9</color>
+    <color name="blue_100">#BBDEFB</color>
+    <color name="red_100">#FFCDD2</color>
+    <color name="yellow_100">#FFF9C4</color>
 
     <color name="green">#1E8E3E</color>
-    <color name="red">#D93025</color>
     <!--resources-->
 
     <!-- <color name="black">#FF000000</color> -->

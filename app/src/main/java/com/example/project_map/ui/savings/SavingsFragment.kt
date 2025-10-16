@@ -124,7 +124,7 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
 
                 Toast.makeText(requireContext(), "Simpanan wajib otomatis berhasil ditambahkan", Toast.LENGTH_SHORT).show()
 
-                handler.postDelayed(this, 30_000) // setiap 30 detik
+                handler.postDelayed(this, 120_000) // setiap 30 detik
             }
         }, 30_000)
     }

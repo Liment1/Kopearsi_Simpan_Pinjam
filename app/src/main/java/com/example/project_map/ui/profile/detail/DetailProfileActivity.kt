@@ -7,22 +7,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.project_map.R
-import com.example.project_map.data.UserDatabase // <-- Pastikan import ini ada
-import com.example.project_map.data.UserData
+import com.example.project_map.data.HashingUtils
+import com.example.project_map.data.UserDatabase
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.textfield.TextInputEditText
 
 class DetailProfileActivity : AppCompatActivity() {
-
-    // ▼▼▼ BAGIAN INI DIHAPUS KARENA SUDAH PINDAH KE UserDatabase.kt ▼▼▼
-    /*
-    private val allUsers = listOf(
-        UserData("0825012", "admin@gmail.com", "admin", "Administrator Utama", "081234567890", true),
-        UserData("1025045", "user@gmail.com", "user", "Budi Santoso", "087654321098"),
-        UserData("1125077", "siti@gmail.com", "siti123", "Siti Aminah", "089988776655")
-    )
-    */
-    // ▲▲▲ -------------------------------------------------------- ▲▲▲
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,10 +23,20 @@ class DetailProfileActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val sharedPreferences = getSharedPreferences("UserData", Context.MODE_PRIVATE)
-        val id = sharedPreferences.getString("USER_ID", "-")
-        val name = sharedPreferences.getString("USER_NAME", "-")
-        val email = sharedPreferences.getString("USER_EMAIL", "-")
-        val phone = sharedPreferences.getString("USER_PHONE", "-")
+        val id = sharedPreferences.getString("USER_ID", null)
+
+        if (id == null) {
+            Toast.makeText(this, "Sesi tidak valid, silakan login kembali.", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        val currentUser = UserDatabase.allUsers.find { it.id == id }
+        if (currentUser == null) {
+            Toast.makeText(this, "Data pengguna tidak ditemukan.", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
 
         val tvNama = findViewById<TextView>(R.id.tvNama)
         val tvKodePegawai = findViewById<TextView>(R.id.tvKodePegawai)
@@ -47,37 +47,38 @@ class DetailProfileActivity : AppCompatActivity() {
         val etKonfirmasiPasswordBaru = findViewById<TextInputEditText>(R.id.etKonfirmasiPasswordBaru)
         val btnSimpan = findViewById<Button>(R.id.btnSimpan)
 
-        tvNama.text = name
-        tvKodePegawai.text = id
-        tvEmailDetail.text = email
-        tvPhoneDetail.text = phone
+        tvNama.text = currentUser.name
+        tvKodePegawai.text = currentUser.id
+        tvEmailDetail.text = currentUser.email
+        tvPhoneDetail.text = currentUser.phone
+
+        // --- THIS IS THE FIX ---
+        // Pre-fill the old password field for the default user for easy testing
+        if (currentUser.name == "Santi Sanjaya") {
+            etPasswordLama.setText("User123_")
+        }
+        // --- END OF FIX ---
 
         btnSimpan.setOnClickListener {
-            val passBaru = etPasswordBaru.text.toString()
-            val konfirmasiPassBaru = etKonfirmasiPasswordBaru.text.toString()
-            val passLama = etPasswordLama.text.toString()
+            val passLamaInput = etPasswordLama.text.toString()
+            val passBaruInput = etPasswordBaru.text.toString()
+            val konfirmasiPassBaruInput = etKonfirmasiPasswordBaru.text.toString()
 
-            // ▼▼▼ DIUBAH AGAR MENGAMBIL DARI UserDatabase.allUsers ▼▼▼
-            val userFromList = UserDatabase.allUsers.firstOrNull { it.id == id }
-            // ▲▲▲ ----------------------------------------------- ▲▲▲
-
-            val credentialsPrefs = getSharedPreferences("UserCredentials", Context.MODE_PRIVATE)
-            val correctOldPassword = credentialsPrefs.getString(userFromList?.id, userFromList?.pass)
+            val hashedOldPasswordInput = HashingUtils.hashPassword(passLamaInput)
 
             when {
-                passBaru.isBlank() || konfirmasiPassBaru.isBlank() || passLama.isBlank() -> {
+                passLamaInput.isBlank() || passBaruInput.isBlank() || konfirmasiPassBaruInput.isBlank() -> {
                     Toast.makeText(this, "Semua kolom password harus diisi!", Toast.LENGTH_SHORT).show()
                 }
-                passBaru != konfirmasiPassBaru -> {
-                    Toast.makeText(this, "Password baru dan konfirmasi tidak cocok!", Toast.LENGTH_SHORT).show()
-                }
-                passLama != correctOldPassword -> {
+                hashedOldPasswordInput != currentUser.pass -> {
                     Toast.makeText(this, "Password lama salah!", Toast.LENGTH_SHORT).show()
                 }
+                passBaruInput != konfirmasiPassBaruInput -> {
+                    Toast.makeText(this, "Password baru dan konfirmasi tidak cocok!", Toast.LENGTH_SHORT).show()
+                }
                 else -> {
-                    val editor = credentialsPrefs.edit()
-                    editor.putString(id, passBaru)
-                    editor.apply()
+                    val hashedNewPassword = HashingUtils.hashPassword(passBaruInput)
+                    currentUser.pass = hashedNewPassword
 
                     Toast.makeText(this, "Password berhasil diubah!", Toast.LENGTH_SHORT).show()
                     finish()
