@@ -1,365 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:background="#E1F5FE"
-tools:context=".ui.loans.LoanDetailFragment">
-
-<com.google.android.material.appbar.AppBarLayout
-    android:id="@+id/appBarLayout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#0277BD"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+    android:layout_height="match_parent"
+    android:background="#E1F5FE"
+    tools:context=".ui.loans.LoanDetailFragment">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:navigationIcon="@drawable/ic_arrow_back"
-        app:title="Rincian Pinjaman" />
-
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:paddingBottom="24dp">
+        android:background="#0277BD"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-        <TextView
-            android:id="@+id/tvLoanPurpose"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/white"
-            tools:text="Pinjaman Berjangka untuk Pernikahan" />
-
-        <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:src="@drawable/ic_timeline_pending"
-            app:tint="@android:color/white" />
-
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/ic_status_active"
-            android:paddingLeft="12dp"
-            android:paddingTop="4dp"
-            android:paddingRight="12dp"
-            android:paddingBottom="4dp"
-            android:textColor="#0277BD"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            tools:text="Pinjaman Berjalan" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Nominal Pinjaman"
-            android:textColor="@android:color/white" />
-
-        <TextView
-            android:id="@+id/tvNominalPinjaman"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/white"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            tools:text="Rp 10.000.000" />
-
-        <TextView
-            android:id="@+id/tvDiterima"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            tools:text="Diterima: Rp 9.000.000" />
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:title="Rincian Pinjaman" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginRight="16dp"
-            android:orientation="horizontal">
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/tvLoanPurpose"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                app:cardCornerRadius="12dp">
+                android:textColor="@android:color/white"
+                tools:text="Pinjaman Berjangka untuk Pernikahan" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:src="@drawable/ic_status_pending"
+                app:tint="@android:color/white" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Jangka Waktu Pinjaman"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tvLoanTerm"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="10 Hari" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                app:cardCornerRadius="12dp">
+                android:layout_marginTop="8dp"
+                android:background="@color/blue_text"
+                android:paddingLeft="12dp"
+                android:paddingTop="4dp"
+                android:paddingRight="12dp"
+                android:paddingBottom="4dp"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                tools:text="Pinjaman Berjalan" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Nominal Pinjaman"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/tvNominalPinjaman"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                tools:text="Rp 10.000.000" />
+
+            <TextView
+                android:id="@+id/tvDiterima"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                tools:text="Diterima: Rp 9.000.000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginRight="16dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="12dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Jatuh Tempo Tanggal"
-                        android:textSize="12sp" />
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
-                    <TextView
-                        android:id="@+id/tvDueDate"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Jangka Waktu Pinjaman"
+                            android:textColor="#757575"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvLoanTerm"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:text="10 Hari" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="15 Setiap Bulan" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Jatuh Tempo Tanggal"
+                            android:textColor="#757575"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvDueDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:text="15 Setiap Bulan" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-</com.google.android.material.appbar.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
-<androidx.core.widget.NestedScrollView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bottom_sheet_background"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:background="@drawable/bottom_sheet_background"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerAngsuran"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
-            tools:itemCount="6"
-            tools:listitem="@layout/item_installment" />
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerAngsuran"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:itemCount="6"
+                tools:listitem="@layout/item_installment" />
 
-</androidx.core.widget.NestedScrollView>
+        </LinearLayout>
 
-<com.google.android.material.button.MaterialButton
-    android:id="@+id/btnBayarAngsuran"
-    android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:layout_gravity="bottom"
-    android:layout_margin="16dp"
-    android:text="Bayar Angsuran"
-    app:cornerRadius="16dp" />
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBayarAngsuran"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp"
+        android:text="Bayar Angsuran"
+        app:cornerRadius="16dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-    <!--<?xml version="1.0" encoding="utf-8"?>-->
-    <!--<LinearLayout-->
-    <!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
-    <!--    android:orientation="vertical"-->
-    <!--    android:background="#F9F9F9"-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="match_parent">-->
-
-    <!--    &lt;!&ndash; HEADER &ndash;&gt;-->
-    <!--    <LinearLayout-->
-    <!--        android:id="@+id/headerLayout"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="80dp"-->
-    <!--        android:background="#00796B"-->
-    <!--        android:orientation="horizontal"-->
-    <!--        android:paddingTop="36dp"-->
-    <!--        android:paddingBottom="12dp"-->
-    <!--        android:paddingStart="16dp"-->
-    <!--        android:paddingEnd="16dp"-->
-    <!--        android:elevation="4dp"-->
-    <!--        android:gravity="center_vertical">-->
-
-    <!--        &lt;!&ndash; 🔹 Tombol Back &ndash;&gt;-->
-    <!--        <ImageView-->
-    <!--            android:id="@+id/btnBack"-->
-    <!--            android:layout_width="36dp"-->
-    <!--            android:layout_height="36dp"-->
-    <!--            android:contentDescription="Kembali"-->
-    <!--            app:srcCompat="@drawable/ic_arrow_back"-->
-    <!--            app:tint="@android:color/white"-->
-    <!--            android:layout_marginEnd="12dp" />-->
-
-    <!--        <TextView-->
-    <!--            android:id="@+id/txtHeaderTitle"-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:text="Detail Pinjaman"-->
-    <!--            android:textColor="@android:color/white"-->
-    <!--            android:textSize="20sp"-->
-    <!--            android:textStyle="bold"-->
-    <!--            android:layout_weight="1"/>-->
-
-    <!--        &lt;!&ndash; 🔹 Tombol Hapus &ndash;&gt;-->
-    <!--        <ImageButton-->
-    <!--            android:id="@+id/btnHapusPinjamanUser"-->
-    <!--            android:layout_width="36dp"-->
-    <!--            android:layout_height="36dp"-->
-    <!--            android:background="@android:color/transparent"-->
-    <!--            app:srcCompat="@drawable/ic_delete"-->
-    <!--            app:tint="?attr/colorError"-->
-    <!--            android:contentDescription="Hapus" />-->
-    <!--    </LinearLayout>-->
-
-    <!--    &lt;!&ndash; KONTEN &ndash;&gt;-->
-    <!--    <ScrollView-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        android:padding="16dp">-->
-
-    <!--        <LinearLayout-->
-    <!--            android:orientation="vertical"-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content">-->
-
-    <!--            &lt;!&ndash; Kartu Status &ndash;&gt;-->
-    <!--            <LinearLayout-->
-    <!--                android:orientation="vertical"-->
-    <!--                android:layout_width="match_parent"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:background="@android:color/white"-->
-    <!--                android:elevation="2dp"-->
-    <!--                android:padding="16dp"-->
-    <!--                android:layout_marginBottom="16dp"-->
-    <!--                android:layout_marginTop="8dp"-->
-    <!--                android:backgroundTint="#FFFFFF"-->
-    <!--                android:clipToOutline="true">-->
-
-    <!--                <TextView-->
-    <!--                    android:id="@+id/txtStatus"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Status: -"-->
-    <!--                    android:textSize="16sp"-->
-    <!--                    android:textStyle="bold"-->
-    <!--                    android:textColor="#00796B"-->
-    <!--                    android:layout_marginBottom="4dp"/>-->
-
-    <!--                <TextView-->
-    <!--                    android:id="@+id/txtAlasan"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Alasan Penolakan: -"-->
-    <!--                    android:textSize="14sp"-->
-    <!--                    android:textColor="@android:color/holo_red_dark"-->
-    <!--                    android:visibility="gone" />-->
-    <!--            </LinearLayout>-->
-
-    <!--            &lt;!&ndash; Kartu Detail &ndash;&gt;-->
-    <!--            <LinearLayout-->
-    <!--                android:orientation="vertical"-->
-    <!--                android:layout_width="match_parent"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:background="@android:color/white"-->
-    <!--                android:elevation="2dp"-->
-    <!--                android:padding="16dp"-->
-    <!--                android:layout_marginBottom="16dp"-->
-    <!--                android:clipToOutline="true">-->
-
-    <!--                <TextView-->
-    <!--                    android:id="@+id/txtNominal"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Nominal: Rp0"-->
-    <!--                    android:textSize="18sp"-->
-    <!--                    android:textStyle="bold"-->
-    <!--                    android:layout_marginBottom="8dp"/>-->
-
-    <!--                <TextView-->
-    <!--                    android:id="@+id/txtSisa"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Sisa Angsuran: Rp0"-->
-    <!--                    android:textSize="16sp"-->
-    <!--                    android:layout_marginBottom="8dp"/>-->
-
-    <!--                <TextView-->
-    <!--                    android:id="@+id/txtTenor"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Tenor: -"-->
-    <!--                    android:textSize="16sp"-->
-    <!--                    android:layout_marginBottom="8dp"/>-->
-
-    <!--                <TextView-->
-    <!--                    android:id="@+id/txtTujuan"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Tujuan: -"-->
-    <!--                    android:textSize="16sp"-->
-    <!--                    android:layout_marginBottom="8dp"/>-->
-    <!--            </LinearLayout>-->
-
-    <!--            &lt;!&ndash; Kartu Pembayaran &ndash;&gt;-->
-    <!--            <LinearLayout-->
-    <!--                android:orientation="vertical"-->
-    <!--                android:layout_width="match_parent"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:background="@android:color/white"-->
-    <!--                android:elevation="2dp"-->
-    <!--                android:padding="16dp"-->
-    <!--                android:clipToOutline="true">-->
-
-    <!--                <EditText-->
-    <!--                    android:id="@+id/edtBayar"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:hint="Masukkan jumlah bayar"-->
-    <!--                    android:inputType="numberDecimal"-->
-    <!--                    android:layout_marginBottom="12dp"/>-->
-
-    <!--                <Button-->
-    <!--                    android:id="@+id/btnBayar"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Bayar"-->
-    <!--                    android:backgroundTint="#388E3C"-->
-    <!--                    android:textColor="@android:color/white"-->
-    <!--                    android:elevation="3dp"/>-->
-    <!--            </LinearLayout>-->
-    <!--        </LinearLayout>-->
-    <!--    </ScrollView>-->
-    <!--</LinearLayout>-->
-

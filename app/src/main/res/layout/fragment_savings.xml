@@ -44,12 +44,13 @@
                 android:id="@+id/btnTambahSimpanan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/button_yellow_background"
+                android:background="@null"
+                android:backgroundTint="#FFB300"
                 android:paddingLeft="32dp"
                 android:paddingTop="12dp"
                 android:paddingRight="32dp"
                 android:paddingBottom="12dp"
-                android:text="Simpanan Sukarela"
+                android:text="@string/simpanan_sukarela"
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
         </LinearLayout>

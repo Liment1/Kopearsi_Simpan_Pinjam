@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Project_MAP</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <!-- Judul -->
     <string name="title_pengajuan">Pengajuan Pinjaman</string>
 
@@ -40,6 +37,7 @@
         <item>Tahun</item>
     </string-array>
     <string name="foto_ktp">Foto KTP</string>
+    <string name="simpanan_sukarela">Simpanan Sukarela</string>
 
 
     <!-- Spinner -->

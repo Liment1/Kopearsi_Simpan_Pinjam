@@ -8,16 +8,16 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.project_map.R
-import com.example.project_map.databinding.FragmentPinjamanV2Binding
+import com.example.project_map.databinding.FragmentPinjamanBinding
 import org.json.JSONObject
 
 class PinjamanFragment : Fragment() {
 
-    private var _binding: FragmentPinjamanV2Binding? = null
+    private var _binding: FragmentPinjamanBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentPinjamanV2Binding.inflate(inflater, container, false)
+        _binding = FragmentPinjamanBinding.inflate(inflater, container, false)
         return binding.root
     }
 

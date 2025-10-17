@@ -1,292 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F7F9FA">
+    android:background="#F7F9FA"
+    tools:context=".ui.loans.PinjamanFragment">
 
-    <!-- HEADER -->
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="#00796B"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingTop="32dp">
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        app:elevation="0dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pinjaman Saya"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/white" />
-    </LinearLayout>
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Pinjaman"
+            app:titleTextColor="@android:color/black" />
 
-    <!-- KONTEN -->
-    <ScrollView
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="90dp"
-        android:padding="16dp">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- Judul -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#4CAF50"
+                app:cardCornerRadius="16dp"
+                android:layout_marginBottom="24dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvLimitTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Limit Pinjaman Kamu"
+                        android:textColor="@android:color/white"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tvLimitValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rp 20.000.000"
+                        android:textColor="@android:color/white"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        app:layout_constraintTop_toBottomOf="@id/tvLimitTitle"
+                        app:layout_constraintStart_toStartOf="parent"/>
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="6dp"
+                        android:layout_marginTop="8dp"
+                        android:progress="20"
+                        android:progressDrawable="@drawable/custom_progress_bar"
+                        app:layout_constraintTop_toBottomOf="@id/tvLimitValue"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tvTerpakai"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Terpakai\nRp 4.000.000"
+                        android:textColor="@android:color/white"
+                        android:textSize="12sp"
+                        app:layout_constraintTop_toBottomOf="@id/progressBar"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginTop="4dp"/>
+
+                    <TextView
+                        android:id="@+id/tvTersedia"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tersedia\nRp 16.000.000"
+                        android:gravity="end"
+                        android:textColor="@android:color/white"
+                        android:textSize="12sp"
+                        app:layout_constraintTop_toBottomOf="@id/progressBar"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginTop="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAjukanPinjaman"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Pengajuan Pinjaman"
+                        android:textColor="#333333"
+                        app:backgroundTint="@android:color/white"
+                        app:icon="@drawable/ic_loan_yellow"
+                        app:iconTint="@null"
+                        app:cornerRadius="12dp"
+                        app:layout_constraintTop_toBottomOf="@id/tvTersedia"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginTop="16dp"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pinjaman Aktif"
-                android:textAlignment="center"
-                android:textSize="20sp"
+                android:text="Riwayat Pinjaman"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="#00796B"
-                android:layout_marginBottom="12dp"/>
-
-            <!-- Container untuk daftar pinjaman -->
-            <LinearLayout
-                android:id="@+id/containerPinjamanAktif"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
-            <!-- Tombol Aksi -->
-            <Button
-                android:id="@+id/btnAjukanPinjaman"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ajukan Pinjaman Baru"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:backgroundTint="#388E3C"
-                android:elevation="3dp"
-                android:layout_marginTop="24dp"
+                android:textColor="@android:color/black"
                 android:layout_marginBottom="8dp"/>
 
-            <Button
-                android:id="@+id/btnLihatRiwayat"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerLoanHistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Lihat Riwayat Pinjaman"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:backgroundTint="#00796B"
-                android:elevation="3dp"/>
+                tools:listitem="@layout/item_loan_history_v2"
+                tools:itemCount="4"/>
+
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-    <!--<?xml version="1.0" encoding="utf-8"?>-->
-    <!--<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="match_parent"-->
-    <!--    android:padding="16dp">-->
-
-    <!--    <LinearLayout-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:orientation="vertical">-->
-
-    <!--                android:layout_width="wrap_content"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:text="Pengajuan Pinjaman"-->
-    <!--                android:layout_marginTop="10dp"/>-->
-    <!--        </LinearLayout>-->
-
-    <!--        &lt;!&ndash; Riwayat Pinjaman Title Section with the new Button &ndash;&gt;-->
-    <!--        <RelativeLayout-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_marginBottom="8dp">-->
-
-    <!--            <TextView-->
-    <!--                android:layout_width="wrap_content"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:text="Riwayat Pinjaman"-->
-    <!--                android:textStyle="bold"-->
-    <!--                android:layout_centerVertical="true"-->
-    <!--                android:layout_alignParentStart="true"/>-->
-
-    <!--            &lt;!&ndash; The restored button &ndash;&gt;-->
-    <!--            <Button-->
-    <!--                android:id="@+id/btnRiwayatPembayaran"-->
-    <!--                android:layout_width="wrap_content"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:text="Riwayat Angsuran"-->
-    <!--                android:layout_alignParentEnd="true"-->
-    <!--                style="@style/Widget.MaterialComponents.Button.TextButton"/>-->
-    <!--        </RelativeLayout>-->
-
-
-    <!--        &lt;!&ndash; Contoh item riwayat &ndash;&gt;-->
-    <!--        <LinearLayout-->
-    <!--            android:orientation="vertical"-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content">-->
-
-    <!--            &lt;!&ndash; Item 1 &ndash;&gt;-->
-    <!--            <LinearLayout-->
-    <!--                android:orientation="vertical"-->
-    <!--                android:layout_width="match_parent"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:background="#FFF3CD"-->
-    <!--                android:padding="8dp"-->
-    <!--                android:layout_marginBottom="8dp">-->
-
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Menunggu Persetujuan"-->
-    <!--                    android:textStyle="bold"/>-->
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Rp 6.000.000 - 2 Bulan Tenor"/>-->
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Pinjaman Berjangka untuk Pernikahan"/>-->
-    <!--            </LinearLayout>-->
-
-    <!--            &lt;!&ndash; Item 2 &ndash;&gt;-->
-    <!--            <LinearLayout-->
-    <!--                android:orientation="vertical"-->
-    <!--                android:layout_width="match_parent"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:background="#D1ECF1"-->
-    <!--                android:padding="8dp"-->
-    <!--                android:layout_marginBottom="8dp">-->
-
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Pinjaman Berjalan"-->
-    <!--                    android:textStyle="bold"/>-->
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Rp 6.000.000 - 3 Tahun Tenor"/>-->
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Pinjaman Berjangka untuk Pernikahan"/>-->
-    <!--            </LinearLayout>-->
-
-    <!--            &lt;!&ndash; Item 3 &ndash;&gt;-->
-    <!--            <LinearLayout-->
-    <!--                android:orientation="vertical"-->
-    <!--                android:layout_width="match_parent"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:background="#F8D7DA"-->
-    <!--                android:padding="8dp"-->
-    <!--                android:layout_marginBottom="8dp">-->
-
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Ditolak"-->
-    <!--                    android:textStyle="bold"/>-->
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Rp 1.000.000 - 2 Bulan Tenor"/>-->
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Alasan: Terlalu sering meminjam tidak dikembalikan"/>-->
-    <!--            </LinearLayout>-->
-
-    <!--            &lt;!&ndash; Item 4 &ndash;&gt;-->
-    <!--            <LinearLayout-->
-    <!--                android:orientation="vertical"-->
-    <!--                android:layout_width="match_parent"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:background="#D4EDDA"-->
-    <!--                android:padding="8dp"-->
-    <!--                android:layout_marginBottom="8dp">-->
-
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Lunas"-->
-    <!--                    android:textStyle="bold"/>-->
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Rp 6.000.000 - 20 Hari Tenor"/>-->
-    <!--                <TextView-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:text="Pinjaman Berjangka untuk Pernikahan"/>-->
-    <!--            </LinearLayout>-->
-
-    <!--        </LinearLayout>-->
-    <!--    </LinearLayout>-->
-    <!--</ScrollView>-->
-    <!--        &lt;!&ndash; Title &ndash;&gt;-->
-    <!--        <TextView-->
-    <!--            android:id="@+id/tvTitle"-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:text="Pinjaman"-->
-    <!--            android:textSize="20sp"-->
-    <!--            android:textStyle="bold"-->
-    <!--            android:layout_marginBottom="12dp"/>-->
-
-    <!--        &lt;!&ndash; Limit Pinjaman Card &ndash;&gt;-->
-    <!--        <LinearLayout-->
-    <!--            android:orientation="vertical"-->
-    <!--            android:background="@android:color/holo_green_dark"-->
-    <!--            android:padding="16dp"-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_marginBottom="16dp">-->
-
-    <!--            <TextView-->
-    <!--                android:layout_width="wrap_content"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:text="Limit Pinjaman Kamu"-->
-    <!--                android:textSize="14sp"-->
-    <!--                android:textColor="@android:color/white"/>-->
-
-    <!--            <TextView-->
-    <!--                android:id="@+id/tvLimit"-->
-    <!--                android:layout_width="wrap_content"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:text="Rp 20.000.000"-->
-    <!--                android:textSize="22sp"-->
-    <!--                android:textStyle="bold"-->
-    <!--                android:textColor="@android:color/white"-->
-    <!--                android:layout_marginBottom="10dp"/>-->
-
-    <!--            <LinearLayout-->
-    <!--                android:orientation="horizontal"-->
-    <!--                android:layout_width="match_parent"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:weightSum="2">-->
-
-    <!--                <TextView-->
-    <!--                    android:layout_width="0dp"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:layout_weight="1"-->
-    <!--                    android:text="Terpakai Rp 4.000.000"-->
-    <!--                    android:textColor="@android:color/white"/>-->
-
-    <!--                <TextView-->
-    <!--                    android:layout_width="0dp"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:layout_weight="1"-->
-    <!--                    android:gravity="end"-->
-    <!--                    android:text="Tersedia Rp 16.000.000"-->
-    <!--                    android:textColor="@android:color/white"/>-->
-    <!--            </LinearLayout>-->
-
-    <!--            <Button-->
-    <!--                android:id="@+id/btnAjukanPinjaman"-->
-

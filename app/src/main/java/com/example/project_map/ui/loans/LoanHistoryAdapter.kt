@@ -47,22 +47,22 @@ class LoanHistoryAdapter(
             "proses" -> {
                 holder.icon.setImageResource(R.drawable.ic_status_pending)
                 holder.status.background = ContextCompat.getDrawable(context, R.drawable.status_tag_pending)
-//                holder.status.setTextColor(ContextCompat.getColor(context, R.color.orange_text))
+                holder.status.setTextColor(ContextCompat.getColor(context, R.color.orange_text))
             }
             "disetujui" -> {
                 holder.icon.setImageResource(R.drawable.ic_status_active)
-//                holder.status.background = ContextCompat.getDrawable(context, R.drawable.status_tag_approved)
-//                holder.status.setTextColor(ContextCompat.getColor(context, R.color.blue_text))
+                holder.status.background = ContextCompat.getDrawable(context, R.drawable.status_tag_approved)
+                holder.status.setTextColor(ContextCompat.getColor(context, R.color.blue_text))
             }
             "ditolak" -> {
                 holder.icon.setImageResource(R.drawable.ic_status_rejected)
-//                holder.status.background = ContextCompat.getDrawable(context, R.drawable.status_tag_rejected)
-//                holder.status.setTextColor(ContextCompat.getColor(context, R.color.red_text))
+                holder.status.background = ContextCompat.getDrawable(context, R.drawable.status_tag_rejected)
+                holder.status.setTextColor(ContextCompat.getColor(context, R.color.red_text))
             }
             "lunas" -> {
                 holder.icon.setImageResource(R.drawable.ic_status_paid)
-//                holder.status.background = ContextCompat.getDrawable(context, R.drawable.status_tag_paid)
-//                holder.status.setTextColor(ContextCompat.getColor(context, R.color.green_text))
+                holder.status.background = ContextCompat.getDrawable(context, R.drawable.status_tag_paid)
+                holder.status.setTextColor(ContextCompat.getColor(context, R.color.green_text))
             }
         }
 
