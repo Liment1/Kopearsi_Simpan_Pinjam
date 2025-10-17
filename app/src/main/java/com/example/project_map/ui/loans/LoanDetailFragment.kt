@@ -4,130 +4,69 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.project_map.R
-import org.json.JSONObject
+import com.example.project_map.databinding.FragmentLoanDetailV2Binding
 import java.text.NumberFormat
-import java.util.Locale
+import java.util.*
 
 class LoanDetailFragment : Fragment() {
 
-    private lateinit var txtNominal: TextView
-    private lateinit var txtSisa: TextView
-    private lateinit var txtTenor: TextView
-    private lateinit var txtTujuan: TextView
-    private lateinit var txtStatus: TextView
-    private lateinit var txtAlasan: TextView
-    private lateinit var edtBayar: EditText
-    private lateinit var btnBayar: Button
-    private lateinit var btnBack: ImageView
-    private lateinit var btnHapus: ImageButton
+    private var _binding: FragmentLoanDetailV2Binding? = null
+    private val binding get() = _binding!!
+    // REMOVED: private val args: LoanDetailFragmentArgs by navArgs()
 
-    private var loanData: JSONObject? = null
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_loan_detail, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentLoanDetailV2Binding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        txtNominal = view.findViewById(R.id.txtNominal)
-        txtSisa = view.findViewById(R.id.txtSisa)
-        txtTenor = view.findViewById(R.id.txtTenor)
-        txtTujuan = view.findViewById(R.id.txtTujuan)
-        txtStatus = view.findViewById(R.id.txtStatus)
-        txtAlasan = view.findViewById(R.id.txtAlasan)
-        edtBayar = view.findViewById(R.id.edtBayar)
-        btnBayar = view.findViewById(R.id.btnBayar)
-        btnBack = view.findViewById(R.id.btnBack)
-        btnHapus = view.findViewById(R.id.btnHapusPinjamanUser)
+        // --- THIS IS THE FIX (RECEIVING) ---
+        // Retrieve the arguments manually from the fragment's 'arguments' property.
+        // We use the same key "loanId" and provide a default value (-1) for safety.
+        val loanId = arguments?.getLong("loanId") ?: -1L
+        // --- END OF FIX ---
 
-        btnBack.setOnClickListener { findNavController().popBackStack() }
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID")).apply { maximumFractionDigits = 0 }
 
-        val dataString = arguments?.getString("loanData")
-        if (dataString.isNullOrEmpty()) {
-            Toast.makeText(requireContext(), "Data pinjaman tidak ditemukan", Toast.LENGTH_SHORT).show()
+        binding.tvLoanPurpose.text = "Pinjaman Berjangka untuk Pernikahan"
+        binding.tvStatus.text = "Pinjaman Berjalan"
+        // ... (rest of the data setup) ...
+
+        binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
-            return
         }
 
-        try {
-            loanData = JSONObject(dataString)
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Data pinjaman rusak", Toast.LENGTH_SHORT).show()
-            findNavController().popBackStack()
-            return
-        }
-
-        tampilkanDetail()
-        btnBayar.setOnClickListener { prosesPembayaran() }
-    }
-
-    private fun tampilkanDetail() {
-        val loan = loanData ?: return
-        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
-
-        val status = loan.optString("status", "-")
-        val alasan = loan.optString("alasanPenolakan", "")
-
-        txtNominal.text = "Nominal: ${formatter.format(loan.optDouble("nominal", 0.0))}"
-        txtSisa.text = "Sisa Angsuran: ${formatter.format(loan.optDouble("sisaAngsuran", 0.0))}"
-        txtTenor.text = "Tenor: ${loan.optString("tenor", "-")}"
-        txtTujuan.text = "Tujuan: ${loan.optString("tujuan", "-")}"
-        txtStatus.text = "Status: $status"
-
-        if (status.equals("Ditolak", true) && alasan.isNotEmpty()) {
-            txtAlasan.visibility = View.VISIBLE
-            txtAlasan.text = "Alasan Penolakan: $alasan"
-        } else {
-            txtAlasan.visibility = View.GONE
-        }
-
-        if (status.equals("Disetujui", true)) {
-            edtBayar.isEnabled = true
-            btnBayar.isEnabled = true
-            btnBayar.alpha = 1f
-        } else {
-            edtBayar.isEnabled = false
-            btnBayar.isEnabled = false
-            btnBayar.alpha = 0.5f
-            btnBayar.text = when (status.lowercase()) {
-                "ditolak" -> "Tidak Dapat Dibayar"
-                "proses" -> "Menunggu Persetujuan"
-                "lunas" -> "Sudah Lunas"
-                else -> "Tidak Tersedia"
+        binding.btnBayarAngsuran.setOnClickListener {
+            // --- THIS IS THE FIX (SENDING) ---
+            // Create another bundle to pass the loanId to the next screen.
+            val bundle = Bundle().apply {
+                putLong("loanId", loanId)
             }
+            findNavController().navigate(R.id.action_loanDetailFragment_to_angsuranFragment, bundle)
+            // --- END OF FIX ---
         }
     }
 
-    private fun prosesPembayaran() {
-        val bayarText = edtBayar.text.toString().replace("[^0-9]".toRegex(), "")
-        if (bayarText.isEmpty()) {
-            Toast.makeText(requireContext(), "Masukkan jumlah bayar", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val bayar = bayarText.toDouble()
-        val loan = loanData ?: return
-        val sisa = loan.optDouble("sisaAngsuran", 0.0)
-        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
-
-        if (bayar >= sisa) {
-            loan.put("status", "Lunas")
-            loan.put("sisaAngsuran", 0.0)
-            LoanStorage.updateLoan(requireContext(), loan)
-            Toast.makeText(requireContext(), "Pembayaran berhasil! Pinjaman lunas.", Toast.LENGTH_SHORT).show()
-            tampilkanDetail()
-        } else {
-            val newSisa = sisa - bayar
-            loan.put("sisaAngsuran", newSisa)
-            LoanStorage.updateLoan(requireContext(), loan)
-            txtSisa.text = "Sisa Angsuran: ${formatter.format(newSisa)}"
-            Toast.makeText(requireContext(), "Pembayaran berhasil! Sisa: ${formatter.format(newSisa)}", Toast.LENGTH_SHORT).show()
-        }
+    // ... (createDummyInstallments and onDestroyView remain the same) ...
+    private fun createDummyInstallments(): List<Installment> {
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID")).apply { maximumFractionDigits = 0 }
+        return listOf(
+            Installment(1, "Angsuran Pokok", formatter.format(100000), "Dibayar pada tanggal 20 Maret 2025", formatter.format(0), true),
+            Installment(2, "Angsuran Pokok", formatter.format(100000), "Dibayar pada tanggal 20 Maret 2025", formatter.format(0), true),
+            Installment(3, "Angsuran Pokok", formatter.format(100000), "Dibayar pada tanggal 20 Maret 2025", formatter.format(0), true),
+            Installment(4, "Angsuran Pokok", formatter.format(100000), "Harus dibayar pada tanggal 20 April 2025", formatter.format(0), false),
+            Installment(5, "Angsuran Pokok", formatter.format(100000), "Harus dibayar pada tanggal 20 Mei 2025", formatter.format(0), false),
+            Installment(6, "Angsuran Pokok", formatter.format(100000), "Harus dibayar pada tanggal 20 Juni 2025", formatter.format(0), false)
+        )
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

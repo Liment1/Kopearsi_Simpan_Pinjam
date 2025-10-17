@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp">
+
+    <ImageView
+        android:id="@+id/ivTimelineIcon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        tools:src="@drawable/ic_timeline_paid"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvInstallmentNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="#1"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTotalPaid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Total Yang Dibayar\nRp 100.000"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivTimelineIcon"
+        android:layout_marginStart="16dp"/>
+
+    <TextView
+        android:id="@+id/tvInstallmentType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Angsuran Pokok\nRp 100.000"
+        android:textSize="12sp"
+        app:layout_constraintTop_toBottomOf="@id/tvTotalPaid"
+        app:layout_constraintStart_toStartOf="@id/tvTotalPaid" />
+
+    <TextView
+        android:id="@+id/tvPaymentDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Dibayar pada tanggal 20 Maret 2025"
+        android:textSize="12sp"
+        app:layout_constraintTop_toBottomOf="@id/tvInstallmentType"
+        app:layout_constraintStart_toStartOf="@id/tvTotalPaid" />
+
+    <TextView
+        android:id="@+id/tvOtherFees"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Biaya Lain\nRp 0"
+        android:gravity="end"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/tvPaymentDate"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

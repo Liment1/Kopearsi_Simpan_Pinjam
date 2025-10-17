@@ -15,6 +15,14 @@
             android:icon="@drawable/ic_loan"
             android:title="Pengajuan Pinjaman" />
         <item
+            android:id="@+id/adminLoanListFragment"
+            android:icon="@drawable/ic_payment"
+            android:title="Daftar Pinjaman" />
+        <item
+            android:id="@+id/adminAngsuranFragment"
+            android:icon="@drawable/ic_loan"
+            android:title="Angsuran Berjalan" />
+        <item
             android:id="@+id/fragmentTransaksiSimpanan"
             android:icon="@drawable/ic_savings"
             android:title="Transaksi Simpanan" />
