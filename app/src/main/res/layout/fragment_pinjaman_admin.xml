@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
-    android:paddingTop="40dp">
+    android:paddingTop="20dp">
 
     <!-- Header + Pengaturan Pinjaman -->
     <LinearLayout

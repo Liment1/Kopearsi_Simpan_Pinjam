@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F7F9FA"
+    android:fitsSystemWindows="true" android:background="#F7F9FA"
     tools:context=".ui.loans.AngsuranFragment">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -17,7 +17,9 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:title="Pembayaran Angsuran" />
+            app:title="Pembayaran Angsuran"
+            app:titleTextColor="@android:color/white"
+            app:navigationIconTint="@android:color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

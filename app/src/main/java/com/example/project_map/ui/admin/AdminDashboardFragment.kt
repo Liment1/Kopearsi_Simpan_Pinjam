@@ -38,7 +38,7 @@ class AdminDashboardFragment : Fragment() {
         displayFinancialSummary(view)
         setupChart(view)
     }
-
+    
     private fun setupNavigation(view: View) {
         // Set click listeners for each card to navigate to the corresponding fragment
         view.findViewById<CardView>(R.id.cardDataAnggota).setOnClickListener {

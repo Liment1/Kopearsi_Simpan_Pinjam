@@ -28,6 +28,9 @@
         <action
             android:id="@+id/action_adminDashboardFragment_to_adminAngsuranFragment"
             app:destination="@id/adminAngsuranFragment" />
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_fragmentPinjamanAdmin"
+            app:destination="@id/fragmentPinjamanAdmin" />
     </fragment>
 
     <fragment
@@ -35,7 +38,6 @@
         android:name="com.example.project_map.ui.admin.loans.AdminLoanListFragment"
         android:label="Daftar Pinjaman"
         tools:layout="@layout/fragment_admin_loan_list" />
-
     <fragment
         android:id="@+id/adminAngsuranFragment"
         android:name="com.example.project_map.ui.admin.AdminAngsuranFragment"
@@ -61,4 +63,9 @@
         android:name="com.example.project_map.ui.admin.AdminNotifikasiFragment"
         android:label="Kirim Notifikasi"
         tools:layout="@layout/fragment_admin_notifikasi" />
+    <fragment
+        android:id="@+id/fragmentPinjamanAdmin"
+        android:name="com.example.project_map.ui.admin.FragmentPinjamanAdmin"
+        android:label="Pengajuan Pinjaman"
+        tools:layout="@layout/fragment_pinjaman_admin" />
 </navigation>

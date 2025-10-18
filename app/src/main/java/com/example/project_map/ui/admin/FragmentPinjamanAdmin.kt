@@ -1,4 +1,4 @@
-package com.example.project_map
+package com.example.project_map.ui.admin
 
 import android.graphics.Color
 import android.os.Bundle
@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AlertDialog
+import com.example.project_map.R
 
 class FragmentPinjamanAdmin : Fragment() {
 

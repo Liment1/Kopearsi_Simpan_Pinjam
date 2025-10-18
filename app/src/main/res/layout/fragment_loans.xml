@@ -10,7 +10,7 @@
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="#00796B"
+        android:background="@color/green_primary"
         android:orientation="horizontal"
         android:paddingTop="36dp"
         android:paddingBottom="12dp"
@@ -22,7 +22,7 @@
             android:id="@+id/btnBack"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@android:drawable/ic_menu_revert"
+            android:src="@drawable/ic_arrow_back"
             app:tint="@android:color/white"
             android:contentDescription="Kembali" />
 
@@ -148,7 +148,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Unggah atau Ambil Foto KTP"
-                android:backgroundTint="#00796B"
+                android:backgroundTint="@color/green_primary"
                 android:textColor="@android:color/white" />
 
             <!-- Info Hitungan -->
@@ -178,7 +178,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="Kirim Pengajuan Pinjaman"
-                android:backgroundTint="#388E3C"
+                android:backgroundTint="@color/green_primary"
                 android:textColor="@android:color/white" />
 
         </LinearLayout>
