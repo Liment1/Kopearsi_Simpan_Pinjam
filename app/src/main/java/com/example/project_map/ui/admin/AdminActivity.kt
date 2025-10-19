@@ -42,6 +42,8 @@ class AdminActivity : AppCompatActivity() {
                 R.id.adminDataAnggotaFragment,
                 R.id.fragmentPinjamanAdmin,
                 R.id.fragmentTransaksiSimpanan,
+                R.id.adminAngsuranFragment,
+                R.id.adminLoanListFragment,
                 R.id.adminLaporanKeuanganFragment
             ), drawerLayout
         )

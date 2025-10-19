@@ -15,12 +15,8 @@
             android:icon="@drawable/ic_loan"
             android:title="Pengajuan Pinjaman" />
         <item
-            android:id="@+id/adminLoanListFragment"
-            android:icon="@drawable/ic_payment"
-            android:title="Daftar Pinjaman" />
-        <item
             android:id="@+id/adminAngsuranFragment"
-            android:icon="@drawable/ic_loan"
+            android:icon="@drawable/ic_payment"
             android:title="Angsuran Berjalan" />
         <item
             android:id="@+id/fragmentTransaksiSimpanan"
@@ -30,6 +26,10 @@
             android:id="@+id/adminLaporanKeuanganFragment"
             android:icon="@drawable/ic_report"
             android:title="Laporan Keuangan" />
+        <item
+            android:id="@+id/adminNotifikasiFragment"
+            android:icon="@drawable/ic_notification"
+            android:title="Kirim Notifikasi" />
     </group>
 
     <!-- Sub-header for account actions -->

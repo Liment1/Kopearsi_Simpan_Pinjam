@@ -31,7 +31,6 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(v: View, s: Bundle?) {
         super.onViewCreated(v, s)
 
-        // --- THIS IS THE FIX ---
         // 1. Get user data from SharedPreferences
         val sharedPreferences = requireActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE)
         val name = sharedPreferences.getString("USER_NAME", "Anggota Koperasi")
@@ -40,7 +39,6 @@ class HomeFragment : Fragment() {
         // 2. Set the user's name in the welcome message
         b.tvWelcomeName.text = name
         b.tvAngNumber.text = userId
-        // --- END OF FIX ---
 
 
         // Make the "Pengajuan Peminjaman" button navigate to the loan screen

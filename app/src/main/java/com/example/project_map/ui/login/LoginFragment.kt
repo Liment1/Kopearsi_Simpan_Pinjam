@@ -49,7 +49,6 @@ class LoginFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // --- THIS IS THE NEW LOGIC ---
 
             // 1. Check if the login attempt is for the admin
             if (emailInput.equals("admin@gmail.com", ignoreCase = true)) {
@@ -73,7 +72,6 @@ class LoginFragment : Fragment() {
                 }
                 // If validation fails, the isValidUserCredentials function will show a specific Toast
             }
-            // --- END OF NEW LOGIC ---
         }
 
         tvRegister.setOnClickListener {

@@ -57,7 +57,6 @@ class LaporanBulananActivity : AppCompatActivity() {
         rvTransactions.layoutManager = LinearLayoutManager(this)
         rvTransactions.adapter = riwayatAdapter
 
-        // ### THIS IS THE CHANGE ###
         // Get data from the new data source instead of creating it here.
         allTransactions.addAll(com.example.project_map.data.LaporanDataSource.getDummyTransactions())
 
@@ -74,7 +73,6 @@ class LaporanBulananActivity : AppCompatActivity() {
         updateUI()
     }
 
-    // REMOVED: createDummyTransactions() and getDate() are now in LaporanDataSource.kt
 
     private fun updateUI() {
         val monthFormat = SimpleDateFormat("MMMM yyyy", Locale("in", "ID"))

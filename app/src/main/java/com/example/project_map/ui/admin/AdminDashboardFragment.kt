@@ -44,11 +44,12 @@ class AdminDashboardFragment : Fragment() {
         view.findViewById<CardView>(R.id.cardDataAnggota).setOnClickListener {
             findNavController().navigate(R.id.action_adminDashboardFragment_to_adminDataAnggotaFragment)
         }
-
-        
-//        view.findViewById<CardView>(R.id.cardPengajuanPinjaman).setOnClickListener {
-//            findNavController().navigate(R.id.action_adminDashboardFragment_to_fragmentPinjamanAdmin)
-//        }
+        view.findViewById<CardView>(R.id.cardPengajuanPinjaman).setOnClickListener {
+            findNavController().navigate(R.id.action_adminDashboardFragment_to_fragmentPinjamanAdmin)
+        }
+        view.findViewById<CardView>(R.id.cardAngsuranBerjalan).setOnClickListener {
+            findNavController().navigate(R.id.action_adminDashboardFragment_to_adminAngsuranFragment)
+        }
         view.findViewById<CardView>(R.id.cardTransaksiSimpanan).setOnClickListener {
             findNavController().navigate(R.id.action_adminDashboardFragment_to_fragmentTransaksiSimpanan)
         }

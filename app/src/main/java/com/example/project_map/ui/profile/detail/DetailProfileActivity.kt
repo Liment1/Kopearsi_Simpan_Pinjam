@@ -52,12 +52,10 @@ class DetailProfileActivity : AppCompatActivity() {
         tvEmailDetail.text = currentUser.email
         tvPhoneDetail.text = currentUser.phone
 
-        // --- THIS IS THE FIX ---
         // Pre-fill the old password field for the default user for easy testing
         if (currentUser.name == "Santi Sanjaya") {
             etPasswordLama.setText("User123_")
         }
-        // --- END OF FIX ---
 
         btnSimpan.setOnClickListener {
             val passLamaInput = etPasswordLama.text.toString()

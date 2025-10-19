@@ -27,14 +27,11 @@ class AngsuranFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // --- THIS IS THE FIX ---
         val loanId = arguments?.getLong("loanId") ?: -1L
-        // --- END OF FIX ---
 
         val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID")).apply { maximumFractionDigits = 0 }
 
         binding.tvAmountDue.text = formatter.format(100000)
-        // ... (rest of the setup) ...
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }

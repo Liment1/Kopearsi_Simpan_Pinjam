@@ -12,7 +12,6 @@ class AdminAngsuranFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // This is a placeholder screen. In a real app, you would inflate a layout
         // with a RecyclerView to show a list of all ongoing installments.
         return inflater.inflate(R.layout.fragment_admin_angsuran, container, false)
     }

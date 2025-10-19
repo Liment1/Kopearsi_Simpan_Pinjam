@@ -178,7 +178,7 @@
         </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/cardDaftarPinjaman"
+                android:id="@+id/cardPengajuanPinjaman"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -199,7 +199,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Daftar Pinjaman"
+                        android:text="Pengajuan Pinjaman"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
