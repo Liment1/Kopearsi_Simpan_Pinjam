@@ -4,17 +4,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.project_map.R
+import com.example.project_map.data.Loan
 import com.example.project_map.databinding.FragmentPinjamanBinding
-import org.json.JSONObject
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class PinjamanFragment : Fragment() {
 
     private var _binding: FragmentPinjamanBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var db: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentPinjamanBinding.inflate(inflater, container, false)
@@ -24,37 +31,40 @@ class PinjamanFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        db = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance()
+
         binding.btnAjukanPinjaman.setOnClickListener {
-            // This navigation doesn't pass data, so it remains the same
             findNavController().navigate(R.id.action_pinjamanFragment_to_loansFragment)
         }
 
-        val allLoans = LoanStorage.getAllLoans(requireContext()).map { parseJsonToLoan(it) }
-
-        val historyAdapter = LoanHistoryAdapter(allLoans.reversed()) { clickedLoan ->
-            val bundle = Bundle().apply {
-                // We put the loan's ID into the bundle with the key "loanId".
-                // This key MUST match the argument name in the nav_graph.
-                putLong("loanId", clickedLoan.id)
-            }
-            // We then navigate using the action ID and pass the bundle as the second parameter.
-            findNavController().navigate(R.id.action_pinjamanFragment_to_loanDetailFragment, bundle)
-
-        }
-        binding.recyclerLoanHistory.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerLoanHistory.adapter = historyAdapter
+        fetchLoans()
     }
 
-    private fun parseJsonToLoan(obj: JSONObject): Loan {
-        return Loan(
-            id = obj.optLong("id"),
-            namaPeminjam = obj.optString("namaPeminjam", "Pengguna"),
-            nominal = obj.optDouble("nominal"),
-            tenor = obj.optString("tenor"),
-            tujuan = obj.optString("tujuan"),
-            status = obj.optString("status"),
-            alasanPenolakan = obj.optString("alasanPenolakan", "")
-        )
+    private fun fetchLoans() {
+        val userId = auth.currentUser?.uid ?: return
+
+        db.collection("users").document(userId).collection("loans")
+            .orderBy("tanggalPengajuan", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { result ->
+                val loanList = result.toObjects(Loan::class.java)
+
+                // Setup Adapter
+                val historyAdapter = LoanHistoryAdapter(loanList) { clickedLoan ->
+                    val bundle = Bundle().apply {
+                        // Pass String ID (Changed from putLong to putString)
+                        putString("loanId", clickedLoan.id)
+                    }
+                    findNavController().navigate(R.id.action_pinjamanFragment_to_loanDetailFragment, bundle)
+                }
+
+                binding.recyclerLoanHistory.layoutManager = LinearLayoutManager(requireContext())
+                binding.recyclerLoanHistory.adapter = historyAdapter
+            }
+            .addOnFailureListener {
+                Toast.makeText(context, "Gagal memuat data", Toast.LENGTH_SHORT).show()
+            }
     }
 
     override fun onDestroyView() {

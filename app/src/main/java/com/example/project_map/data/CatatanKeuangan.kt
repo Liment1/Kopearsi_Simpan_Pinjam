@@ -9,10 +9,6 @@ enum class TipeCatatan {
     PINJAMAN,
     OPERASIONAL; // <-- ADDED: For operational costs like electricity, supplies, etc.
 
-    /**
-     * Helper function to determine if a transaction is income.
-     * Simplifies calculations for financial reports.
-     */
     fun isPemasukan(): Boolean {
         return this == SIMPANAN || this == ANGSURAN
     }

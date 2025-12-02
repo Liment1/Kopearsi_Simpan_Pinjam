@@ -2,6 +2,8 @@ package com.example.project_map
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.util.Log.e
 import android.view.View
 import com.example.project_map.R
 import androidx.appcompat.app.AppCompatActivity
@@ -9,8 +11,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.example.project_map.databinding.ActivityMainBinding
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
+    val db = Firebase.firestore
+    // Create a new user with a first and last name
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

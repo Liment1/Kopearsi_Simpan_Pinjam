@@ -18,9 +18,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.project_map.R
-import org.json.JSONObject
+import com.example.project_map.data.Loan
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.io.FileNotFoundException
 import java.io.InputStream
+import java.util.Date
 
 class LoansFragment : Fragment() {
 
@@ -43,11 +46,18 @@ class LoansFragment : Fragment() {
     private var ktpBitmap: Bitmap? = null
     private val RATE = 0.05
 
+    // Firebase
+    private lateinit var db: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_loans, container, false)
+
+        db = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance()
 
         imgKtp = view.findViewById(R.id.imgKtpPreview)
         btnUploadKtp = view.findViewById(R.id.btnUploadKtp)
@@ -66,6 +76,21 @@ class LoansFragment : Fragment() {
             findNavController().popBackStack()
         }
 
+        setupImagePickers()
+        setupSpinner()
+
+        edtNominal.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) { updateHitungan() }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        btnAjukan.setOnClickListener { kirimPengajuan() }
+        updateHitungan()
+        return view
+    }
+
+    private fun setupImagePickers() {
         galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == android.app.Activity.RESULT_OK && result.data != null) {
                 val uri = result.data!!.data
@@ -84,23 +109,15 @@ class LoansFragment : Fragment() {
         }
 
         btnUploadKtp.setOnClickListener { showUploadOptions() }
+    }
 
+    private fun setupSpinner() {
         if (spinnerSatuan.adapter == null) {
             val arr = resources.getStringArray(R.array.satuan_tenor)
             spinnerSatuan.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, arr).apply {
                 setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             }
         }
-
-        edtNominal.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) { updateHitungan() }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-
-        btnAjukan.setOnClickListener { kirimPengajuan() }
-        updateHitungan()
-        return view
     }
 
     private fun showUploadOptions() {
@@ -148,14 +165,13 @@ class LoansFragment : Fragment() {
             txtJasa.text = "Jasa Pinjaman (${(RATE*100).toInt()}%): Rp ${bunga.toLong()}"
             txtTotalPengembalian.text = "Total Pengembalian: Rp ${totalPengembalian.toLong()}"
             txtDanaDiterima.text = "Total Dana Diterima: Rp ${nominal.toLong()}"
-        } else {
-            txtJasa.text = "Jasa Pinjaman (${(RATE*100).toInt()}%): Rp 0"
-            txtTotalPengembalian.text = "Total Pengembalian: Rp 0"
-            txtDanaDiterima.text = "Total Dana Diterima: Rp 0"
         }
     }
 
     private fun kirimPengajuan() {
+        val userId = auth.currentUser?.uid
+        if (userId == null) return
+
         val jenis = edtJenisPinjaman.text.toString().trim()
         val peruntukan = edtPeruntukan.text.toString().trim()
         val lama = edtLamaPinjaman.text.toString().trim()
@@ -171,21 +187,30 @@ class LoansFragment : Fragment() {
         val bunga = nominal * RATE
         val totalPengembalian = nominal + bunga
 
-        val loan = JSONObject().apply {
-            put("status", "Proses")
-            put("nominal", nominal)
-            put("tenor", "$lama $satuan")
-            put("tujuan", peruntukan)
-            put("bunga", RATE)
-            put("sisaAngsuran", totalPengembalian)
-            put("hasKtp", true)
-            put("isPaid", false)
-        }
+        // Create new Document Reference
+        val newLoanRef = db.collection("users").document(userId).collection("loans").document()
 
-        LoanStorage.saveLoan(requireContext(), loan)
-        Toast.makeText(requireContext(), "Pengajuan berhasil dikirim.", Toast.LENGTH_SHORT).show()
+        val loanData = Loan(
+            id = newLoanRef.id,
+            namaPeminjam = auth.currentUser?.displayName ?: "User",
+            nominal = nominal,
+            tenor = "$lama $satuan",
+            tujuan = peruntukan,
+            status = "Proses",
+            bunga = RATE,
+            sisaAngsuran = totalPengembalian,
+            totalDibayar = 0.0,
+            tanggalPengajuan = Date()
+        )
 
-        findNavController().navigate(R.id.action_loansFragment_to_pinjamanFragment)
+        // Save to Firestore
+        newLoanRef.set(loanData)
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Pengajuan berhasil dikirim.", Toast.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_loansFragment_to_pinjamanFragment)
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Gagal mengirim pengajuan", Toast.LENGTH_SHORT).show()
+            }
     }
 }
-

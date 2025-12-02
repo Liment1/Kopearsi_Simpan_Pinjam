@@ -8,6 +8,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
+import com.example.project_map.data.Transaction
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
+
 
 class TransactionAdapter(
     private var transaksi: List<Transaction>,
@@ -29,20 +34,24 @@ class TransactionAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = transaksi[position]
-        holder.tvKeterangan.text = item.keterangan
-        holder.tvJumlah.text = item.jumlah
 
-        // Cek apakah jenis simpanan adalah "Simpanan Sukarela"
-        if (item.keterangan == "Simpanan Sukarela") {
-            // Jika ya, buat ImageView terlihat dan atur gambarnya
+        // Format Currency
+        val localeID = Locale("in", "ID")
+        val numberFormat = NumberFormat.getCurrencyInstance(localeID)
+        numberFormat.maximumFractionDigits = 0
+
+        holder.tvKeterangan.text = item.type // e.g. "Simpanan Sukarela"
+        holder.tvJumlah.text = "+ ${numberFormat.format(item.amount)}"
+
+        // Logic for Image Visibility
+        if (item.type == "Simpanan Sukarela" && !item.imageUri.isNullOrEmpty()) {
             holder.ivProof.visibility = View.VISIBLE
-            if (item.imageUri.isNullOrEmpty()) {
-                holder.ivProof.setImageResource(R.drawable.placeholder_image)
-            } else {
+            try {
                 holder.ivProof.setImageURI(Uri.parse(item.imageUri))
+            } catch (e: Exception) {
+                holder.ivProof.setImageResource(R.drawable.ic_launcher_background) // Placeholder
             }
         } else {
-            // Jika bukan (Pokok atau Wajib), sembunyikan ImageView
             holder.ivProof.visibility = View.GONE
         }
 

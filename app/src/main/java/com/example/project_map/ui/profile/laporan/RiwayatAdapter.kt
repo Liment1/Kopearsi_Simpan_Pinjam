@@ -31,25 +31,28 @@ class RiwayatAdapter(private var transactions: List<CatatanKeuangan>) :
     override fun onBindViewHolder(holder: RiwayatViewHolder, position: Int) {
         val catatan = transactions[position]
 
-        val dateFormat = SimpleDateFormat("dd MMM", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd MMM", Locale("in", "ID"))
         holder.tvDate.text = dateFormat.format(catatan.date)
         holder.tvDesc.text = catatan.description
 
         val format: NumberFormat = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
         format.maximumFractionDigits = 0
 
+        // Determine color and sign based on Type
+        // Note: You can also use catatan.type.isPemasukan() if you want to simplify logic,
+        // but explicit handling per type gives you more control over colors.
         when (catatan.type) {
             TipeCatatan.SIMPANAN -> {
                 holder.tvAmount.text = "+ ${format.format(catatan.amount)}"
                 holder.tvAmount.setTextColor(Color.parseColor("#1E8E3E")) // Green
             }
-            TipeCatatan.ANGSURAN -> {
-                holder.tvAmount.text = "- ${format.format(catatan.amount)}"
-                holder.tvAmount.setTextColor(Color.parseColor("#D93025")) // Red
-            }
             TipeCatatan.PINJAMAN -> {
                 holder.tvAmount.text = "+ ${format.format(catatan.amount)}"
                 holder.tvAmount.setTextColor(Color.parseColor("#1A73E8")) // Blue
+            }
+            TipeCatatan.ANGSURAN -> {
+                holder.tvAmount.text = "- ${format.format(catatan.amount)}"
+                holder.tvAmount.setTextColor(Color.parseColor("#D93025")) // Red
             }
             TipeCatatan.OPERASIONAL -> {
                 holder.tvAmount.text = "- ${format.format(catatan.amount)}"

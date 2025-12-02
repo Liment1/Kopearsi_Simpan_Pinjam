@@ -32,7 +32,7 @@ class AnggotaAdapter(
     override fun onBindViewHolder(holder: AnggotaViewHolder, position: Int) {
         val anggota = anggotaList[position]
         holder.tvNama.text = anggota.name
-        holder.tvId.text = "ID: ${anggota.id}"
+//        holder.tvId.text = "ID: ${anggota.id}"
         holder.tvStatus.text = anggota.status
 
         val statusBackground = holder.tvStatus.background as GradientDrawable

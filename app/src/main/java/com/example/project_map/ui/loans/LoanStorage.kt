@@ -13,7 +13,6 @@ object LoanStorage {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         val array = JSONArray(prefs.getString(KEY_LOANS, "[]"))
 
-        // ✅ Pastikan setiap pinjaman punya ID unik
         if (!loan.has("id")) {
             loan.put("id", System.currentTimeMillis()) // Gunakan timestamp sebagai ID unik
         }

@@ -11,12 +11,9 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
-import com.example.project_map.data.KoperasiDatabase
-import com.example.project_map.data.TipeCatatan
-import com.example.project_map.data.UserDatabase
 import com.example.project_map.data.UserData
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.NumberFormat
 import java.util.*
 
@@ -25,6 +22,9 @@ class AdminDataAnggotaFragment : Fragment() {
     private lateinit var rvAnggota: RecyclerView
     private lateinit var fabTambahAnggota: FloatingActionButton
     private lateinit var anggotaAdapter: AnggotaAdapter
+    private lateinit var db: FirebaseFirestore
+
+    private var allMembers = mutableListOf<UserData>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,26 +36,53 @@ class AdminDataAnggotaFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        db = FirebaseFirestore.getInstance()
+
         rvAnggota = view.findViewById(R.id.rvAnggota)
         fabTambahAnggota = view.findViewById(R.id.fabTambahAnggota)
 
         setupRecyclerView()
+        fetchMembers()
 
         fabTambahAnggota.setOnClickListener {
-            showAnggotaDialog(null) // Pass null for adding a new member
+            // Adding a user usually requires Auth creation which is complex here.
+            // For now, we'll show a toast or implement basic Firestore add if needed.
+            Toast.makeText(context, "Fitur tambah anggota manual belum tersedia (Perlu Auth)", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun setupRecyclerView() {
-        anggotaAdapter = AnggotaAdapter(UserDatabase.allUsers) { anggota ->
-            // UPDATED: Show financial summary on click first
+        anggotaAdapter = AnggotaAdapter(allMembers) { anggota ->
             showFinancialSummaryDialog(anggota)
         }
         rvAnggota.layoutManager = LinearLayoutManager(requireContext())
         rvAnggota.adapter = anggotaAdapter
     }
 
-    // NEW: Function to show financial summary
+    private fun fetchMembers() {
+        // Fetch all users
+        db.collection("users").get()
+            .addOnSuccessListener { result ->
+                allMembers.clear()
+                for (document in result) {
+                    // Manual mapping to handle potential missing fields
+                    val user = UserData(
+                        id = document.id, // Using Doc ID as ID
+                        name = document.getString("name") ?: "",
+                        email = document.getString("email") ?: "",
+                        phone = document.getString("phone") ?: "",
+                        status = document.getString("status") ?: "Aktif",
+                        memberCode = document.getString("memberCode") ?: ""
+                    )
+                    allMembers.add(user)
+                }
+                anggotaAdapter.notifyDataSetChanged()
+            }
+            .addOnFailureListener {
+                Toast.makeText(context, "Gagal memuat data anggota", Toast.LENGTH_SHORT).show()
+            }
+    }
+
     private fun showFinancialSummaryDialog(anggota: UserData) {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_financial_summary, null)
         val tvNamaAnggota = dialogView.findViewById<TextView>(R.id.tvNamaAnggota)
@@ -65,15 +92,28 @@ class AdminDataAnggotaFragment : Fragment() {
 
         tvNamaAnggota.text = anggota.name
 
-        // Calculate financial data for the specific member
-        val memberTransactions = KoperasiDatabase.allTransactions.filter {
-            it.description.contains(anggota.name, ignoreCase = true)
-        }
-        val totalSimpanan = memberTransactions.filter { it.type == TipeCatatan.SIMPANAN }.sumOf { it.amount }
-        val totalPinjaman = memberTransactions.filter { it.type == TipeCatatan.PINJAMAN }.sumOf { it.amount }
+        // Fetch Financials from Firestore for this specific user
+        val userRef = db.collection("users").document(anggota.id)
 
-        tvTotalSimpanan.text = formatCurrency(totalSimpanan)
-        tvTotalPinjaman.text = formatCurrency(totalPinjaman)
+        userRef.get().addOnSuccessListener { doc ->
+            if (doc.exists()) {
+                val totalSimpanan = doc.getDouble("totalSimpanan") ?: 0.0
+                // For Total Pinjaman (Outstanding), we might need to sum 'sisaAngsuran' of active loans
+                // Or if you store a running total 'totalPinjaman' in user doc, use that.
+                // Here we fetch active loans count for simplicity or calculate:
+
+                tvTotalSimpanan.text = formatCurrency(totalSimpanan)
+                // Placeholder for loan calc or fetch separate collection
+                tvTotalPinjaman.text = "Loading..."
+
+                // Calculate Total Outstanding Loan
+                userRef.collection("loans").whereNotEqualTo("status", "Lunas").get()
+                    .addOnSuccessListener { loans ->
+                        val outstanding = loans.documents.sumOf { it.getDouble("sisaAngsuran") ?: 0.0 }
+                        tvTotalPinjaman.text = formatCurrency(outstanding)
+                    }
+            }
+        }
 
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
@@ -81,101 +121,9 @@ class AdminDataAnggotaFragment : Fragment() {
 
         btnEditData.setOnClickListener {
             dialog.dismiss()
-            showAnggotaDialog(anggota) // Now open the edit dialog
+            showEditAnggotaDialog(anggota) // Call the new function
         }
-
         dialog.show()
-    }
-
-
-    private fun showAnggotaDialog(anggota: UserData?) {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_form_anggota, null)
-        val etNama = dialogView.findViewById<EditText>(R.id.etNamaForm)
-        val etEmail = dialogView.findViewById<EditText>(R.id.etEmailForm)
-        val etPhone = dialogView.findViewById<EditText>(R.id.etPhoneForm)
-        val spinnerStatus = dialogView.findViewById<Spinner>(R.id.spinnerStatus)
-        val layoutPasswordLama = dialogView.findViewById<TextInputLayout>(R.id.layoutPasswordLama)
-        val etPasswordLama = dialogView.findViewById<EditText>(R.id.etPasswordLamaForm)
-        val etPasswordBaru = dialogView.findViewById<EditText>(R.id.etPasswordBaruForm)
-        val etKonfirmasiPasswordBaru = dialogView.findViewById<EditText>(R.id.etKonfirmasiPasswordBaruForm)
-
-
-        val statusAdapter = ArrayAdapter.createFromResource(
-            requireContext(), R.array.status_array, android.R.layout.simple_spinner_item
-        )
-        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerStatus.adapter = statusAdapter
-
-        val dialogTitle = if (anggota == null) "Tambah Anggota Baru" else "Edit Data Anggota"
-
-        anggota?.let {
-            etNama.setText(it.name)
-            etEmail.setText(it.email)
-            etPhone.setText(it.phone)
-            spinnerStatus.setSelection(statusAdapter.getPosition(it.status))
-            layoutPasswordLama.visibility = View.VISIBLE
-        }
-
-        AlertDialog.Builder(requireContext())
-            .setTitle(dialogTitle)
-            .setView(dialogView)
-            .setPositiveButton("Simpan") { dialog, _ ->
-                val nama = etNama.text.toString()
-                val email = etEmail.text.toString()
-                val phone = etPhone.text.toString()
-                val status = spinnerStatus.selectedItem.toString()
-                val passBaru = etPasswordBaru.text.toString()
-                val konfirmasiPassBaru = etKonfirmasiPasswordBaru.text.toString()
-                val passLama = etPasswordLama.text.toString()
-
-                if (nama.isBlank() || email.isBlank()) {
-                    Toast.makeText(requireContext(), "Nama dan Email tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                if (anggota == null) {
-                    if (passBaru.isBlank() || konfirmasiPassBaru.isBlank()) {
-                        Toast.makeText(requireContext(), "Password baru tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
-                    }
-                    if (passBaru != konfirmasiPassBaru) {
-                        Toast.makeText(requireContext(), "Password baru dan konfirmasi tidak cocok", Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
-                    }
-                    val newId = "AGT" + String.format("%04d", (UserDatabase.allUsers.size + 1))
-                    val newAnggota = UserData(newId, email, passBaru, nama, phone, false, status)
-                    UserDatabase.allUsers.add(newAnggota)
-                    anggotaAdapter.notifyItemInserted(UserDatabase.allUsers.size - 1)
-                    Toast.makeText(requireContext(), "Anggota baru berhasil ditambahkan", Toast.LENGTH_SHORT).show()
-                }
-                else {
-                    anggota.name = nama
-                    anggota.email = email
-                    anggota.phone = phone
-                    anggota.status = status
-
-                    if (passBaru.isNotBlank() || konfirmasiPassBaru.isNotBlank() || passLama.isNotBlank()) {
-                        val credentialsPrefs = requireContext().getSharedPreferences("UserCredentials", Context.MODE_PRIVATE)
-                        val correctOldPassword = credentialsPrefs.getString(anggota.id, anggota.pass)
-
-                        if (passLama != correctOldPassword) {
-                            Toast.makeText(requireContext(), "Password lama salah!", Toast.LENGTH_SHORT).show()
-                            return@setPositiveButton
-                        }
-                        if (passBaru != konfirmasiPassBaru) {
-                            Toast.makeText(requireContext(), "Password baru dan konfirmasi tidak cocok", Toast.LENGTH_SHORT).show()
-                            return@setPositiveButton
-                        }
-                        anggota.pass = passBaru
-                        credentialsPrefs.edit().putString(anggota.id, passBaru).apply()
-                    }
-                    anggotaAdapter.notifyDataSetChanged()
-                    Toast.makeText(requireContext(), "Data berhasil diperbarui", Toast.LENGTH_SHORT).show()
-                }
-                dialog.dismiss()
-            }
-            .setNegativeButton("Batal", null)
-            .show()
     }
 
     private fun formatCurrency(value: Double): String {
@@ -183,5 +131,64 @@ class AdminDataAnggotaFragment : Fragment() {
         val format = NumberFormat.getCurrencyInstance(localeID)
         format.maximumFractionDigits = 0
         return format.format(value)
+    }
+
+    private fun showEditAnggotaDialog(anggota: UserData) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_form_anggota, null)
+
+        val etNama = dialogView.findViewById<EditText>(R.id.etNamaForm)
+        val etEmail = dialogView.findViewById<EditText>(R.id.etEmailForm) // Read-only usually
+        val etPhone = dialogView.findViewById<EditText>(R.id.etPhoneForm)
+        val spinnerStatus = dialogView.findViewById<Spinner>(R.id.spinnerStatus)
+
+        // Hide Password fields for Edit mode if not needed
+        dialogView.findViewById<View>(R.id.layoutPasswordLama)?.visibility = View.GONE
+
+        // Pre-fill Data
+        etNama.setText(anggota.name)
+        etEmail.setText(anggota.email)
+        etEmail.isEnabled = false // Email is usually unique/ID based, so disable edit
+        etPhone.setText(anggota.phone)
+
+        // Setup Status Spinner
+        val statusList = listOf("Anggota Aktif", "Calon Anggota", "Diblokir", "Tidak Aktif")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, statusList)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerStatus.adapter = adapter
+
+        // Set current selection
+        val statusIndex = statusList.indexOf(anggota.status)
+        if (statusIndex >= 0) spinnerStatus.setSelection(statusIndex)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Edit Anggota: ${anggota.name}")
+            .setView(dialogView)
+            .setPositiveButton("Simpan") { dialog, _ ->
+                val newName = etNama.text.toString()
+                val newPhone = etPhone.text.toString()
+                val newStatus = spinnerStatus.selectedItem.toString()
+
+                updateMemberInFirestore(anggota.id, newName, newPhone, newStatus)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun updateMemberInFirestore(uid: String, name: String, phone: String, status: String) {
+        val updates = mapOf(
+            "name" to name,
+            "phone" to phone,
+            "status" to status
+        )
+
+        db.collection("users").document(uid).update(updates)
+            .addOnSuccessListener {
+                Toast.makeText(context, "Data berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                fetchMembers() // Refresh list
+            }
+            .addOnFailureListener {
+                Toast.makeText(context, "Gagal update: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 }

@@ -5,7 +5,7 @@ import android.view.*
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
-import com.example.project_map.ui.loans.Loan
+import com.example.project_map.data.Loan
 import com.google.android.material.card.MaterialCardView
 import java.text.NumberFormat
 import java.util.*

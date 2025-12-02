@@ -1,7 +1,10 @@
-plugins {
+import org.gradle.kotlin.dsl.implementation
+
+  plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-
+    id("com.google.gms.google-services")
+//    id("com.android.application")
 }
 
 android {
@@ -45,6 +48,8 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.navigation.ui.ktx)
     val nav = "2.8.2";
     // Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:$nav")
@@ -68,4 +73,12 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.fragment:fragment-ktx:1.6.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+
+    // Declare the dependencies for the desired Firebase products without specifying versions
+    // For example, declare the dependencies for Firebase Authentication and Cloud Firestore
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
 }

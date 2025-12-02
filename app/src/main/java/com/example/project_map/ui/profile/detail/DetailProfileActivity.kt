@@ -1,18 +1,21 @@
 package com.example.project_map.ui.profile.detail
 
-import android.content.Context
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.project_map.R
-import com.example.project_map.data.HashingUtils
-import com.example.project_map.data.UserDatabase
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class DetailProfileActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,18 +25,14 @@ class DetailProfileActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val sharedPreferences = getSharedPreferences("UserData", Context.MODE_PRIVATE)
-        val id = sharedPreferences.getString("USER_ID", null)
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
-        if (id == null) {
-            Toast.makeText(this, "Sesi tidak valid, silakan login kembali.", Toast.LENGTH_LONG).show()
-            finish()
-            return
-        }
+        val currentUser = auth.currentUser
 
-        val currentUser = UserDatabase.allUsers.find { it.id == id }
+        // Safety Check
         if (currentUser == null) {
-            Toast.makeText(this, "Data pengguna tidak ditemukan.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Sesi habis, silakan login kembali.", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -42,46 +41,69 @@ class DetailProfileActivity : AppCompatActivity() {
         val tvKodePegawai = findViewById<TextView>(R.id.tvKodePegawai)
         val tvEmailDetail = findViewById<TextView>(R.id.tvEmailDetail)
         val tvPhoneDetail = findViewById<TextView>(R.id.tvPhoneDetail)
+
         val etPasswordLama = findViewById<TextInputEditText>(R.id.etPasswordLama)
         val etPasswordBaru = findViewById<TextInputEditText>(R.id.etPasswordBaru)
         val etKonfirmasiPasswordBaru = findViewById<TextInputEditText>(R.id.etKonfirmasiPasswordBaru)
         val btnSimpan = findViewById<Button>(R.id.btnSimpan)
 
-        tvNama.text = currentUser.name
-        tvKodePegawai.text = currentUser.id
-        tvEmailDetail.text = currentUser.email
-        tvPhoneDetail.text = currentUser.phone
-
-        // Pre-fill the old password field for the default user for easy testing
-        if (currentUser.name == "Santi Sanjaya") {
-            etPasswordLama.setText("User123_")
-        }
-
-        btnSimpan.setOnClickListener {
-            val passLamaInput = etPasswordLama.text.toString()
-            val passBaruInput = etPasswordBaru.text.toString()
-            val konfirmasiPassBaruInput = etKonfirmasiPasswordBaru.text.toString()
-
-            val hashedOldPasswordInput = HashingUtils.hashPassword(passLamaInput)
-
-            when {
-                passLamaInput.isBlank() || passBaruInput.isBlank() || konfirmasiPassBaruInput.isBlank() -> {
-                    Toast.makeText(this, "Semua kolom password harus diisi!", Toast.LENGTH_SHORT).show()
-                }
-                hashedOldPasswordInput != currentUser.pass -> {
-                    Toast.makeText(this, "Password lama salah!", Toast.LENGTH_SHORT).show()
-                }
-                passBaruInput != konfirmasiPassBaruInput -> {
-                    Toast.makeText(this, "Password baru dan konfirmasi tidak cocok!", Toast.LENGTH_SHORT).show()
-                }
-                else -> {
-                    val hashedNewPassword = HashingUtils.hashPassword(passBaruInput)
-                    currentUser.pass = hashedNewPassword
-
-                    Toast.makeText(this, "Password berhasil diubah!", Toast.LENGTH_SHORT).show()
-                    finish()
+        // --- FETCH DATA FROM FIRESTORE ---
+        db.collection("users").document(currentUser.uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    tvNama.text = document.getString("name")
+                    // Note: We use 'memberCode' (or whatever you named the field for AGT...)
+                    // If you kept it as 'id' in the DB, change this string to "id"
+                    tvKodePegawai.text = document.getString("memberCode") ?: document.getString("id") ?: "-"
+                    tvEmailDetail.text = document.getString("email")
+                    tvPhoneDetail.text = document.getString("phone")
                 }
             }
+            .addOnFailureListener {
+                Toast.makeText(this, "Gagal mengambil data user.", Toast.LENGTH_SHORT).show()
+            }
+
+        // --- PASSWORD CHANGE LOGIC ---
+        btnSimpan.setOnClickListener {
+            val passLama = etPasswordLama.text.toString()
+            val passBaru = etPasswordBaru.text.toString()
+            val konfirmasiPass = etKonfirmasiPasswordBaru.text.toString()
+
+            // 1. Basic Validation
+            if (passLama.isEmpty() || passBaru.isEmpty() || konfirmasiPass.isEmpty()) {
+                Toast.makeText(this, "Semua kolom harus diisi", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (passBaru.length < 6) {
+                Toast.makeText(this, "Password baru minimal 6 karakter", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (passBaru != konfirmasiPass) {
+                Toast.makeText(this, "Konfirmasi password tidak cocok", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // 2. Re-Authenticate User (Required by Firebase for sensitive changes)
+            val credential = EmailAuthProvider.getCredential(currentUser.email!!, passLama)
+
+            currentUser.reauthenticate(credential)
+                .addOnSuccessListener {
+                    // 3. Update Password in Firebase Auth
+                    currentUser.updatePassword(passBaru)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Password berhasil diubah!", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Gagal update password: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+                .addOnFailureListener {
+                    // This usually means the 'Old Password' was wrong
+                    Toast.makeText(this, "Password lama salah", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 

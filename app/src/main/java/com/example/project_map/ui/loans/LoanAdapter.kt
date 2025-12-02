@@ -12,7 +12,17 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class InstallmentAdapter(private var installments: List<Loans>) : RecyclerView.Adapter<InstallmentAdapter.ViewHolder>() {
+// Ensure your data class matches this structure
+data class Installment(
+    var number: Int = 0,
+    var type: String = "",
+    var amount: Double = 0.0,
+    var date: Date? = null,
+    var otherFees: Double = 0.0,
+    var isPaid: Boolean = false
+)
+
+class LoanAdapter(private var installments: List<Installment>) : RecyclerView.Adapter<LoanAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val icon: ImageView = view.findViewById(R.id.ivTimelineIcon)
@@ -24,6 +34,7 @@ class InstallmentAdapter(private var installments: List<Loans>) : RecyclerView.A
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        // Uses the XML you provided in the prompt
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_installment, parent, false)
         return ViewHolder(view)
     }
@@ -32,34 +43,43 @@ class InstallmentAdapter(private var installments: List<Loans>) : RecyclerView.A
         val item = installments[position]
         val context = holder.itemView.context
         val localeID = Locale("in", "ID")
-
-        // Format Currency
-        val currencyFormat = NumberFormat.getCurrencyInstance(localeID).apply {
-            maximumFractionDigits = 0
-        }
-
-        // Format Date
+        val currencyFormat = NumberFormat.getCurrencyInstance(localeID).apply { maximumFractionDigits = 0 }
         val dateFormat = SimpleDateFormat("dd MMMM yyyy", localeID)
-        val dateString = if (item.date != null) "Dibayar pada ${dateFormat.format(item.date)}" else "Belum dibayar"
 
         holder.number.text = "#${item.number}"
-        holder.totalPaid.text = "Total Yang Dibayar\n${currencyFormat.format(item.amount)}"
-        holder.type.text = "${item.type}\n${currencyFormat.format(item.amount)}"
-        holder.date.text = dateString
         holder.fees.text = "Biaya Lain\n${currencyFormat.format(item.otherFees)}"
 
         if (item.isPaid) {
-            holder.icon.setImageResource(R.drawable.ic_timeline_paid)
+            // --- PAID STYLE (Green) ---
+            holder.icon.setImageResource(R.drawable.ic_check_circle) // Ensure you have a check icon
+            holder.icon.setColorFilter(ContextCompat.getColor(context, android.R.color.holo_green_dark))
+
+            holder.totalPaid.text = "Total Yang Dibayar\n${currencyFormat.format(item.amount)}"
+            holder.type.text = "${item.type}\n${currencyFormat.format(item.amount)}"
+            holder.date.text = "Dibayar pada ${dateFormat.format(item.date!!)}"
+
             holder.totalPaid.setTextColor(ContextCompat.getColor(context, android.R.color.black))
         } else {
-            holder.icon.setImageResource(R.drawable.ic_timeline_pending)
+            // --- UPCOMING STYLE (Yellow/Gray) ---
+            // Use a clock or circle icon
+            holder.icon.setImageResource(R.drawable.ic_access_time) // Standard android icon
+            holder.icon.setColorFilter(ContextCompat.getColor(context, R.color.orange_text)) // Define orange in colors.xml
+
+            holder.totalPaid.text = "Total Yang Harus Dibayar\n${currencyFormat.format(item.amount)}"
+            holder.type.text = "${item.type}\n${currencyFormat.format(item.amount)}"
+
+            // Calculate Future Date based on number
+            val futureDate = item.date
+            val dateStr = if(futureDate != null) dateFormat.format(futureDate) else "Segera"
+            holder.date.text = "Jatuh tempo pada $dateStr"
+
             holder.totalPaid.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray))
         }
     }
 
     override fun getItemCount() = installments.size
 
-    fun updateData(newData: List<Loans>) {
+    fun updateData(newData: List<Installment>) {
         installments = newData
         notifyDataSetChanged()
     }

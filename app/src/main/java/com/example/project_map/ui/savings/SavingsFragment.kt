@@ -14,29 +14,46 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.app.savings.TransactionType
 import com.example.project_map.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+// IMPORT THE DATA PACKAGE
+import com.example.project_map.data.Transaction
 
 class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.OnNominalEntered {
 
-    private var totalSimpanan = 10_000_000
-    private var totalPokok = 5_000_000
-    private var totalWajib = 1_000_000
-    private var totalSukarela = 3_000_000
+    // Define new views
+    private lateinit var tvTotalPokok: TextView
+    private lateinit var tvTotalWajib: TextView
+    private lateinit var tvTotalSukarela: TextView
 
-    private lateinit var transaksi: MutableList<Transaction>
+    // Firebase
+    private lateinit var db: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
+
+    // Data
+    private var totalSimpanan = 0.0
+    private var totalPokok = 0.0
+    private var totalWajib = 0.0
+    private var totalSukarela = 0.0
+
+    private var allTransactions: List<Transaction> = emptyList()
     private lateinit var adapter: TransactionAdapter
-    private var selectedImageUri: Uri? = null
-    private var currentNominal = 0
 
+    // UI
     private lateinit var tvTotal: TextView
     private lateinit var spinnerFilter: Spinner
     private lateinit var recycler: RecyclerView
-    private lateinit var handler: Handler
 
-    // Untuk memilih gambar
+    // Upload Logic
+    private var selectedImageUri: Uri? = null
+    private var currentNominal = 0
+
     private val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -46,7 +63,6 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
         }
     }
 
-    // Permission launcher (Android 13+ pakai READ_MEDIA_IMAGES)
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -57,22 +73,20 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        tvTotalPokok = view.findViewById(R.id.tvTotalPokok)
+        tvTotalWajib = view.findViewById(R.id.tvTotalWajib)
+        tvTotalSukarela = view.findViewById(R.id.tvTotalSukarela)
+
+        db = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance()
+
         tvTotal = view.findViewById(R.id.tvTotalSimpanan)
         spinnerFilter = view.findViewById(R.id.spinnerFilter)
         recycler = view.findViewById(R.id.recyclerView)
         val btnSimpan: Button = view.findViewById(R.id.btnTambahSimpanan)
 
-        updateTotals()
-
-        transaksi = mutableListOf(
-            Transaction("2025-09-01 08:10:00", "Simpanan Pokok", "+ Rp 5.000.000", TransactionType.DEPOSIT, null),
-            Transaction("2025-09-10 10:30:00", "Simpanan Wajib", "+ Rp 1.000.000", TransactionType.DEPOSIT, null),
-            Transaction("2025-09-25 09:15:00", "Simpanan Sukarela", "+ Rp 3.000.000", TransactionType.DEPOSIT, null)
-        )
-
-        adapter = TransactionAdapter(transaksi) { transaction ->
-            showTransactionDetail(transaction)
-        }
+        // --- FIX HERE: Explicitly specify the type <Transaction> ---
+        adapter = TransactionAdapter(ArrayList<Transaction>(), ::showTransactionDetail)
 
         recycler.layoutManager = LinearLayoutManager(requireContext())
         recycler.adapter = adapter
@@ -83,50 +97,53 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
             override fun onItemSelected(parent: AdapterView<*>?, v: View?, pos: Int, id: Long) {
                 filterTransactions(options[pos])
             }
-
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        // Tombol Simpan otomatis masuk ke Simpanan Sukarela
         btnSimpan.setOnClickListener {
             TarikBottomSheet(this).show(parentFragmentManager, "SimpanBottomSheet")
         }
 
-        // Handler untuk simpanan wajib otomatis setiap 30 detik
-        handler = Handler(Looper.getMainLooper())
-        startAutoSimpananWajib()
+        fetchUserDataAndTotals()
+        fetchTransactionHistory()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        handler.removeCallbacksAndMessages(null)
-    }
+    private fun fetchUserDataAndTotals() {
+        val userId = auth.currentUser?.uid ?: return
 
-    // Auto-simpanan wajib (simulasi tiap 30 detik)
-    private fun startAutoSimpananWajib() {
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                val nominalWajib = 100_000 // contoh nominal wajib per bulan
-                totalWajib += nominalWajib
-                totalSimpanan += nominalWajib
+        db.collection("users").document(userId)
+            .addSnapshotListener { document, e ->
+                if (e != null) return@addSnapshotListener
 
-                val transaction = Transaction(
-                    tanggal = getCurrentDate(),
-                    keterangan = "Simpanan Wajib",
-                    jumlah = "+ ${formatRupiah(nominalWajib)}",
-                    type = TransactionType.DEPOSIT,
-                    imageUri = null
-                )
+                if (document != null && document.exists()) {
+                    totalSimpanan = document.getDouble("totalSimpanan") ?: 0.0
+                    totalPokok = document.getDouble("simpananPokok") ?: 0.0
+                    totalWajib = document.getDouble("simpananWajib") ?: 0.0
+                    totalSukarela = document.getDouble("simpananSukarela") ?: 0.0
 
-                transaksi.add(0, transaction)
-                adapter.updateList(transaksi)
-                updateTotals()
-
-                Toast.makeText(requireContext(), "Simpanan wajib otomatis berhasil ditambahkan", Toast.LENGTH_SHORT).show()
-
-                handler.postDelayed(this, 120_000) // setiap 30 detik
+                    // UPDATE ALL TEXT VIEWS SEPARATELY
+                    tvTotal.text = formatRupiah(totalSimpanan)
+                    tvTotalPokok.text = formatRupiah(totalPokok)
+                    tvTotalWajib.text = formatRupiah(totalWajib)
+                    tvTotalSukarela.text = formatRupiah(totalSukarela)
+                }
             }
-        }, 30_000)
+    }
+
+    private fun fetchTransactionHistory() {
+        val userId = auth.currentUser?.uid ?: return
+
+        db.collection("users").document(userId).collection("savings")
+            .orderBy("date", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) return@addSnapshotListener
+
+                if (snapshots != null) {
+                    allTransactions = snapshots.toObjects(Transaction::class.java)
+                    val currentFilter = spinnerFilter.selectedItem?.toString() ?: "Semua"
+                    filterTransactions(currentFilter)
+                }
+            }
     }
 
     override fun onNominalEntered(nominal: Int) {
@@ -137,7 +154,7 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
     private fun showBuktiTransferDialog(nominal: Int) {
         AlertDialog.Builder(requireContext())
             .setTitle("Upload Bukti Transfer")
-            .setMessage("Upload bukti transfer untuk Simpanan Sukarela sebesar ${formatRupiah(nominal)}")
+            .setMessage("Upload bukti transfer untuk Simpanan Sukarela sebesar ${formatRupiah(nominal.toDouble())}")
             .setPositiveButton("Upload") { dialog, _ ->
                 dialog.dismiss()
                 checkGalleryPermission()
@@ -170,75 +187,54 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
         ivPreview.setImageURI(imageUri)
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Konfirmasi Bukti Transfer")
+            .setTitle("Konfirmasi")
             .setView(view)
-            .setPositiveButton("Lanjutkan") { _, _ ->
-                processSavingsAfterUpload(currentNominal, imageUri)
+            .setPositiveButton("Simpan") { _, _ ->
+                saveToFirestore(currentNominal.toDouble(), "Simpanan Sukarela", imageUri.toString())
             }
-            .setNegativeButton("Ganti Gambar") { _, _ ->
-                openImagePicker()
-            }
+            .setNegativeButton("Ganti", null)
             .show()
     }
 
-    private fun processSavingsAfterUpload(nominal: Int, imageUri: Uri) {
-        totalSukarela += nominal
-        totalSimpanan += nominal
-        updateTotals()
+    private fun saveToFirestore(amount: Double, type: String, imageUriString: String?) {
+        val userId = auth.currentUser?.uid ?: return
+        val batch = db.batch()
 
-        val newTransaction = Transaction(
-            tanggal = getCurrentDate(),
-            keterangan = "Simpanan Sukarela",
-            jumlah = "+ ${formatRupiah(nominal)}",
-            type = TransactionType.DEPOSIT,
-            imageUri = imageUri.toString()
+        val userRef = db.collection("users").document(userId)
+        val newTransRef = userRef.collection("savings").document()
+
+        val transaction = Transaction(
+            id = newTransRef.id,
+            date = Date(),
+            type = type,
+            amount = amount,
+            description = "Setoran $type",
+            imageUri = imageUriString
         )
 
-        transaksi.add(0, newTransaction)
-        adapter.updateList(transaksi)
+        batch.set(newTransRef, transaction)
+        batch.update(userRef, "totalSimpanan", FieldValue.increment(amount))
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Berhasil")
-            .setMessage("Simpanan Sukarela sebesar ${formatRupiah(nominal)} berhasil disimpan.")
-            .setPositiveButton("OK", null)
-            .show()
-    }
-
-    private fun showTransactionDetail(transaction: Transaction) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_transaction_detail, null)
-        val ivBukti = dialogView.findViewById<ImageView>(R.id.ivProof)
-        val tvType = dialogView.findViewById<TextView>(R.id.tvType)
-        val tvDate = dialogView.findViewById<TextView>(R.id.tvDate)
-        val tvTime = dialogView.findViewById<TextView>(R.id.tvTime)
-
-        tvType.text = transaction.keterangan
-        val (date, time) = transaction.tanggal.split(" ")
-        tvDate.text = "Tanggal: $date"
-        tvTime.text = "Jam: $time"
-
-        // Cek apakah jenis simpanan adalah "Simpanan Sukarela"
-        if (transaction.keterangan == "Simpanan Sukarela") {
-            // Jika ya, tampilkan ImageView dan atur gambarnya
-            ivBukti.visibility = View.VISIBLE
-            if (transaction.imageUri.isNullOrEmpty()) {
-                ivBukti.setImageResource(R.drawable.placeholder_image)
-            } else {
-                ivBukti.setImageURI(Uri.parse(transaction.imageUri))
-            }
-        } else {
-            // Jika bukan, sembunyikan ImageView
-            ivBukti.visibility = View.GONE
+        val fieldToUpdate = when (type) {
+            "Simpanan Pokok" -> "simpananPokok"
+            "Simpanan Wajib" -> "simpananWajib"
+            "Simpanan Sukarela" -> "simpananSukarela"
+            else -> "simpananSukarela"
         }
+        batch.update(userRef, fieldToUpdate, FieldValue.increment(amount))
 
-        AlertDialog.Builder(requireContext())
-            .setView(dialogView)
-            .setPositiveButton("Tutup", null)
-            .show()
+        batch.commit()
+            .addOnSuccessListener {
+                Toast.makeText(context, "Berhasil disimpan!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Gagal menyimpan: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun filterTransactions(filter: String) {
-        val filtered = if (filter == "Semua") transaksi else transaksi.filter {
-            it.keterangan == filter
+        val filtered = if (filter == "Semua") allTransactions else allTransactions.filter {
+            it.type == filter
         }
         adapter.updateList(filtered)
         updateTotalsByFilter(filter)
@@ -254,11 +250,34 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
         tvTotal.text = formatRupiah(totalFiltered)
     }
 
-    private fun updateTotals() {
-        tvTotal.text = formatRupiah(totalSimpanan)
+    private fun showTransactionDetail(transaction: Transaction) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_transaction_detail, null)
+        val ivBukti = dialogView.findViewById<ImageView>(R.id.ivProof)
+        val tvType = dialogView.findViewById<TextView>(R.id.tvType)
+        val tvDate = dialogView.findViewById<TextView>(R.id.tvDate)
+
+        val dateFormat = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("in", "ID"))
+        val dateStr = if (transaction.date != null) dateFormat.format(transaction.date) else "-"
+
+        tvType.text = transaction.type
+        tvDate.text = dateStr
+
+        if (transaction.type == "Simpanan Sukarela" && !transaction.imageUri.isNullOrEmpty()) {
+            ivBukti.visibility = View.VISIBLE
+            ivBukti.setImageURI(Uri.parse(transaction.imageUri))
+        } else {
+            ivBukti.visibility = View.GONE
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setPositiveButton("Tutup", null)
+            .show()
     }
 
-    private fun formatRupiah(amount: Int): String = "Rp %,d".format(amount).replace(',', '.')
-    private fun getCurrentDate(): String =
-        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+    private fun formatRupiah(amount: Double): String {
+        val format = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        format.maximumFractionDigits = 0
+        return format.format(amount)
+    }
 }

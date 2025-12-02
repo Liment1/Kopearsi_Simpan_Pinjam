@@ -40,28 +40,32 @@
         android:id="@+id/tvInstallmentType"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="Angsuran Pokok\nRp 100.000"
+        android:layout_marginTop="12dp"
         android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@id/tvTotalPaid"
         app:layout_constraintTop_toBottomOf="@id/tvTotalPaid"
-        app:layout_constraintStart_toStartOf="@id/tvTotalPaid" />
+        tools:text="Angsuran Pokok\nRp 100.000" />
 
     <TextView
         android:id="@+id/tvPaymentDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="Dibayar pada tanggal 20 Maret 2025"
+        android:layout_marginTop="12dp"
         android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@id/tvTotalPaid"
         app:layout_constraintTop_toBottomOf="@id/tvInstallmentType"
-        app:layout_constraintStart_toStartOf="@id/tvTotalPaid" />
+        tools:text="Dibayar pada tanggal 20 Maret 2025" />
 
     <TextView
         android:id="@+id/tvOtherFees"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="Biaya Lain\nRp 0"
+        android:layout_marginEnd="148dp"
+        android:layout_marginBottom="28dp"
         android:gravity="end"
         android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/tvPaymentDate"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/tvPaymentDate"/>
+        tools:text="Biaya Lain\nRp 0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

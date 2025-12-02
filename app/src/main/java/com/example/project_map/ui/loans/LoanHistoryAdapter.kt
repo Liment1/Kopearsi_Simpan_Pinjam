@@ -8,7 +8,9 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
+import com.example.project_map.data.Loan
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.util.Locale
 
 class LoanHistoryAdapter(
@@ -34,11 +36,13 @@ class LoanHistoryAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val loan = loans[position]
         val context = holder.itemView.context
-        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID")).apply { maximumFractionDigits = 0 }
+        val localeID = Locale("in", "ID")
+        val formatter = NumberFormat.getCurrencyInstance(localeID).apply { maximumFractionDigits = 0 }
+        val dateFormatter = SimpleDateFormat("dd MMM yyyy", localeID)
 
         holder.amount.text = formatter.format(loan.nominal)
         holder.purpose.text = loan.tujuan
-        holder.date.text = "20 Januari 2025" // Dummy date for now
+        holder.date.text = if (loan.tanggalPengajuan != null) dateFormatter.format(loan.tanggalPengajuan!!) else "-"
         holder.tenor.text = "${loan.tenor}\nTenor"
         holder.status.text = loan.status
 
@@ -49,7 +53,7 @@ class LoanHistoryAdapter(
                 holder.status.background = ContextCompat.getDrawable(context, R.drawable.status_tag_pending)
                 holder.status.setTextColor(ContextCompat.getColor(context, R.color.orange_text))
             }
-            "disetujui" -> {
+            "disetujui", "pinjaman berjalan" -> {
                 holder.icon.setImageResource(R.drawable.ic_status_active)
                 holder.status.background = ContextCompat.getDrawable(context, R.drawable.status_tag_approved)
                 holder.status.setTextColor(ContextCompat.getColor(context, R.color.blue_text))
@@ -66,15 +70,13 @@ class LoanHistoryAdapter(
             }
         }
 
-        // Show rejection reason if available
         if (loan.status.equals("Ditolak", true) && loan.alasanPenolakan.isNotEmpty()) {
             holder.reason.visibility = View.VISIBLE
-            holder.reason.text = "Alasan Penolakan: ${loan.alasanPenolakan}"
+            holder.reason.text = "Alasan: ${loan.alasanPenolakan}"
         } else {
             holder.reason.visibility = View.GONE
         }
 
-        // Set click listener to open detail screen
         holder.itemView.setOnClickListener { onItemClick(loan) }
     }
 

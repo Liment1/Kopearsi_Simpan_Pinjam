@@ -13,20 +13,16 @@ class SyaratKetentuanActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_syarat_ketentuan)
 
-        // Setup Toolbar
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // Inisialisasi TextView
         val tvContent = findViewById<TextView>(R.id.tvSyaratKetentuanContent)
 
-        // Mengisi TextView dengan teks S&K
         tvContent.text = getSyaratKetentuanText()
     }
 
-    // Fungsi untuk menyediakan teks Syarat dan Ketentuan
     private fun getSyaratKetentuanText(): CharSequence {
         // Kita gunakan HTML sederhana untuk formatting (bold, paragraf)
         val text = """
@@ -66,7 +62,6 @@ class SyaratKetentuanActivity : AppCompatActivity() {
             Terima kasih telah menjadi bagian dari Koperasi Digital kami.
         """.trimIndent()
 
-        // Menggunakan Html.fromHtml untuk memproses tag HTML
         return Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
     }
 }
