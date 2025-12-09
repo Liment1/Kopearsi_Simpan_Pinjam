@@ -1,31 +1,34 @@
 package com.example.project_map.ui.admin.loans
 
 import android.graphics.Color
-import android.view.*
-import android.widget.*
+import android.graphics.drawable.GradientDrawable
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
 import com.example.project_map.data.Loan
-import com.google.android.material.card.MaterialCardView
+import com.google.android.material.button.MaterialButton
 import java.text.NumberFormat
 import java.util.*
 
 class AdminLoanAdapter(
-    private val loans: MutableList<Loan>,
+    private var loans: List<Loan>,
     private val onActionClick: (Loan, String) -> Unit
 ) : RecyclerView.Adapter<AdminLoanAdapter.LoanViewHolder>() {
 
     class LoanViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val container: MaterialCardView = view.findViewById(R.id.cardContainer)
         val txtNama: TextView = view.findViewById(R.id.txtNamaPeminjam)
         val txtNominal: TextView = view.findViewById(R.id.txtNominal)
         val txtTenor: TextView = view.findViewById(R.id.txtTenor)
         val txtTujuan: TextView = view.findViewById(R.id.txtTujuan)
         val txtStatus: TextView = view.findViewById(R.id.txtStatus)
         val txtAlasan: TextView = view.findViewById(R.id.txtAlasan)
-        val btnTerima: Button = view.findViewById(R.id.btnTerima)
-        val btnTolak: Button = view.findViewById(R.id.btnTolak)
-        val btnHapus: ImageButton = view.findViewById(R.id.btnHapusPinjamanAdmin)
+        val layoutActions: LinearLayout = view.findViewById(R.id.layoutActions)
+        val btnTerima: MaterialButton = view.findViewById(R.id.btnTerima)
+        val btnTolak: MaterialButton = view.findViewById(R.id.btnTolak)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LoanViewHolder {
@@ -37,13 +40,43 @@ class AdminLoanAdapter(
     override fun onBindViewHolder(holder: LoanViewHolder, position: Int) {
         val loan = loans[position]
         val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        formatter.maximumFractionDigits = 0
 
         holder.txtNama.text = loan.namaPeminjam
-        holder.txtNominal.text = "Nominal: ${formatter.format(loan.nominal)}"
-        holder.txtTenor.text = "Tenor: ${loan.tenor}"
-        holder.txtTujuan.text = "Tujuan: ${loan.tujuan}"
-        holder.txtStatus.text = "Status: ${loan.status}"
+        holder.txtNominal.text = formatter.format(loan.nominal)
+        holder.txtTenor.text = loan.tenor
+        holder.txtTujuan.text = loan.tujuan
+        holder.txtStatus.text = loan.status
 
+        // Status Styling Logic
+        // Ensure you have a generic drawable or set background color directly
+        // Here we assume txtStatus has a shape background we can tint
+        val statusBg = holder.txtStatus.background as? GradientDrawable
+
+        when (loan.status) {
+            "Proses" -> {
+                statusBg?.setColor(Color.parseColor("#FFF8E1")) // Yellow bg
+                holder.txtStatus.setTextColor(Color.parseColor("#FBC02D")) // Dark Yellow text
+                holder.layoutActions.visibility = View.VISIBLE
+            }
+            "Disetujui", "Pinjaman Berjalan" -> {
+                statusBg?.setColor(Color.parseColor("#E8F5E9")) // Green bg
+                holder.txtStatus.setTextColor(Color.parseColor("#388E3C")) // Green text
+                holder.layoutActions.visibility = View.GONE
+            }
+            "Ditolak" -> {
+                statusBg?.setColor(Color.parseColor("#FFEBEE")) // Red bg
+                holder.txtStatus.setTextColor(Color.parseColor("#D32F2F")) // Red text
+                holder.layoutActions.visibility = View.GONE
+            }
+            "Lunas" -> {
+                statusBg?.setColor(Color.parseColor("#E0F7FA")) // Cyan bg
+                holder.txtStatus.setTextColor(Color.parseColor("#0097A7")) // Cyan text
+                holder.layoutActions.visibility = View.GONE
+            }
+        }
+
+        // Show Rejection Reason if applicable
         if (loan.status == "Ditolak" && loan.alasanPenolakan.isNotEmpty()) {
             holder.txtAlasan.visibility = View.VISIBLE
             holder.txtAlasan.text = "Alasan: ${loan.alasanPenolakan}"
@@ -51,22 +84,15 @@ class AdminLoanAdapter(
             holder.txtAlasan.visibility = View.GONE
         }
 
-        when (loan.status) {
-            "Proses" -> holder.container.setCardBackgroundColor(Color.parseColor("#FFF59D"))
-            "Disetujui" -> holder.container.setCardBackgroundColor(Color.parseColor("#90CAF9"))
-            "Ditolak" -> holder.container.setCardBackgroundColor(Color.parseColor("#EF9A9A"))
-            "Lunas" -> holder.container.setCardBackgroundColor(Color.parseColor("#A5D6A7"))
-            else -> holder.container.setCardBackgroundColor(Color.WHITE)
-        }
-
+        // Button Listeners
         holder.btnTerima.setOnClickListener { onActionClick(loan, "terima") }
         holder.btnTolak.setOnClickListener { onActionClick(loan, "tolak") }
-        holder.btnHapus.setOnClickListener { onActionClick(loan, "hapus") }
-
-        val isProses = loan.status == "Proses"
-        holder.btnTerima.isEnabled = isProses
-        holder.btnTolak.isEnabled = isProses
     }
 
     override fun getItemCount(): Int = loans.size
+
+    fun updateList(newLoans: List<Loan>) {
+        loans = newLoans
+        notifyDataSetChanged()
+    }
 }

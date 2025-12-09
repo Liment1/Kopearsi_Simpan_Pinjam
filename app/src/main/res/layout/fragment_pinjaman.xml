@@ -11,16 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/transparent"
-        app:elevation="0dp">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="Pinjaman"
-            app:titleTextColor="@android:color/black" />
-
-    </com.google.android.material.appbar.AppBarLayout>
+        app:elevation="0dp"/>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

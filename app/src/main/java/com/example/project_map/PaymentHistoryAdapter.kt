@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.project_map.R
 import com.example.project_map.data.PaymentHistory
 
 class PaymentHistoryAdapter(

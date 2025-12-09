@@ -140,7 +140,7 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
         <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/barChartDashboard"
+            android:id="@+id/chartRevenue"
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:layout_marginBottom="16dp"/>
@@ -250,11 +250,12 @@
                         android:layout_height="48dp"
                         android:src="@drawable/ic_savings"
                         app:tint="?attr/colorPrimary"/>
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Transaksi Simpanan"
-                        android:layout_marginTop="8dp"/>
+                        android:layout_marginTop="8dp"
+                        android:text="History Simpanan" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -311,6 +312,45 @@
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardPengaturan"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@android:drawable/ic_menu_manage"
+                        app:tint="#607D8B"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pengaturan Admin"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1" />
 
         </GridLayout>
 

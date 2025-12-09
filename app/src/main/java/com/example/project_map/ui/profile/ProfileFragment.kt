@@ -1,132 +1,133 @@
 package com.example.project_map.ui.profile
 
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.RelativeLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.example.project_map.R
+import com.example.project_map.databinding.FragmentProfileBinding
 import com.example.project_map.ui.profile.detail.DetailProfileActivity
 import com.example.project_map.ui.profile.laporan.LaporanBulananActivity
 import com.example.project_map.ui.profile.syarat.SyaratKetentuanActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileFragment : Fragment() {
 
+    private var _binding: FragmentProfileBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel: ProfileViewModel by viewModels()
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+    ): View {
+        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Initialize Firebase
         auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
 
-        // Initialize Views
-        val tvName = view.findViewById<TextView>(R.id.tvName)
-        val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
-        val tvStatus = view.findViewById<TextView>(R.id.tvStatus)
-        val btnDetailProfile = view.findViewById<RelativeLayout>(R.id.btnDetailProfile)
-        val btnLaporanBulanan = view.findViewById<RelativeLayout>(R.id.btnLaporanBulanan)
-        val btnSyaratKetentuan = view.findViewById<RelativeLayout>(R.id.btnSyaratKetentuan)
-        val btnKeluar = view.findViewById<Button>(R.id.btnKeluar)
+        setupUI()
+        setupObservers()
+    }
 
-        // Admin Menus
-        val btnAdminMenu = view.findViewById<RelativeLayout>(R.id.btnAdminMenu)
-        val btnLaporanKeuangan = view.findViewById<RelativeLayout>(R.id.btnLaporanKeuangan)
-        val dividerAdmin = view.findViewById<View>(R.id.dividerAdmin)
-        val dividerLaporan = view.findViewById<View>(R.id.dividerLaporan)
-
-        // Default visibility (Hidden until data loads)
-        btnAdminMenu.visibility = View.GONE
-        btnLaporanKeuangan.visibility = View.GONE
-        dividerAdmin.visibility = View.GONE
-        dividerLaporan.visibility = View.GONE
-
-        // --- FETCH USER DATA ---
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            val userId = currentUser.uid
-
-            // Set email directly from Auth (it's faster)
-            tvEmail.text = currentUser.email
-
-            db.collection("users").document(userId).get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val name = document.getString("name") ?: "No Name"
-                        val status = document.getString("status") ?: "Tidak Aktif"
-                        val isAdmin = document.getBoolean("admin") ?: false
-
-                        tvName.text = name
-                        tvStatus.text = status
-
-                        // Set Status Color
-                        val statusBackground = tvStatus.background as GradientDrawable
-                        statusBackground.setColor(getStatusColor(status))
-
-                        // Show/Hide Admin Menus based on Firestore data
-                        if (isAdmin) {
-                            btnAdminMenu.visibility = View.VISIBLE
-                            btnLaporanKeuangan.visibility = View.VISIBLE
-                            dividerAdmin.visibility = View.VISIBLE
-                            dividerLaporan.visibility = View.VISIBLE
-                        }
-                    }
-                }
-                .addOnFailureListener {
-                    Toast.makeText(context, "Gagal memuat profil", Toast.LENGTH_SHORT).show()
-                }
+    override fun onResume() {
+        super.onResume()
+        // Reload data whenever we return to this screen (e.g. from DetailProfile)
+        auth.currentUser?.let { user ->
+            viewModel.loadUserProfile(user.uid)
         }
+    }
 
-        // --- NAVIGATION ---
+    private fun setupUI() {
+        binding.btnAdminMenu.visibility = View.GONE
+        binding.btnLaporanKeuangan.visibility = View.GONE
+        binding.dividerAdmin.visibility = View.GONE
+        binding.dividerLaporan.visibility = View.GONE
 
-        btnDetailProfile.setOnClickListener {
-            val intent = Intent(requireContext(), DetailProfileActivity::class.java)
-            startActivity(intent)
+        // Navigation
+        binding.btnDetailProfile.setOnClickListener {
+            startActivity(Intent(requireContext(), DetailProfileActivity::class.java))
         }
-
-        btnLaporanBulanan.setOnClickListener {
-            val intent = Intent(requireContext(), LaporanBulananActivity::class.java)
-            startActivity(intent)
+        binding.btnLaporanBulanan.setOnClickListener {
+            startActivity(Intent(requireContext(), LaporanBulananActivity::class.java))
         }
-
-        btnSyaratKetentuan.setOnClickListener {
-            val intent = Intent(requireContext(), SyaratKetentuanActivity::class.java)
-            startActivity(intent)
+        binding.btnSyaratKetentuan.setOnClickListener {
+            startActivity(Intent(requireContext(), SyaratKetentuanActivity::class.java))
         }
-
-        btnKeluar.setOnClickListener {
+        binding.btnKeluar.setOnClickListener {
             auth.signOut()
             findNavController().navigate(R.id.action_profileFragment_to_loginFragment)
         }
     }
 
+    private fun setupObservers() {
+        viewModel.userProfileState.observe(viewLifecycleOwner) { state ->
+            if (_binding == null) return@observe
+
+            when (state) {
+                is ProfileViewModel.ProfileState.Loading -> {
+                    // Optional: Show skeleton or spinner
+                }
+                is ProfileViewModel.ProfileState.Success -> {
+                    val user = state.user
+                    binding.tvName.text = user.name
+                    binding.tvEmail.text = user.email
+                    binding.tvStatus.text = user.status
+
+                    if (user.admin) {
+                        binding.btnAdminMenu.visibility = View.VISIBLE
+                        binding.btnLaporanKeuangan.visibility = View.VISIBLE
+                        binding.dividerAdmin.visibility = View.VISIBLE
+                        binding.dividerLaporan.visibility = View.VISIBLE
+                    }
+
+                    // Status Color
+                    val statusBackground = binding.tvStatus.background as GradientDrawable
+                    statusBackground.setColor(getStatusColor(user.status))
+
+                    // Load Avatar
+                    if (user.avatarUrl.isNotEmpty()) {
+                        binding.imgProfile.load(user.avatarUrl) {
+                            crossfade(true)
+                            transformations(CircleCropTransformation())
+                            placeholder(R.drawable.account_circle)
+                        }
+                    }
+                }
+                is ProfileViewModel.ProfileState.Error -> {
+                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     private fun getStatusColor(status: String): Int {
         return when (status) {
-            "Anggota Aktif" -> Color.parseColor("#1E8E3E") // Hijau
-            "Calon Anggota" -> Color.parseColor("#F9AB00") // Kuning
-            "Anggota Tidak Aktif" -> Color.parseColor("#5F6368") // Abu-abu
-            "Diblokir Sementara" -> Color.parseColor("#E67C73") // Oranye
-            "Dikeluarkan" -> Color.parseColor("#D93025") // Merah
+            "Anggota Aktif" -> Color.parseColor("#1E8E3E")
+            "Calon Anggota" -> Color.parseColor("#F9AB00")
+            "Anggota Tidak Aktif" -> Color.parseColor("#5F6368")
+            "Diblokir Sementara" -> Color.parseColor("#E67C73")
+            "Dikeluarkan" -> Color.parseColor("#D93025")
             else -> Color.LTGRAY
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

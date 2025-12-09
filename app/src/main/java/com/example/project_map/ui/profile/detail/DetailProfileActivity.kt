@@ -1,109 +1,186 @@
 package com.example.project_map.ui.profile.detail
 
+import android.net.Uri
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.example.project_map.R
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.textfield.TextInputEditText
-import com.google.firebase.auth.EmailAuthProvider
+import com.example.project_map.databinding.ActivityDetailProfileBinding // Make sure this matches your XML file name
+import com.example.project_map.ui.profile.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 class DetailProfileActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityDetailProfileBinding
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
+    private var imageCacheParams: String = ""
+    // MVVM: Inject ViewModel
+    private val viewModel: ProfileViewModel by viewModels()
+
+    // Variable to track the current image URL for refreshing
+    private var currentAvatarUrl: String = ""
+
+    // Image Picker
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            val userId = auth.currentUser?.uid ?: return@let
+            viewModel.uploadProfilePicture(userId, it)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detail_profile)
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        binding = ActivityDetailProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Setup Toolbar (Optional based on your XML)
+        // setSupportActionBar(binding.toolbar)
+        // supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
-
         val currentUser = auth.currentUser
 
-        // Safety Check
         if (currentUser == null) {
-            Toast.makeText(this, "Sesi habis, silakan login kembali.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Sesi habis.", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        val tvNama = findViewById<TextView>(R.id.tvNama)
-        val tvKodePegawai = findViewById<TextView>(R.id.tvKodePegawai)
-        val tvEmailDetail = findViewById<TextView>(R.id.tvEmailDetail)
-        val tvPhoneDetail = findViewById<TextView>(R.id.tvPhoneDetail)
+        setupObservers()
+        viewModel.loadUserProfile(currentUser.uid)
+        setupListeners(currentUser)
+    }
 
-        val etPasswordLama = findViewById<TextInputEditText>(R.id.etPasswordLama)
-        val etPasswordBaru = findViewById<TextInputEditText>(R.id.etPasswordBaru)
-        val etKonfirmasiPasswordBaru = findViewById<TextInputEditText>(R.id.etKonfirmasiPasswordBaru)
-        val btnSimpan = findViewById<Button>(R.id.btnSimpan)
+    private fun setupListeners(currentUser: com.google.firebase.auth.FirebaseUser) {
+        // 1. Image Picker
+        binding.fabChangePhoto.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
 
-        // --- FETCH DATA FROM FIRESTORE ---
-        db.collection("users").document(currentUser.uid).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    tvNama.text = document.getString("name")
-                    // Note: We use 'memberCode' (or whatever you named the field for AGT...)
-                    // If you kept it as 'id' in the DB, change this string to "id"
-                    tvKodePegawai.text = document.getString("memberCode") ?: document.getString("id") ?: "-"
-                    tvEmailDetail.text = document.getString("email")
-                    tvPhoneDetail.text = document.getString("phone")
-                }
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Gagal mengambil data user.", Toast.LENGTH_SHORT).show()
-            }
+        // 2. Save Changes (Name, Email, Phone)
+        binding.btnSave.setOnClickListener {
+            val newName = binding.etName.text.toString().trim()
+            val newEmail = binding.etEmail.text.toString().trim()
+            val newPhone = binding.etPhone.text.toString().trim()
 
-        // --- PASSWORD CHANGE LOGIC ---
-        btnSimpan.setOnClickListener {
-            val passLama = etPasswordLama.text.toString()
-            val passBaru = etPasswordBaru.text.toString()
-            val konfirmasiPass = etKonfirmasiPasswordBaru.text.toString()
-
-            // 1. Basic Validation
-            if (passLama.isEmpty() || passBaru.isEmpty() || konfirmasiPass.isEmpty()) {
-                Toast.makeText(this, "Semua kolom harus diisi", Toast.LENGTH_SHORT).show()
+            if (newName.isEmpty() || newEmail.isEmpty()) {
+                Toast.makeText(this, "Nama dan Email tidak boleh kosong", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (passBaru.length < 6) {
-                Toast.makeText(this, "Password baru minimal 6 karakter", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            // Call ViewModel to update data (Create this function in your ViewModel if missing)
+            viewModel.updateUserProfile(
+                uid = currentUser.uid,
+                name = newName,
+                email = newEmail,
+                phone = newPhone
+            )
+        }
+    }
 
-            if (passBaru != konfirmasiPass) {
-                Toast.makeText(this, "Konfirmasi password tidak cocok", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // 2. Re-Authenticate User (Required by Firebase for sensitive changes)
-            val credential = EmailAuthProvider.getCredential(currentUser.email!!, passLama)
-
-            currentUser.reauthenticate(credential)
-                .addOnSuccessListener {
-                    // 3. Update Password in Firebase Auth
-                    currentUser.updatePassword(passBaru)
-                        .addOnSuccessListener {
-                            Toast.makeText(this, "Password berhasil diubah!", Toast.LENGTH_SHORT).show()
-                            finish()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "Gagal update password: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
+    private fun setupObservers() {
+        // 1. Observe Profile Data Loading
+        viewModel.userProfileState.observe(this) { state ->
+            when (state) {
+                is ProfileViewModel.ProfileState.Loading -> {
+                    // Optional: Show loading progress
                 }
-                .addOnFailureListener {
-                    // This usually means the 'Old Password' was wrong
-                    Toast.makeText(this, "Password lama salah", Toast.LENGTH_SHORT).show()
+                is ProfileViewModel.ProfileState.Success -> {
+                    val user = state.user
+
+                    // Set Text Fields
+                    binding.etKodePegawai.setText(user.memberCode.ifEmpty { user.id })
+                    binding.etName.setText(user.name)
+                    binding.etEmail.setText(user.email)
+                    binding.etPhone.setText(user.phone)
+
+                    // Load Image
+                    loadImageSafe(user.avatarUrl)
                 }
+                is ProfileViewModel.ProfileState.Error -> {
+                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        // 2. Observe Upload/Update Status
+        viewModel.uploadState.observe(this) { state ->
+            when (state) {
+                is ProfileViewModel.UploadState.Idle -> {
+                    // Reset UI state if needed
+                    binding.ivProfile.alpha = 1.0f
+                }
+                is ProfileViewModel.UploadState.Loading -> {
+                    binding.ivProfile.alpha = 0.5f
+                    Toast.makeText(this, "Memproses...", Toast.LENGTH_SHORT).show()
+                }
+                is ProfileViewModel.UploadState.Success -> {
+                    binding.ivProfile.alpha = 1.0f
+
+                    // If an image URL was returned, update the image
+                    if (state.imageUrl.isNotEmpty()) {
+                        Toast.makeText(this, "Foto berhasil diubah", Toast.LENGTH_SHORT).show()
+
+                        // UPDATE VERSION TIMESTAMP (The Cache Fix)
+                        imageCacheParams = "?v=${System.currentTimeMillis()}"
+                        loadImageSafe(state.imageUrl)
+                    } else {
+                        // If empty string, it was just a text data update
+                        Toast.makeText(this, "Data profil berhasil disimpan", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                is ProfileViewModel.UploadState.Error -> {
+                    binding.ivProfile.alpha = 1.0f
+                    Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    private fun loadImageSafe(url: String) {
+        if (url.isNotEmpty()) {
+
+
+            // Construct a URL that looks like: "https://cloudinary.../image.jpg?v=17099999"
+            val urlToLoad = url + imageCacheParams
+            android.util.Log.d("DEBUG_IMAGE", "Loading URL: $urlToLoad")
+            binding.ivProfile.load(urlToLoad) {
+                crossfade(true)
+                transformations(CircleCropTransformation())
+                placeholder(R.drawable.account_circle) // Make sure this drawable exists
+                error(R.drawable.ic_launcher_background)
+
+                // This ensures Coil treats it as a unique memory key
+                memoryCacheKey(urlToLoad)
+                diskCacheKey(urlToLoad)
+            }
+        }
+    }
+
+    /**
+     * COIL CACHE FIX
+     * This function generates a unique cache key using the current timestamp.
+     * This forces Coil to ignore the old cached image and fetch the new one.
+     */
+    private fun loadProfileImageWithCacheBust(url: String, forceRefresh: Boolean = false) {
+        val timestamp = if (forceRefresh) System.currentTimeMillis() else 0
+
+        binding.ivProfile.load(url) {
+            crossfade(true)
+            transformations(CircleCropTransformation())
+            placeholder(R.drawable.account_circle) // Ensure you have this drawable
+            error(R.drawable.ic_launcher_background)
+
+            if (forceRefresh) {
+                // Key trick: changing the memory/disk key forces a reload
+                memoryCacheKey(url + "_" + timestamp)
+                diskCacheKey(url + "_" + timestamp)
+            }
         }
     }
 

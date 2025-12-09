@@ -3,7 +3,7 @@ package com.example.project_map.data
 import com.google.firebase.firestore.Exclude
 
 data class UserData(
-    // This field will store the Firestore Document ID (UID)
+    // Firestore Document ID (Excluded from writing to DB)
     @get:Exclude var id: String = "",
 
     var memberCode: String = "",
@@ -11,5 +11,6 @@ data class UserData(
     var name: String = "",
     var phone: String = "",
     var admin: Boolean = false,
-    var status: String = ""
+    var status: String = "",
+    var avatarUrl: String = ""
 )

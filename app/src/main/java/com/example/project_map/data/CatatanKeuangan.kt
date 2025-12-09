@@ -7,8 +7,7 @@ enum class TipeCatatan {
     SIMPANAN,
     ANGSURAN,
     PINJAMAN,
-    OPERASIONAL; // <-- ADDED: For operational costs like electricity, supplies, etc.
-
+    OPERASIONAL;
     fun isPemasukan(): Boolean {
         return this == SIMPANAN || this == ANGSURAN
     }

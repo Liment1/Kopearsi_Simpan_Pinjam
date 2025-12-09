@@ -12,16 +12,17 @@ import com.example.project_map.data.UserData
 
 class AnggotaAdapter(
     private var anggotaList: List<UserData>,
-    private val onItemClick: (UserData) -> Unit // <-- Tambahkan parameter ini
+    private val onItemClick: (UserData) -> Unit
 ) : RecyclerView.Adapter<AnggotaAdapter.AnggotaViewHolder>() {
 
-    // ... (class AnggotaViewHolder tetap sama) ...
     class AnggotaViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        // --- ADDED THIS LINE TO FIX THE ERROR ---
+        val tvInitial: TextView = view.findViewById(R.id.tvInitial)
+
         val tvNama: TextView = view.findViewById(R.id.tvNamaAnggota)
         val tvId: TextView = view.findViewById(R.id.tvIdAnggota)
         val tvStatus: TextView = view.findViewById(R.id.tvStatusAnggota)
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnggotaViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -31,28 +32,42 @@ class AnggotaAdapter(
 
     override fun onBindViewHolder(holder: AnggotaViewHolder, position: Int) {
         val anggota = anggotaList[position]
+
         holder.tvNama.text = anggota.name
-//        holder.tvId.text = "ID: ${anggota.id}"
+        // Use memberCode if available, otherwise fallback to ID or empty
+        holder.tvId.text = if (anggota.memberCode.isNotEmpty()) anggota.memberCode else "ID: ${anggota.id.take(6)}"
         holder.tvStatus.text = anggota.status
 
-        val statusBackground = holder.tvStatus.background as GradientDrawable
-        statusBackground.setColor(getStatusColor(anggota.status))
+        // 1. Logic for Initial (First letter of name)
+        val initial = anggota.name.firstOrNull()?.toString()?.uppercase() ?: "?"
+        holder.tvInitial.text = initial
 
-        // ▼▼▼ Tambahkan listener klik di sini ▼▼▼
+        // 2. Modern Status Styling (Pill Colors)
+        // Ensure tvStatusAnggota has 'bg_status_active' set in XML as default background
+        val statusBg = holder.tvStatus.background as? GradientDrawable
+
+        when (anggota.status) {
+            "Aktif", "Anggota Aktif" -> {
+                statusBg?.setColor(Color.parseColor("#E8F5E9")) // Light Green
+                holder.tvStatus.setTextColor(Color.parseColor("#2E7D32")) // Dark Green
+            }
+            "Calon Anggota" -> {
+                statusBg?.setColor(Color.parseColor("#FFF8E1")) // Light Yellow
+                holder.tvStatus.setTextColor(Color.parseColor("#F9A825")) // Dark Yellow
+            }
+            "Tidak Aktif", "Dikeluarkan" -> {
+                statusBg?.setColor(Color.parseColor("#FFEBEE")) // Light Red
+                holder.tvStatus.setTextColor(Color.parseColor("#C62828")) // Dark Red
+            }
+            else -> {
+                // Default Grey
+                statusBg?.setColor(Color.parseColor("#F5F5F5"))
+                holder.tvStatus.setTextColor(Color.GRAY)
+            }
+        }
+
         holder.itemView.setOnClickListener { onItemClick(anggota) }
     }
 
-    // ... (fungsi getItemCount dan getStatusColor tetap sama) ...
     override fun getItemCount() = anggotaList.size
-
-    private fun getStatusColor(status: String): Int {
-        return when (status) {
-            "Anggota Aktif" -> Color.parseColor("#1E8E3E") // Hijau
-            "Calon Anggota" -> Color.parseColor("#F9AB00") // Kuning
-            "Anggota Tidak Aktif" -> Color.parseColor("#5F6368") // Abu-abu
-            "Diblokir Sementara" -> Color.parseColor("#E67C73") // Oranye
-            "Dikeluarkan" -> Color.parseColor("#D93025") // Merah
-            else -> Color.LTGRAY
-        }
-    }
 }

@@ -14,7 +14,6 @@ import com.example.project_map.data.Loan
 import com.example.project_map.databinding.FragmentLoanDetailBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import java.text.NumberFormat
 import java.util.*
 

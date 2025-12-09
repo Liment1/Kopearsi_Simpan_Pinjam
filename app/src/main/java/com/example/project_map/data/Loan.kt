@@ -1,6 +1,5 @@
 package com.example.project_map.data
 
-import com.google.firebase.Timestamp
 import java.util.Date
 
 data class Loan(

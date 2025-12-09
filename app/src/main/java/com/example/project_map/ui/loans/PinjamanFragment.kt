@@ -15,7 +15,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
-class PinjamanFragment : Fragment() {
+class
+PinjamanFragment : Fragment() {
 
     private var _binding: FragmentPinjamanBinding? = null
     private val binding get() = _binding!!

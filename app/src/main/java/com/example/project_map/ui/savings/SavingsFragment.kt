@@ -22,19 +22,24 @@ import com.google.firebase.firestore.Query
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
-// IMPORT THE DATA PACKAGE
 import com.example.project_map.data.Transaction
+import com.google.android.material.chip.ChipGroup
+// Removed Storage Import
 
 class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.OnNominalEntered {
 
-    // Define new views
+    private lateinit var db: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
+    // Removed 'storage' variable
+
+    // UI Components
+    private lateinit var tvTotal: TextView
     private lateinit var tvTotalPokok: TextView
     private lateinit var tvTotalWajib: TextView
     private lateinit var tvTotalSukarela: TextView
-
-    // Firebase
-    private lateinit var db: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
+    private lateinit var chipGroup: ChipGroup
+    private lateinit var recycler: RecyclerView
+    private lateinit var btnSimpan: Button
 
     // Data
     private var totalSimpanan = 0.0
@@ -45,15 +50,11 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
     private var allTransactions: List<Transaction> = emptyList()
     private lateinit var adapter: TransactionAdapter
 
-    // UI
-    private lateinit var tvTotal: TextView
-    private lateinit var spinnerFilter: Spinner
-    private lateinit var recycler: RecyclerView
-
-    // Upload Logic
+    // Logic Variables
     private var selectedImageUri: Uri? = null
     private var currentNominal = 0
 
+    // Permissions & Image Picker
     private val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -73,31 +74,34 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        db = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance()
+        // Removed storage init
+
+        tvTotal = view.findViewById(R.id.tvTotalSimpanan)
         tvTotalPokok = view.findViewById(R.id.tvTotalPokok)
         tvTotalWajib = view.findViewById(R.id.tvTotalWajib)
         tvTotalSukarela = view.findViewById(R.id.tvTotalSukarela)
-
-        db = FirebaseFirestore.getInstance()
-        auth = FirebaseAuth.getInstance()
-
-        tvTotal = view.findViewById(R.id.tvTotalSimpanan)
-        spinnerFilter = view.findViewById(R.id.spinnerFilter)
+        chipGroup = view.findViewById(R.id.chipGroupFilter)
         recycler = view.findViewById(R.id.recyclerView)
-        val btnSimpan: Button = view.findViewById(R.id.btnTambahSimpanan)
+        btnSimpan = view.findViewById(R.id.btnTambahSimpanan)
 
-        // --- FIX HERE: Explicitly specify the type <Transaction> ---
-        adapter = TransactionAdapter(ArrayList<Transaction>(), ::showTransactionDetail)
-
+        adapter = TransactionAdapter(ArrayList<Transaction>()) { transaction ->
+            showTransactionDetail(transaction)
+        }
         recycler.layoutManager = LinearLayoutManager(requireContext())
         recycler.adapter = adapter
 
-        val options = resources.getStringArray(R.array.filter_options)
-        spinnerFilter.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, options)
-        spinnerFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, v: View?, pos: Int, id: Long) {
-                filterTransactions(options[pos])
+        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.isEmpty()) return@setOnCheckedStateChangeListener
+            val checkedId = checkedIds[0]
+            val filterType = when (checkedId) {
+                R.id.chipWajib -> "Simpanan Wajib"
+                R.id.chipPokok -> "Simpanan Pokok"
+                R.id.chipSukarela -> "Simpanan Sukarela"
+                else -> "Semua"
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            filterTransactions(filterType)
         }
 
         btnSimpan.setOnClickListener {
@@ -110,10 +114,10 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
 
     private fun fetchUserDataAndTotals() {
         val userId = auth.currentUser?.uid ?: return
-
         db.collection("users").document(userId)
             .addSnapshotListener { document, e ->
                 if (e != null) return@addSnapshotListener
+                if (!isAdded) return@addSnapshotListener
 
                 if (document != null && document.exists()) {
                     totalSimpanan = document.getDouble("totalSimpanan") ?: 0.0
@@ -121,7 +125,6 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
                     totalWajib = document.getDouble("simpananWajib") ?: 0.0
                     totalSukarela = document.getDouble("simpananSukarela") ?: 0.0
 
-                    // UPDATE ALL TEXT VIEWS SEPARATELY
                     tvTotal.text = formatRupiah(totalSimpanan)
                     tvTotalPokok.text = formatRupiah(totalPokok)
                     tvTotalWajib.text = formatRupiah(totalWajib)
@@ -132,18 +135,31 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
 
     private fun fetchTransactionHistory() {
         val userId = auth.currentUser?.uid ?: return
-
         db.collection("users").document(userId).collection("savings")
             .orderBy("date", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
                 if (e != null) return@addSnapshotListener
+                if (!isAdded) return@addSnapshotListener
 
                 if (snapshots != null) {
                     allTransactions = snapshots.toObjects(Transaction::class.java)
-                    val currentFilter = spinnerFilter.selectedItem?.toString() ?: "Semua"
-                    filterTransactions(currentFilter)
+                    val checkedId = if (chipGroup.checkedChipIds.isNotEmpty()) chipGroup.checkedChipIds[0] else R.id.chipAll
+                    val filterType = when (checkedId) {
+                        R.id.chipWajib -> "Simpanan Wajib"
+                        R.id.chipPokok -> "Simpanan Pokok"
+                        R.id.chipSukarela -> "Simpanan Sukarela"
+                        else -> "Semua"
+                    }
+                    filterTransactions(filterType)
                 }
             }
+    }
+
+    private fun filterTransactions(filter: String) {
+        val filtered = if (filter == "Semua") allTransactions else allTransactions.filter {
+            it.type == filter
+        }
+        adapter.updateList(filtered)
     }
 
     override fun onNominalEntered(nominal: Int) {
@@ -190,6 +206,8 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
             .setTitle("Konfirmasi")
             .setView(view)
             .setPositiveButton("Simpan") { _, _ ->
+                // DIRECTLY SAVE TO FIRESTORE (Skipping Cloud Storage Upload)
+                // We just convert the URI to a string: "content://media/external/..."
                 saveToFirestore(currentNominal.toDouble(), "Simpanan Sukarela", imageUri.toString())
             }
             .setNegativeButton("Ganti", null)
@@ -209,7 +227,7 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
             type = type,
             amount = amount,
             description = "Setoran $type",
-            imageUri = imageUriString
+            imageUri = imageUriString // This saves the LOCAL path
         )
 
         batch.set(newTransRef, transaction)
@@ -223,31 +241,9 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
         }
         batch.update(userRef, fieldToUpdate, FieldValue.increment(amount))
 
-        batch.commit()
-            .addOnSuccessListener {
-                Toast.makeText(context, "Berhasil disimpan!", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(context, "Gagal menyimpan: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun filterTransactions(filter: String) {
-        val filtered = if (filter == "Semua") allTransactions else allTransactions.filter {
-            it.type == filter
+        batch.commit().addOnSuccessListener {
+            Toast.makeText(context, "Berhasil disimpan (Lokal)!", Toast.LENGTH_SHORT).show()
         }
-        adapter.updateList(filtered)
-        updateTotalsByFilter(filter)
-    }
-
-    private fun updateTotalsByFilter(filter: String) {
-        val totalFiltered = when (filter) {
-            "Simpanan Pokok" -> totalPokok
-            "Simpanan Wajib" -> totalWajib
-            "Simpanan Sukarela" -> totalSukarela
-            else -> totalSimpanan
-        }
-        tvTotal.text = formatRupiah(totalFiltered)
     }
 
     private fun showTransactionDetail(transaction: Transaction) {
@@ -264,7 +260,12 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
 
         if (transaction.type == "Simpanan Sukarela" && !transaction.imageUri.isNullOrEmpty()) {
             ivBukti.visibility = View.VISIBLE
-            ivBukti.setImageURI(Uri.parse(transaction.imageUri))
+            // This works because the URI is local on this phone
+            try {
+                ivBukti.setImageURI(Uri.parse(transaction.imageUri))
+            } catch (e: Exception) {
+                ivBukti.setImageResource(R.drawable.ic_launcher_background)
+            }
         } else {
             ivBukti.visibility = View.GONE
         }

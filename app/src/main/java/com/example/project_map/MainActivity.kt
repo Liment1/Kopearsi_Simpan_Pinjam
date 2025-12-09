@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         // Set up the listener to hide/show the bottom navigation bar
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.loginFragment, R.id.registerFragment -> {
+                R.id.splashFragment, R.id.loginFragment, R.id.registerFragment -> {
                     binding.bottomNav.visibility = View.GONE
                 }
                 else -> {

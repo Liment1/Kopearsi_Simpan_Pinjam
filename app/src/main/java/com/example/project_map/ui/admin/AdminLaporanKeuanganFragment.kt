@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.project_map.R
@@ -20,7 +18,6 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButtonToggleGroup
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -69,14 +66,6 @@ class AdminLaporanKeuanganFragment : Fragment() {
         tvRincianOperasional = view.findViewById(R.id.tvRincianOperasional)
         barChart = view.findViewById(R.id.barChart)
     }
-
-//    private fun setupToolbar(view: View) {
-//        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbarLaporan)
-//        (activity as AppCompatActivity).setSupportActionBar(toolbar)
-//        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-//        (activity as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
-//        toolbar.setNavigationOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
-//    }
 
     // Fungsi untuk setup semua listener
     private fun setupListeners() {

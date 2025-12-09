@@ -26,7 +26,7 @@
                 android:layout_height="120dp"
                 android:contentDescription="Profile Picture"
                 android:scaleType="centerCrop"
-                android:src="@drawable/people_image"
+                android:src="@drawable/account_circle"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircleImageView" />
             <TextView
                 android:id="@+id/tvName"

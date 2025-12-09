@@ -13,7 +13,6 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-
 class TransactionAdapter(
     private var transaksi: List<Transaction>,
     private val onClick: (Transaction) -> Unit
@@ -22,7 +21,10 @@ class TransactionAdapter(
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvKeterangan: TextView = view.findViewById(R.id.tvKeterangan)
         val tvJumlah: TextView = view.findViewById(R.id.tvJumlah)
-        val ivProof: ImageView = view.findViewById(R.id.ivProof)
+        val tvDate: TextView = view.findViewById(R.id.tvDate)
+
+        // CHANGE THIS LINE: Use R.id.ivIcon (matches your new XML)
+        val ivIcon: ImageView = view.findViewById(R.id.ivIcon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -40,19 +42,26 @@ class TransactionAdapter(
         val numberFormat = NumberFormat.getCurrencyInstance(localeID)
         numberFormat.maximumFractionDigits = 0
 
-        holder.tvKeterangan.text = item.type // e.g. "Simpanan Sukarela"
+        holder.tvKeterangan.text = item.type
         holder.tvJumlah.text = "+ ${numberFormat.format(item.amount)}"
 
-        // Logic for Image Visibility
-        if (item.type == "Simpanan Sukarela" && !item.imageUri.isNullOrEmpty()) {
-            holder.ivProof.visibility = View.VISIBLE
+        // Format Date
+        val dateFormat = SimpleDateFormat("dd MMM yyyy", localeID)
+        val dateStr = if (item.date != null) dateFormat.format(item.date) else "-"
+        holder.tvDate.text = dateStr
+
+        // Handle Image Logic (Thumbnail)
+        // If imageUri exists, load it into the icon. Otherwise, keep default icon.
+        if (!item.imageUri.isNullOrEmpty()) {
             try {
-                holder.ivProof.setImageURI(Uri.parse(item.imageUri))
+                holder.ivIcon.setImageURI(Uri.parse(item.imageUri))
+                // Make it round or add styling if needed
             } catch (e: Exception) {
-                holder.ivProof.setImageResource(R.drawable.ic_launcher_background) // Placeholder
+                // Ignore, keep default icon
             }
         } else {
-            holder.ivProof.visibility = View.GONE
+            // Reset to default icon in case of recycling views
+            holder.ivIcon.setImageResource(R.drawable.ic_savings)
         }
 
         holder.itemView.setOnClickListener { onClick(item) }

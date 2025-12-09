@@ -1,6 +1,5 @@
 package com.example.project_map.ui.admin
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View

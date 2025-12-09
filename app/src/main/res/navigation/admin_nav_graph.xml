@@ -22,22 +22,20 @@
         <action
             android:id="@+id/action_adminDashboardFragment_to_adminNotifikasiFragment"
             app:destination="@id/adminNotifikasiFragment" />
-        <action
-            android:id="@+id/action_adminDashboardFragment_to_adminLoanListFragment"
-            app:destination="@id/adminLoanListFragment" />
+<!--        <action-->
+<!--            android:id="@+id/action_adminDashboardFragment_to_adminLoanListFragment"-->
+<!--            app:destination="@id/adminLoanListFragment" />-->
         <action
             android:id="@+id/action_adminDashboardFragment_to_adminAngsuranFragment"
             app:destination="@id/adminAngsuranFragment" />
         <action
             android:id="@+id/action_adminDashboardFragment_to_fragmentPinjamanAdmin"
             app:destination="@id/fragmentPinjamanAdmin" />
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminPengaturanFragment"
+            app:destination="@id/adminPengaturanFragment" />
     </fragment>
 
-    <fragment
-        android:id="@+id/adminLoanListFragment"
-        android:name="com.example.project_map.ui.admin.loans.AdminLoanListFragment"
-        android:label="Daftar Pinjaman"
-        tools:layout="@layout/fragment_admin_loan_list" />
     <fragment
         android:id="@+id/adminAngsuranFragment"
         android:name="com.example.project_map.ui.admin.AdminAngsuranFragment"
@@ -50,9 +48,9 @@
         tools:layout="@layout/fragment_admin_data_anggota" />
     <fragment
         android:id="@+id/fragmentTransaksiSimpanan"
-        android:name="com.example.project_map.ui.admin.FragmentTransaksiSimpanan"
+        android:name="com.example.project_map.ui.admin.FragmentHistoriSimpanan"
         android:label="Transaksi Simpanan"
-        tools:layout="@layout/fragment_transaksi_simpanan" />
+        tools:layout="@layout/fragment_riwayat_simpanan" />
     <fragment
         android:id="@+id/adminLaporanKeuanganFragment"
         android:name="com.example.project_map.ui.admin.AdminLaporanKeuanganFragment"
@@ -68,4 +66,9 @@
         android:name="com.example.project_map.ui.admin.FragmentPinjamanAdmin"
         android:label="Pengajuan Pinjaman"
         tools:layout="@layout/fragment_pinjaman_admin" />
+    <fragment
+        android:id="@+id/adminPengaturanFragment"
+        android:name="com.example.project_map.ui.admin.AdminPengaturanFragment"
+        android:label="Pengaturan"
+        tools:layout="@layout/fragment_admin_pengaturan" />
 </navigation>

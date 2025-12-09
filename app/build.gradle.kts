@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.annotationProcessor
 import org.gradle.kotlin.dsl.implementation
 
   plugins {
@@ -11,7 +12,8 @@ android {
     namespace = "com.example.project_map"
     compileSdk = 36
 
-    buildFeatures { viewBinding = true }
+    buildFeatures { viewBinding = true
+    }
 
     defaultConfig {
         applicationId = "com.example.project_map"
@@ -44,6 +46,21 @@ android {
 }
 
 dependencies {
+    implementation("com.squareup.retrofit2:retrofit:3.1.0-SNAPSHOT")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.cloudinary:cloudinary-android:2.5.0")
+    implementation("io.coil-kt:coil:2.4.0")
+    // ViewModel delegates
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
+
+    // Material Design (For TextInputLayout, ShapeableImageView)
+    implementation ("com.google.android.material:material:1.9.0")
+
+    // Glide (For Image Loading & Cache Fixing)
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.navigation.fragment.ktx)
