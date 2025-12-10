@@ -5,6 +5,10 @@ import com.example.project_map.api.ApiClient
 import com.example.project_map.api.CreditScoreResponse
 import com.example.project_map.api.ScoreRequest
 
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
 object CreditScoreManager {
 
     // Helper to get parameters (Historical or Default)

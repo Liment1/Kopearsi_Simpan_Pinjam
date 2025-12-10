@@ -19,8 +19,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.project_map.R
 import com.example.project_map.data.Loan
-import com.example.project_map.data.CreditScoreManager // Import Manager
-import com.example.project_map.ui.custom.SemiCircleProgressBar // Import Custom View
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.io.FileNotFoundException
@@ -29,13 +27,6 @@ import java.util.Date
 
 class LoansFragment : Fragment() {
 
-    // Credit Score Views
-    private lateinit var progressBarScore: SemiCircleProgressBar
-    private lateinit var tvScore: TextView
-    private lateinit var tvDecision: TextView
-    private lateinit var btnRefreshScore: Button
-
-    // Existing Form Views
     private lateinit var imgKtp: ImageView
     private lateinit var btnUploadKtp: Button
     private lateinit var btnAjukan: Button
@@ -68,13 +59,6 @@ class LoansFragment : Fragment() {
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
 
-        // Init Credit Score Views
-        progressBarScore = view.findViewById(R.id.progressBarScore)
-        tvScore = view.findViewById(R.id.tvScore)
-        tvDecision = view.findViewById(R.id.tvDecision)
-        btnRefreshScore = view.findViewById(R.id.btnRefreshScore)
-
-        // Init Form Views
         imgKtp = view.findViewById(R.id.imgKtpPreview)
         btnUploadKtp = view.findViewById(R.id.btnUploadKtp)
         btnAjukan = view.findViewById(R.id.btnAjukan)
@@ -95,7 +79,6 @@ class LoansFragment : Fragment() {
         setupImagePickers()
         setupSpinner()
 
-        // Listener for nominal calculations
         edtNominal.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) { updateHitungan() }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -103,46 +86,8 @@ class LoansFragment : Fragment() {
         })
 
         btnAjukan.setOnClickListener { kirimPengajuan() }
-
-        // Listener for Credit Score refresh
-        btnRefreshScore.setOnClickListener {
-            fetchCreditScore()
-        }
-
         updateHitungan()
-
-        // Auto-fetch score when screen loads
-        fetchCreditScore()
-
         return view
-    }
-
-    private fun fetchCreditScore() {
-        val userId = auth.currentUser?.uid ?: return
-
-        btnRefreshScore.isEnabled = false
-        btnRefreshScore.text = "Memuat..."
-
-        // Call the Manager created in the previous step
-        CreditScoreManager.getScoreFromApi(userId) { score, decision ->
-            // Switch back to Main Thread for UI updates
-            activity?.runOnUiThread {
-                btnRefreshScore.isEnabled = true
-                btnRefreshScore.text = "Cek Skor Terbaru"
-
-                if (score != null) {
-                    // Update Progress Bar (0-100)
-                    progressBarScore.progress = score.toFloat()
-
-                    // Update Text
-                    tvScore.text = String.format("%.2f", score)
-                    tvDecision.text = "Keputusan Sistem: $decision"
-                } else {
-                    Toast.makeText(context, "Gagal mengambil skor kredit", Toast.LENGTH_SHORT).show()
-                    tvDecision.text = "Keputusan: Gagal memuat"
-                }
-            }
-        }
     }
 
     private fun setupImagePickers() {

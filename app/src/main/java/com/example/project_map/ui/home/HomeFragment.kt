@@ -1,6 +1,7 @@
 package com.example.project_map.ui.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,161 +13,172 @@ import com.example.project_map.R
 import com.example.project_map.data.Transaction
 import com.example.project_map.databinding.FragmentHomeBinding
 import com.example.project_map.data.Loan
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
-import java.util.Locale
-import kotlin.jvm.java
 import java.util.Date
-import java.util.Calendar
+import java.util.Locale
 
 class HomeFragment : Fragment() {
-    private var _b: FragmentHomeBinding? = null
-    private val b get() = _b!!
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
 
-    // Listener references to avoid memory leaks
+    // Listener reference to avoid memory leaks
     private var userListener: ListenerRegistration? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        s: Bundle?
+        savedInstanceState: Bundle?
     ): View {
-        _b = FragmentHomeBinding.inflate(inflater, container, false)
-        return b.root
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    override fun onViewCreated(v: View, s: Bundle?) {
-        super.onViewCreated(v, s)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
+        val currentUser = auth.currentUser
 
-        // Navigation
-        b.btnPengajuanPenarikan.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_pinjamanFragment)
-        }
+        binding.rvHistori.layoutManager = LinearLayoutManager(requireContext())
 
-        // Setup RecyclerView
-        b.recyclerRecent.layoutManager = LinearLayoutManager(requireContext())
-
-        // Load Data
-        val userId = auth.currentUser?.uid
-        if (userId != null) {
-            setupRealtimeUserListener(userId)
-            fetchLoanStats(userId)
-            fetchRecentActivity(userId)
+        if (currentUser != null) {
+            setupRealtimeUserListener(currentUser.uid)
+            fetchLoanSummary(currentUser.uid)
+            fetchCombinedRecentActivity(currentUser.uid)
+            setupNavigationActions()
         } else {
-            // Fallback for guest/not logged in
-            b.tvWelcomeName.text = "Tamu"
-            b.tvAngNumber.text = "-"
+            binding.tvUserName.text = "Tamu"
+            binding.tvSaldoValue.text = "Rp 0"
         }
+    }
+
+    private fun fetchCombinedRecentActivity(userId: String) {
+        val mixedList = mutableListOf<DashboardItem>()
+        val sdf = SimpleDateFormat("dd MMM", Locale("in", "ID"))
+
+        // 1. Query Savings
+        val savingsTask = db.collection("users").document(userId).collection("savings")
+            .orderBy("date", Query.Direction.DESCENDING)
+            .limit(5)
+            .get()
+
+        // 2. Query Loans
+        val loansTask = db.collection("users").document(userId).collection("loans")
+            .orderBy("tanggalPengajuan", Query.Direction.DESCENDING)
+            .limit(5)
+            .get()
+
+        // Execute queries
+        Tasks.whenAllSuccess<Any>(savingsTask, loansTask)
+            .addOnSuccessListener { results ->
+                if (_binding == null) return@addOnSuccessListener
+
+                // Process Savings
+                val savingsSnapshot = results[0] as com.google.firebase.firestore.QuerySnapshot
+                for (doc in savingsSnapshot) {
+                    val item = doc.toObject(Transaction::class.java)
+                    val isExp = item.type.contains("Penarikan")
+                    val prefix = if (isExp) "-" else "+"
+
+                    mixedList.add(DashboardItem(
+                        title = item.type,
+                        date = item.date,
+                        amountString = "$prefix ${formatCurrency(item.amount)}",
+                        isExpense = isExp
+                    ))
+                }
+
+                // Process Loans
+                val loansSnapshot = results[1] as com.google.firebase.firestore.QuerySnapshot
+                for (doc in loansSnapshot) {
+                    val item = doc.toObject(Loan::class.java)
+                    mixedList.add(DashboardItem(
+                        title = "Pinjaman: ${item.tujuan}",
+                        date = item.tanggalPengajuan,
+                        amountString = "+ ${formatCurrency(item.nominal)}",
+                        isExpense = false
+                    ))
+                }
+
+                // Sort & Map
+                val sortedList = mixedList.sortedByDescending { it.date }.take(5)
+                val adapterList = sortedList.map {
+                    RecentActivity(
+                        title = it.title,
+                        date = if (it.date != null) sdf.format(it.date) else "-",
+                        amount = it.amountString
+                    )
+                }
+
+                binding.rvHistori.adapter = RecentActivityAdapter(adapterList)
+            }
+            .addOnFailureListener { e ->
+                Log.e("HomeFragment", "Error fetching combined activity", e)
+            }
     }
 
     private fun setupRealtimeUserListener(userId: String) {
         userListener = db.collection("users").document(userId)
             .addSnapshotListener { document, e ->
                 if (e != null) return@addSnapshotListener
-                if (_b == null) return@addSnapshotListener // Crash prevention
+                if (_binding == null) return@addSnapshotListener
 
                 if (document != null && document.exists()) {
-                    // 1. Profile Data
                     val name = document.getString("name") ?: "Anggota"
-                    val memberCode = document.getString("memberCode") ?: "ANG-..."
+                    binding.tvUserName.text = name
 
-                    b.tvWelcomeName.text = name
-                    b.tvAngNumber.text = memberCode
-
-                    // 2. Financial Totals
                     val totalSimpanan = document.getDouble("totalSimpanan") ?: 0.0
-                    val simpananWajib = document.getDouble("simpananWajib") ?: 0.0
-
-                    b.tvSaldo.text = formatCurrency(totalSimpanan)
-                    b.tvSimpananWajib.text = "Simpanan Wajib ${formatCurrency(simpananWajib)}"
+                    binding.tvSaldoValue.text = formatCurrency(totalSimpanan)
                 }
             }
     }
 
-    private fun fetchLoanStats(userId: String) {
+    private fun fetchLoanSummary(userId: String) {
         db.collection("users").document(userId).collection("loans")
+            .whereIn("status", listOf("Disetujui", "Pinjaman Berjalan", "Proses"))
             .get()
             .addOnSuccessListener { result ->
-                if (_b == null) return@addOnSuccessListener
-
-                var activeCount = 0
-                var paidCount = 0
-                var usedAmount = 0.0
-
+                if (_binding == null) return@addOnSuccessListener
+                var totalSisaPinjaman = 0.0
                 for (doc in result) {
                     val loan = doc.toObject(Loan::class.java)
-
-                    // Logic to determine active vs paid
-                    if (loan.status == "Lunas") {
-                        paidCount++
-                    } else if (loan.status == "Disetujui" || loan.status == "Pinjaman Berjalan" || loan.status == "Proses") {
-                        activeCount++
-                        // Add to "Used Amount" only if it's currently active/running
-                        usedAmount += loan.nominal
-                    }
+                    totalSisaPinjaman += loan.sisaAngsuran
                 }
-
-                // Update UI
-                b.tvPinjamanAktifValue.text = activeCount.toString()
-                b.tvPinjamanLunasValue.text = paidCount.toString()
-                b.tvPinjamanTerpakaiValue.text = formatCurrency(usedAmount)
-
-                // Static Limit (Or fetch from user profile if you have a 'limit' field)
-                b.tvLimitPinjamanValue.text = formatCurrency(100_000_000.0)
+                binding.tvPinjamanValue.text = formatCurrency(totalSisaPinjaman)
             }
             .addOnFailureListener {
-                // Handle error silently or show toast
+                binding.tvPinjamanValue.text = "Rp 0"
             }
     }
 
-    private fun fetchRecentActivity(userId: String) {
-        // Fetching from 'savings' collection as the primary activity log
-        // (You could also fetch 'installments' and merge them if you want a mixed list)
-
-        db.collection("users").document(userId).collection("savings")
-            .orderBy("date", Query.Direction.DESCENDING)
-            .limit(5)
-            .get()
-            .addOnSuccessListener { result ->
-                if (_b == null) return@addOnSuccessListener
-
-                val activityList = mutableListOf<RecentActivity>()
-                val sdf = SimpleDateFormat("dd MMM yyyy", Locale("in", "ID"))
-
-                for (doc in result) {
-                    val trans = doc.toObject(Transaction::class.java)
-
-                    val dateStr = if (trans.date != null) sdf.format(trans.date!!) else "-"
-                    val amountStr = if (trans.type.contains("Penarikan"))
-                        "-${formatCurrency(trans.amount)}"
-                    else
-                        "+${formatCurrency(trans.amount)}"
-
-                    activityList.add(
-                        RecentActivity(
-                            title = trans.type, // e.g. "Simpanan Sukarela"
-                            date = dateStr,
-                            amount = amountStr
-                        )
-                    )
-                }
-
-                // If empty, you might want to show a dummy item or "Belum ada aktivitas"
-                if (activityList.isEmpty()) {
-                    // Optional: Handle empty state
-                }
-
-                b.recyclerRecent.adapter = RecentActivityAdapter(activityList)
-            }
+    private fun setupNavigationActions() {
+        binding.menuSimpanan.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_savingsFragment)
+        }
+        binding.menuPinjaman.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_pinjamanFragment)
+        }
+        binding.menuAngsuran.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_angsuranFragment)
+        }
+        binding.menuProfil.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_profileFragment)
+        }
+        binding.btnNotification.setOnClickListener {
+            Toast.makeText(context, "Tidak ada notifikasi baru", Toast.LENGTH_SHORT).show()
+        }
+//        binding.fabDeposit.setOnClickListener {
+//            findNavController().navigate(R.id.action_homeFragment_to_savingsFragment)
+//        }
     }
 
     private fun formatCurrency(amount: Double): String {
@@ -177,8 +189,15 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Stop listening to realtime updates to save battery/data
         userListener?.remove()
-        _b = null
+        _binding = null
     }
+
+    // --- INTERNAL DATA CLASS ---
+    data class DashboardItem(
+        val title: String,
+        val date: Date?,
+        val amountString: String,
+        val isExpense: Boolean
+    )
 }

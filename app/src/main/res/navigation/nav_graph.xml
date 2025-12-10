@@ -5,18 +5,18 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/splashFragment">
 
+    <include app:graph="@navigation/admin_nav_graph" />
+
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.example.project_map.ui.splash.SplashFragment"
         android:label="Splash"
         tools:layout="@layout/fragment_splash">
-
         <action
             android:id="@+id/action_splashFragment_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
-
         <action
             android:id="@+id/action_splashFragment_to_homeFragment"
             app:destination="@id/homeFragment"
@@ -38,6 +38,9 @@
         <action
             android:id="@+id/action_homeFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_angsuranFragment"
+            app:destination="@id/angsuranFragment" />
     </fragment>
 
     <fragment
@@ -55,16 +58,6 @@
             android:id="@+id/action_loansFragment_to_pinjamanFragment"
             app:destination="@id/pinjamanFragment" />
     </fragment>
-
-<!--    <fragment-->
-<!--        android:id="@+id/loanHistoryFragment"-->
-<!--        android:name="com.example.project_map.ui.loans.LoanHistoryFragment"-->
-<!--        android:label="Riwayat Pinjaman"-->
-<!--        tools:layout="@layout/fragment_loan_history">-->
-<!--        <action-->
-<!--            android:id="@+id/action_loanHistoryFragment_to_loanDetailFragment"-->
-<!--            app:destination="@id/loanDetailFragment" />-->
-<!--    </fragment>-->
 
     <fragment
         android:id="@+id/loginFragment"
@@ -141,7 +134,9 @@
         tools:layout="@layout/fragment_angsuran">
         <argument
             android:name="loanId"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 
 </navigation>
