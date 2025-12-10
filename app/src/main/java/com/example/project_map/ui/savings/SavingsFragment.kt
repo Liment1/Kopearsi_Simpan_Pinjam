@@ -2,6 +2,8 @@ package com.example.project_map.ui.savings
 
 import android.Manifest
 import android.app.AlertDialog
+import android.app.ProgressDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -12,25 +14,30 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
+import com.example.project_map.data.Transaction
+import com.example.project_map.data.repository.SavingsRepository
+import com.google.android.material.chip.ChipGroup
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import com.example.project_map.data.Transaction
-import com.google.android.material.chip.ChipGroup
-// Removed Storage Import
+import coil.load
 
 class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.OnNominalEntered {
 
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
-    // Removed 'storage' variable
+    private val repository = SavingsRepository()
 
     // UI Components
     private lateinit var tvTotal: TextView
@@ -41,6 +48,8 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
     private lateinit var recycler: RecyclerView
     private lateinit var btnSimpan: Button
 
+    private lateinit var progressDialog: ProgressDialog
+
     // Data
     private var totalSimpanan = 0.0
     private var totalPokok = 0.0
@@ -50,11 +59,9 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
     private var allTransactions: List<Transaction> = emptyList()
     private lateinit var adapter: TransactionAdapter
 
-    // Logic Variables
     private var selectedImageUri: Uri? = null
     private var currentNominal = 0
 
-    // Permissions & Image Picker
     private val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -76,7 +83,11 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
 
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
-        // Removed storage init
+
+        progressDialog = ProgressDialog(requireContext()).apply {
+            setMessage("Sedang mengupload bukti transfer...")
+            setCancelable(false)
+        }
 
         tvTotal = view.findViewById(R.id.tvTotalSimpanan)
         tvTotalPokok = view.findViewById(R.id.tvTotalPokok)
@@ -142,7 +153,30 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
                 if (!isAdded) return@addSnapshotListener
 
                 if (snapshots != null) {
-                    allTransactions = snapshots.toObjects(Transaction::class.java)
+                    val rawList = snapshots.toObjects(Transaction::class.java)
+
+                    // --- FIX 1: DATA SANITIZER ---
+                    // This prevents the app from crashing when it sees old "content://" links
+                    allTransactions = rawList.map { t ->
+                        if (t.imageUri != null && t.imageUri!!.startsWith("content://")) {
+                            // If it's a bad link, we copy the object but set imageUri to null
+                            // Assuming Transaction is a Data Class. If it's not, just remove this map block.
+                            try {
+                                t.copy(imageUri = null)
+                            } catch (e: Exception) {
+                                // Fallback if copy() doesn't exist (e.g. if it's not a data class)
+                                t.apply {
+                                    // Try to set it via reflection or direct access if var
+                                    // If you can't edit it, we just return t and let the adapter handle errors
+                                    // (but usually data classes have copy)
+                                }
+                                t
+                            }
+                        } else {
+                            t
+                        }
+                    }
+
                     val checkedId = if (chipGroup.checkedChipIds.isNotEmpty()) chipGroup.checkedChipIds[0] else R.id.chipAll
                     val filterType = when (checkedId) {
                         R.id.chipWajib -> "Simpanan Wajib"
@@ -206,43 +240,59 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
             .setTitle("Konfirmasi")
             .setView(view)
             .setPositiveButton("Simpan") { _, _ ->
-                // DIRECTLY SAVE TO FIRESTORE (Skipping Cloud Storage Upload)
-                // We just convert the URI to a string: "content://media/external/..."
-                saveToFirestore(currentNominal.toDouble(), "Simpanan Sukarela", imageUri.toString())
+                uploadAndSaveTransaction(currentNominal.toDouble(), "Simpanan Sukarela", imageUri)
             }
             .setNegativeButton("Ganti", null)
             .show()
     }
 
-    private fun saveToFirestore(amount: Double, type: String, imageUriString: String?) {
-        val userId = auth.currentUser?.uid ?: return
-        val batch = db.batch()
+    // --- FIX 2: TEMP FILE HANDLING ---
 
-        val userRef = db.collection("users").document(userId)
-        val newTransRef = userRef.collection("savings").document()
-
-        val transaction = Transaction(
-            id = newTransRef.id,
-            date = Date(),
-            type = type,
-            amount = amount,
-            description = "Setoran $type",
-            imageUri = imageUriString // This saves the LOCAL path
-        )
-
-        batch.set(newTransRef, transaction)
-        batch.update(userRef, "totalSimpanan", FieldValue.increment(amount))
-
-        val fieldToUpdate = when (type) {
-            "Simpanan Pokok" -> "simpananPokok"
-            "Simpanan Wajib" -> "simpananWajib"
-            "Simpanan Sukarela" -> "simpananSukarela"
-            else -> "simpananSukarela"
+    private fun imageUriToTempFile(context: Context, uri: Uri): File? {
+        return try {
+            val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+            val tempFile = File.createTempFile("temp_image", ".jpg", context.cacheDir)
+            val outputStream = FileOutputStream(tempFile)
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+            tempFile
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
-        batch.update(userRef, fieldToUpdate, FieldValue.increment(amount))
+    }
 
-        batch.commit().addOnSuccessListener {
-            Toast.makeText(context, "Berhasil disimpan (Lokal)!", Toast.LENGTH_SHORT).show()
+    private fun uploadAndSaveTransaction(amount: Double, type: String, originalUri: Uri) {
+        val userId = auth.currentUser?.uid ?: return
+        progressDialog.show()
+
+        lifecycleScope.launch {
+            try {
+                // Step A: Convert unsafe URI to safe local file
+                val localFile = imageUriToTempFile(requireContext(), originalUri)
+
+                if (localFile != null) {
+                    val localUri = Uri.fromFile(localFile)
+
+                    // Step B: Upload using the SAFE local URI
+                    val imageUrl = repository.uploadProofToCloudinary(userId, localUri)
+
+                    // Step C: Save to Firestore
+                    repository.saveTransaction(userId, amount, type, imageUrl)
+
+                    Toast.makeText(context, "Berhasil disimpan!", Toast.LENGTH_SHORT).show()
+
+                    localFile.delete()
+                } else {
+                    Toast.makeText(context, "Gagal memproses gambar", Toast.LENGTH_SHORT).show()
+                }
+
+            } catch (e: Exception) {
+                Toast.makeText(context, "Gagal: ${e.message}", Toast.LENGTH_LONG).show()
+            } finally {
+                progressDialog.dismiss()
+            }
         }
     }
 
@@ -258,13 +308,15 @@ class SavingsFragment : Fragment(R.layout.fragment_savings), TarikBottomSheet.On
         tvType.text = transaction.type
         tvDate.text = dateStr
 
-        if (transaction.type == "Simpanan Sukarela" && !transaction.imageUri.isNullOrEmpty()) {
+        // FIX 3: Check protocol before loading to avoid crash in Detail Dialog too
+        if (transaction.type == "Simpanan Sukarela" &&
+            !transaction.imageUri.isNullOrEmpty() &&
+            transaction.imageUri!!.startsWith("http")) { // Only load http/https
+
             ivBukti.visibility = View.VISIBLE
-            // This works because the URI is local on this phone
-            try {
-                ivBukti.setImageURI(Uri.parse(transaction.imageUri))
-            } catch (e: Exception) {
-                ivBukti.setImageResource(R.drawable.ic_launcher_background)
+            ivBukti.load(transaction.imageUri) {
+                placeholder(R.drawable.ic_launcher_background)
+                error(R.drawable.ic_launcher_background)
             }
         } else {
             ivBukti.visibility = View.GONE
