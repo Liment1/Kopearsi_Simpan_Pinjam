@@ -18,13 +18,13 @@
         android:theme="@style/Theme.ProjectMap" >
 
         <activity
-            android:name=".ui.profile.syarat.SyaratKetentuanActivity"
+            android:name=".ui.user.profile.syarat.UserSyaratKetentuanActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.laporan.LaporanBulananActivity"
+            android:name=".ui.user.profile.laporan.UserLaporanBulananActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.detail.DetailProfileActivity"
+            android:name=".ui.user.profile.detail.UserDetailProfileActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

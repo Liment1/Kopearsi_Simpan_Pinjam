@@ -8,78 +8,96 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingTop="20dp"
+        android:paddingHorizontal="24dp"
+        android:paddingBottom="10dp">
 
-        <EditText
-            android:id="@+id/etNamaForm"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Nama Lengkap"
-            android:importantForAutofill="no" />
-        <EditText
-            android:id="@+id/etEmailForm"
+            app:startIconDrawable="@drawable/ic_person_24">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNamaForm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:importantForAutofill="no" />
-        <EditText
-            android:id="@+id/etPhoneForm"
+            app:startIconDrawable="@drawable/ic_email">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmailForm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:hint="Nomor Telepon"
-            android:inputType="phone"
-            android:importantForAutofill="no" />
+            app:startIconDrawable="@drawable/ic_phone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPhoneForm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Status Anggota"/>
-        <Spinner
-            android:id="@+id/spinnerStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"/>
+            android:text="Status Keanggotaan"
+            android:textSize="12sp"
+            android:textColor="#757575"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="4dp"/>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_spinner_border">
+            <Spinner
+                android:id="@+id/spinnerStatus"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:spinnerMode="dropdown"/>
+        </RelativeLayout>
+
+        <LinearLayout
             android:id="@+id/layoutPasswordLama"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Password Lama (untuk verifikasi)"
-            app:passwordToggleEnabled="true"
-            android:visibility="gone">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPasswordLamaForm"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="16dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Password Baru"
-            app:passwordToggleEnabled="true">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPasswordBaruForm"
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:hint="Password Lama">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Konfirmasi Password Baru"
-            app:passwordToggleEnabled="true">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etKonfirmasiPasswordBaruForm"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword" />
-        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 </ScrollView>

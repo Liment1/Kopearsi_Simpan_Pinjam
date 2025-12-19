@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/adminDashboardFragment"
-        android:name="com.example.project_map.ui.admin.AdminDashboardFragment"
+        android:name="com.example.project_map.ui.admin.dashboard.AdminDashboardFragment"
         android:label="Dashboard"
         tools:layout="@layout/fragment_admin_dashboard" >
         <action
@@ -41,21 +41,21 @@
 
     <fragment
         android:id="@+id/adminAngsuranFragment"
-        android:name="com.example.project_map.ui.admin.AdminAngsuranFragment"
+        android:name="com.example.project_map.ui.admin.installments.AdminInstallmentFragment"
         android:label="Angsuran Berjalan"
-        tools:layout="@layout/fragment_admin_angsuran" >
+        tools:layout="@layout/fragment_admin_installment" >
         <argument android:name="loanId" app:argType="string" />
         <argument android:name="installmentId" app:argType="string" />
         <argument android:name="amount" app:argType="float" />
     </fragment>
     <fragment
         android:id="@+id/adminDataAnggotaFragment"
-        android:name="com.example.project_map.ui.admin.AdminDataAnggotaFragment"
+        android:name="com.example.project_map.ui.admin.users.AdminUserFragment"
         android:label="Data Anggota"
-        tools:layout="@layout/fragment_admin_data_anggota" />
+        tools:layout="@layout/fragment_admin_user" />
     <fragment
         android:id="@+id/fragmentTransaksiSimpanan"
-        android:name="com.example.project_map.ui.admin.FragmentHistoriSimpanan"
+        android:name="com.example.project_map.ui.admin.savings.FragmentHistoriSimpanan"
         android:label="Transaksi Simpanan"
         tools:layout="@layout/fragment_riwayat_simpanan" />
     <fragment
@@ -65,17 +65,17 @@
         tools:layout="@layout/fragment_admin_laporan_keuangan" />
     <fragment
         android:id="@+id/adminNotifikasiFragment"
-        android:name="com.example.project_map.ui.admin.AdminNotifikasiFragment"
+        android:name="com.example.project_map.ui.admin.notification.AdminNotifikasiFragment"
         android:label="Kirim Notifikasi"
         tools:layout="@layout/fragment_admin_notifikasi" />
     <fragment
         android:id="@+id/fragmentPinjamanAdmin"
-        android:name="com.example.project_map.ui.admin.FragmentPinjamanAdmin"
+        android:name="com.example.project_map.ui.admin.loans.AdminLoanFragment"
         android:label="Pengajuan Pinjaman"
-        tools:layout="@layout/fragment_pinjaman_admin" />
+        tools:layout="@layout/fragment_admin_loan" />
     <fragment
         android:id="@+id/adminPengaturanFragment"
-        android:name="com.example.project_map.ui.admin.AdminPengaturanFragment"
+        android:name="com.example.project_map.ui.admin.settings.AdminPengaturanFragment"
         android:label="Pengaturan"
         tools:layout="@layout/fragment_admin_pengaturan" />
 </navigation>

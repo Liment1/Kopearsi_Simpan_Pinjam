@@ -25,6 +25,8 @@ class AdminActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin)
 
+        debugAdminRule()
+
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar_admin)
         drawerLayout = findViewById(R.id.drawer_layout)
         val navView = findViewById<NavigationView>(R.id.nav_view)
@@ -63,6 +65,49 @@ class AdminActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    fun debugAdminRule() {
+        val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+        val currentUser = auth.currentUser
+
+        if (currentUser == null) {
+            android.util.Log.e("DEBUG_RULES", "FATAL: User is NOT logged in!")
+            return
+        }
+
+        val uid = currentUser.uid
+        android.util.Log.d("DEBUG_RULES", "1. Your Auth UID is: $uid")
+
+        // Check the User Document exactly how the Rule does
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    android.util.Log.d("DEBUG_RULES", "2. Document found at: users/$uid")
+
+                    // CHECK THE ADMIN FIELD
+                    val adminValue = document.get("admin")
+                    val adminType = adminValue?.javaClass?.simpleName
+
+                    android.util.Log.d("DEBUG_RULES", "3. Raw 'admin' field value: $adminValue")
+                    android.util.Log.d("DEBUG_RULES", "4. 'admin' field Type: $adminType")
+
+                    if (adminValue == true) {
+                        android.util.Log.i("DEBUG_RULES", "SUCCESS: Data looks correct. You are an Admin.")
+                    } else {
+                        android.util.Log.e("DEBUG_RULES", "FAILURE: You are NOT an admin in the database.")
+                        if (adminType == "String") {
+                            android.util.Log.e("DEBUG_RULES", "FIX: You saved 'true' as a String. Change it to a Boolean in Firebase Console.")
+                        }
+                    }
+                } else {
+                    android.util.Log.e("DEBUG_RULES", "FAILURE: No document found for this UID. Rules cannot find your admin status.")
+                }
+            }
+            .addOnFailureListener { e ->
+                android.util.Log.e("DEBUG_RULES", "ERROR: Could not read user profile: ${e.message}")
+            }
     }
 
     private fun logout() {

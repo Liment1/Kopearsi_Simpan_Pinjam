@@ -9,7 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
-import com.example.project_map.data.Loan
+import com.example.project_map.data.model.Loan
 import com.google.android.material.button.MaterialButton
 import java.text.NumberFormat
 import java.util.*

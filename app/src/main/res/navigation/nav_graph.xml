@@ -9,7 +9,7 @@
 
     <fragment
         android:id="@+id/splashFragment"
-        android:name="com.example.project_map.ui.splash.SplashFragment"
+        android:name="com.example.project_map.ui.other.splash.SplashFragment"
         android:label="Splash"
         tools:layout="@layout/fragment_splash">
         <action
@@ -26,7 +26,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.project_map.ui.home.HomeFragment"
+        android:name="com.example.project_map.ui.user.home.UserHomeFragment"
         android:label="Beranda"
         tools:layout="@layout/fragment_home" >
         <action
@@ -45,13 +45,13 @@
 
     <fragment
         android:id="@+id/savingsFragment"
-        android:name="com.example.project_map.ui.savings.SavingsFragment"
+        android:name="com.example.project_map.ui.user.savings.UserSavingsFragment"
         android:label="Simpanan"
-        tools:layout="@layout/fragment_savings" />
+        tools:layout="@layout/fragment_user_savings" />
 
     <fragment
         android:id="@+id/loansFragment"
-        android:name="com.example.project_map.ui.loans.LoansFragment"
+        android:name="com.example.project_map.ui.user.loans.UserLoansFragment"
         android:label="Pengajuan Pinjaman"
         tools:layout="@layout/fragment_loans" >
         <action
@@ -61,7 +61,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.project_map.ui.login.LoginFragment"
+        android:name="com.example.project_map.ui.auth.login.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login">
         <action
@@ -81,7 +81,7 @@
 
     <fragment
         android:id="@+id/registerFragment"
-        android:name="com.example.project_map.ui.register.RegisterFragment"
+        android:name="com.example.project_map.ui.auth.register.RegisterFragment"
         android:label="fragment_register"
         tools:layout="@layout/fragment_register">
         <action
@@ -91,7 +91,7 @@
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.example.project_map.ui.profile.ProfileFragment"
+        android:name="com.example.project_map.ui.user.profile.UserProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile">
         <action
@@ -103,7 +103,7 @@
 
     <fragment
         android:id="@+id/pinjamanFragment"
-        android:name="com.example.project_map.ui.loans.PinjamanFragment"
+        android:name="com.example.project_map.ui.user.loans.UserPinjamanFragment"
         android:label="Pinjaman"
         tools:layout="@layout/fragment_pinjaman">
         <action
@@ -116,7 +116,7 @@
 
     <fragment
         android:id="@+id/loanDetailFragment"
-        android:name="com.example.project_map.ui.loans.LoanDetailFragment"
+        android:name="com.example.project_map.ui.user.loans.UserLoanDetailFragment"
         android:label="Rincian Pinjaman"
         tools:layout="@layout/fragment_loan_detail">
         <argument
@@ -129,7 +129,7 @@
 
     <fragment
         android:id="@+id/angsuranFragment"
-        android:name="com.example.project_map.ui.loans.AngsuranFragment"
+        android:name="com.example.project_map.ui.user.loans.UserAngsuranFragment"
         android:label="Pembayaran Angsuran"
         tools:layout="@layout/fragment_angsuran">
         <argument

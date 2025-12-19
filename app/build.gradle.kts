@@ -1,5 +1,6 @@
 import org.gradle.kotlin.dsl.annotationProcessor
 import org.gradle.kotlin.dsl.implementation
+import java.util.Properties
 
   plugins {
     alias(libs.plugins.android.application)
@@ -12,10 +13,25 @@ android {
     namespace = "com.example.project_map"
     compileSdk = 36
 
-    buildFeatures { viewBinding = true
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
     }
 
     defaultConfig {
+
+        // 1. Read the value from local.properties
+        val properties = Properties()
+        val localPropertiesFile = project.rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            properties.load(localPropertiesFile.inputStream())
+        }
+
+        // 2. Inject it into BuildConfig
+        // The format is: buildConfigField("Type", "Name", "Value")
+        val cloudName = properties.getProperty("CLOUDINARY_CLOUD_NAME") ?: ""
+        buildConfigField("String", "CLOUD_NAME", "\"$cloudName\"")
+
         applicationId = "com.example.project_map"
         minSdk = 24
         targetSdk = 36
@@ -58,6 +74,8 @@ dependencies {
     // Material Design (For TextInputLayout, ShapeableImageView)
     implementation ("com.google.android.material:material:1.9.0")
 
+//    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+
     // Glide (For Image Loading & Cache Fixing)
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
@@ -93,9 +111,12 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     // Import the BoM for the Firebase platform
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-messaging:23.x.x")
 
     // Declare the dependencies for the desired Firebase products without specifying versions
     // For example, declare the dependencies for Firebase Authentication and Cloud Firestore
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+
 }
