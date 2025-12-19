@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,6 +28,9 @@ class LoanDetailFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var loanAdapter: LoanAdapter
 
+    // Store status to check in click listener
+    private var currentLoanStatus: String = ""
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentLoanDetailBinding.inflate(inflater, container, false)
         return binding.root
@@ -39,8 +43,6 @@ class LoanDetailFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         val loanId = arguments?.getString("loanId")
 
-        Log.d(TAG, "Opened Loan Detail with ID: $loanId") // Check Logcat for this!
-
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
@@ -52,8 +54,15 @@ class LoanDetailFragment : Fragment() {
 
         binding.btnBayarAngsuran.setOnClickListener {
             if (loanId != null) {
-                val bundle = Bundle().apply { putString("loanId", loanId) }
-                findNavController().navigate(R.id.action_loanDetailFragment_to_angsuranFragment, bundle)
+                // FEATURE IMPLEMENTATION: Check status before allowing payment
+                if (currentLoanStatus.equals("Ditolak", ignoreCase = true)) {
+                    Toast.makeText(requireContext(), "Pinjaman ditolak, tidak dapat melakukan pembayaran.", Toast.LENGTH_LONG).show()
+                } else if (currentLoanStatus.equals("Lunas", ignoreCase = true)) {
+                    Toast.makeText(requireContext(), "Pinjaman sudah lunas!", Toast.LENGTH_SHORT).show()
+                } else {
+                    val bundle = Bundle().apply { putString("loanId", loanId) }
+                    findNavController().navigate(R.id.action_loanDetailFragment_to_angsuranFragment, bundle)
+                }
             }
         }
 
@@ -68,7 +77,6 @@ class LoanDetailFragment : Fragment() {
     private fun loadLoanData(userId: String, docId: String) {
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale("in", "ID")).apply { maximumFractionDigits = 0 }
 
-        // 1. FETCH LOAN HEADER
         val loanRef = db.collection("users").document(userId).collection("loans").document(docId)
 
         loanRef.get()
@@ -77,9 +85,9 @@ class LoanDetailFragment : Fragment() {
                     val loan = document.toObject(Loan::class.java)
 
                     if (loan != null) {
-                        Log.d(TAG, "Loan Data Loaded: Nominal=${loan.nominal}, Tenor=${loan.tenor}")
+                        currentLoanStatus = loan.status // Save status for button logic
 
-                        // Update Header UI
+                        // UI Updates
                         binding.tvLoanPurpose.text = loan.tujuan
                         binding.tvStatus.text = loan.status
                         binding.tvNominalPinjaman.text = currencyFormat.format(loan.nominal)
@@ -87,14 +95,11 @@ class LoanDetailFragment : Fragment() {
                         binding.tvLoanTerm.text = loan.tenor
                         binding.tvDueDate.text = "20 Setiap Bulan"
 
-                        // 2. FETCH INSTALLMENTS (Nested Collection)
+                        // FEATURE: Disable button visually if Ditolak
+                        updateButtonState(loan.status)
+
                         loadInstallmentTimeline(loanRef, loan)
-                    } else {
-                        Log.e(TAG, "Loan object is null after conversion")
                     }
-                } else {
-                    Log.e(TAG, "Loan Document does not exist at path: ${loanRef.path}")
-                    binding.tvLoanPurpose.text = "Data Error"
                 }
             }
             .addOnFailureListener { e ->
@@ -102,35 +107,52 @@ class LoanDetailFragment : Fragment() {
             }
     }
 
+    private fun updateButtonState(status: String) {
+        if (status.equals("Ditolak", ignoreCase = true)) {
+            binding.btnBayarAngsuran.text = "Pengajuan Ditolak"
+            binding.btnBayarAngsuran.isEnabled = false
+            binding.btnBayarAngsuran.backgroundTintList = ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray)
+        } else if (status.equals("Lunas", ignoreCase = true)) {
+            binding.btnBayarAngsuran.text = "Pinjaman Lunas"
+            binding.btnBayarAngsuran.isEnabled = false
+            binding.btnBayarAngsuran.backgroundTintList = ContextCompat.getColorStateList(requireContext(), android.R.color.holo_green_dark)
+        } else {
+            binding.btnBayarAngsuran.text = "Bayar Angsuran"
+            binding.btnBayarAngsuran.isEnabled = true
+            // Reset color if needed, or leave default from XML
+        }
+    }
+
     private fun loadInstallmentTimeline(loanRef: com.google.firebase.firestore.DocumentReference, loan: Loan) {
-        // Look strictly inside the LOAN document for 'installments'
         loanRef.collection("installments")
             .get()
             .addOnSuccessListener { result ->
+                // Use the Installment class defined in LoanAdapter.kt
                 val paidList = result.toObjects(Installment::class.java)
-                Log.d(TAG, "Found ${paidList.size} paid installments in subcollection")
 
-                // Parse Tenor (e.g., "1 Bulan" -> 1)
+                Log.d(TAG, "Installments found in DB: ${paidList.size}")
+                paidList.forEach { Log.d(TAG, "DB Item: #${it.number} isPaid=${it.isPaid}") }
+
                 val tenorInt = try {
                     loan.tenor.filter { it.isDigit() }.toInt()
                 } catch (e: Exception) { 1 }
 
-                // Avoid division by zero
                 val monthlyAmount = if (tenorInt > 0) loan.nominal / tenorInt else 0.0
 
                 val fullTimeline = mutableListOf<Installment>()
                 val startDate = loan.tanggalPengajuan ?: Date()
 
-                // Generate 1 to Tenor
                 for (i in 1..tenorInt) {
-                    // Check if this number exists in the PAID list
+                    // Logic: Find if there is a payment in DB with number 'i'
                     val existingPayment = paidList.find { it.number == i }
 
                     if (existingPayment != null) {
-                        // Use the Paid record
+                        // FIX: Explicitly ensure isPaid is true if coming from DB,
+                        // though Firestore should handle it if field matches.
+                        existingPayment.isPaid = true
                         fullTimeline.add(existingPayment)
                     } else {
-                        // Generate Upcoming record
+                        // Generate Upcoming (Not Paid)
                         val cal = Calendar.getInstance()
                         cal.time = startDate
                         cal.add(Calendar.MONTH, i)
@@ -145,7 +167,6 @@ class LoanDetailFragment : Fragment() {
                     }
                 }
 
-                // Sort and Update
                 fullTimeline.sortBy { it.number }
                 loanAdapter.updateData(fullTimeline)
             }

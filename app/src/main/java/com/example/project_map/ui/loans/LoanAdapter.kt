@@ -12,13 +12,15 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Ensure your data class matches this structure
+// FIXED: Data Class for Firestore Mapping
+// Ensure this is accessible to LoanDetailFragment
 data class Installment(
     var number: Int = 0,
     var type: String = "",
     var amount: Double = 0.0,
     var date: Date? = null,
     var otherFees: Double = 0.0,
+    @field:JvmField // Helps Firestore map "isPaid" correctly
     var isPaid: Boolean = false
 )
 
@@ -34,7 +36,6 @@ class LoanAdapter(private var installments: List<Installment>) : RecyclerView.Ad
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        // Uses the XML you provided in the prompt
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_installment, parent, false)
         return ViewHolder(view)
     }
@@ -51,24 +52,25 @@ class LoanAdapter(private var installments: List<Installment>) : RecyclerView.Ad
 
         if (item.isPaid) {
             // --- PAID STYLE (Green) ---
-            holder.icon.setImageResource(R.drawable.ic_check_circle) // Ensure you have a check icon
+            holder.icon.setImageResource(R.drawable.ic_check_circle) // Make sure this drawable exists
             holder.icon.setColorFilter(ContextCompat.getColor(context, android.R.color.holo_green_dark))
 
             holder.totalPaid.text = "Total Yang Dibayar\n${currencyFormat.format(item.amount)}"
             holder.type.text = "${item.type}\n${currencyFormat.format(item.amount)}"
-            holder.date.text = "Dibayar pada ${dateFormat.format(item.date!!)}"
+
+            // Safety check for date
+            val paidDate = if(item.date != null) dateFormat.format(item.date!!) else "-"
+            holder.date.text = "Dibayar pada $paidDate"
 
             holder.totalPaid.setTextColor(ContextCompat.getColor(context, android.R.color.black))
         } else {
             // --- UPCOMING STYLE (Yellow/Gray) ---
-            // Use a clock or circle icon
-            holder.icon.setImageResource(R.drawable.ic_access_time) // Standard android icon
-            holder.icon.setColorFilter(ContextCompat.getColor(context, R.color.orange_text)) // Define orange in colors.xml
+            holder.icon.setImageResource(R.drawable.ic_access_time) // Make sure this drawable exists
+            holder.icon.setColorFilter(ContextCompat.getColor(context, R.color.orange_text))
 
             holder.totalPaid.text = "Total Yang Harus Dibayar\n${currencyFormat.format(item.amount)}"
             holder.type.text = "${item.type}\n${currencyFormat.format(item.amount)}"
 
-            // Calculate Future Date based on number
             val futureDate = item.date
             val dateStr = if(futureDate != null) dateFormat.format(futureDate) else "Segera"
             holder.date.text = "Jatuh tempo pada $dateStr"

@@ -18,14 +18,24 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.project_map.R
+import com.example.project_map.data.CreditScoreManager // Import CreditScoreManager
 import com.example.project_map.data.Loan
+import com.example.project_map.ui.custom.SemiCircleProgressBar // Import custom view
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.io.FileNotFoundException
 import java.io.InputStream
+import java.util.Calendar
 import java.util.Date
 
 class LoansFragment : Fragment() {
+
+    // --- Credit Score UI Components ---
+    private lateinit var progressBarScore: SemiCircleProgressBar
+    private lateinit var tvScore: TextView
+    private lateinit var tvDecision: TextView
+    private lateinit var btnRefreshScore: Button
+    // ----------------------------------
 
     private lateinit var imgKtp: ImageView
     private lateinit var btnUploadKtp: Button
@@ -59,6 +69,14 @@ class LoansFragment : Fragment() {
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
 
+        // --- Initialize Credit Score Views ---
+        // Make sure these IDs exist in your updated fragment_loans.xml
+        progressBarScore = view.findViewById(R.id.progressBarScore)
+        tvScore = view.findViewById(R.id.tvScore)
+        tvDecision = view.findViewById(R.id.tvDecision)
+        btnRefreshScore = view.findViewById(R.id.btnRefreshScore)
+        // -------------------------------------
+
         imgKtp = view.findViewById(R.id.imgKtpPreview)
         btnUploadKtp = view.findViewById(R.id.btnUploadKtp)
         btnAjukan = view.findViewById(R.id.btnAjukan)
@@ -86,8 +104,50 @@ class LoansFragment : Fragment() {
         })
 
         btnAjukan.setOnClickListener { kirimPengajuan() }
+
+        // Listener for manual refresh of score
+        btnRefreshScore.setOnClickListener {
+            fetchCreditScore()
+        }
+
         updateHitungan()
+
+        // Fetch score automatically when screen loads
+        fetchCreditScore()
+
         return view
+    }
+
+    private fun fetchCreditScore() {
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            tvDecision.text = "Error: User not logged in"
+            return
+        }
+
+        btnRefreshScore.isEnabled = false
+        btnRefreshScore.text = "Memuat..."
+
+        // Call the Manager to get the score from API
+        CreditScoreManager.getScoreFromApi(userId) { score, decision ->
+            // Switch back to Main Thread for UI updates
+            activity?.runOnUiThread {
+                btnRefreshScore.isEnabled = true
+                btnRefreshScore.text = "Cek Skor Terbaru"
+
+                if (score != null) {
+                    // Update Progress Bar (0-100)
+                    progressBarScore.progress = score.toFloat()
+
+                    // Update Text
+                    tvScore.text = String.format("%.2f", score)
+                    tvDecision.text = "Keputusan Sistem: $decision"
+                } else {
+                    Toast.makeText(context, "Gagal mengambil skor kredit", Toast.LENGTH_SHORT).show()
+                    tvDecision.text = "Keputusan: Gagal memuat"
+                }
+            }
+        }
     }
 
     private fun setupImagePickers() {
@@ -174,20 +234,29 @@ class LoansFragment : Fragment() {
 
         val jenis = edtJenisPinjaman.text.toString().trim()
         val peruntukan = edtPeruntukan.text.toString().trim()
-        val lama = edtLamaPinjaman.text.toString().trim()
+        val lamaStr = edtLamaPinjaman.text.toString().trim()
         val satuan = spinnerSatuan.selectedItem?.toString() ?: ""
         val nominalText = edtNominal.text.toString().replace("[^0-9]".toRegex(), "")
 
-        if (jenis.isEmpty() || peruntukan.isEmpty() || lama.isEmpty() || nominalText.isEmpty() || ktpBitmap == null) {
+        if (jenis.isEmpty() || peruntukan.isEmpty() || lamaStr.isEmpty() || nominalText.isEmpty() || ktpBitmap == null) {
             Toast.makeText(requireContext(), "Lengkapi semua data (termasuk foto KTP)!", Toast.LENGTH_SHORT).show()
             return
         }
 
         val nominal = nominalText.toDouble()
+        val lama = lamaStr.toInt()
+
+        // 1. Calculate Financials
         val bunga = nominal * RATE
         val totalPengembalian = nominal + bunga
 
-        // Create new Document Reference
+        // Simple calculation: Total / Duration
+        val cicilanPerBulan = totalPengembalian / lama
+
+        // 2. Prepare Batch Write
+        val batch = db.batch()
+
+        // A. Loan Document
         val newLoanRef = db.collection("users").document(userId).collection("loans").document()
 
         val loanData = Loan(
@@ -202,11 +271,34 @@ class LoansFragment : Fragment() {
             totalDibayar = 0.0,
             tanggalPengajuan = Date()
         )
+        batch.set(newLoanRef, loanData)
 
-        // Save to Firestore
-        newLoanRef.set(loanData)
+        // B. Generate Installment Schedule
+        val calendar = Calendar.getInstance()
+
+        for (i in 1..lama) {
+            calendar.add(Calendar.MONTH, 1) // Next month
+
+            val instRef = newLoanRef.collection("installments").document()
+
+            val installmentMap = hashMapOf(
+                "id" to instRef.id,
+                "loanId" to newLoanRef.id,
+                "bulanKe" to i,
+                "jumlahBayar" to cicilanPerBulan,
+                "jatuhTempo" to calendar.time,
+                "status" to "Belum Bayar",
+                "tanggalBayar" to null,
+                "buktiBayarUrl" to ""
+            )
+
+            batch.set(instRef, installmentMap)
+        }
+
+        // 3. Commit
+        batch.commit()
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Pengajuan berhasil dikirim.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Pengajuan & Jadwal berhasil dibuat.", Toast.LENGTH_SHORT).show()
                 findNavController().navigate(R.id.action_loansFragment_to_pinjamanFragment)
             }
             .addOnFailureListener {

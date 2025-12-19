@@ -2,6 +2,7 @@ package com.example.project_map.ui.admin
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -96,13 +97,23 @@ class AdminDashboardFragment : Fragment() {
         }
 
         // B. Total Active Loans (Sum of all active loans)
+// ... di dalam fun loadUserFinancials()
+
+// B. Total Active Loans (Sum of all active loans)
         db.collectionGroup("loans").whereNotEqualTo("status", "Lunas").get()
             .addOnSuccessListener { result ->
                 val totalPinjaman = result.documents.sumOf { it.getDouble("sisaAngsuran") ?: 0.0 }
                 tvTotalPinjaman.text = formatCurrency(totalPinjaman)
             }
-            .addOnFailureListener {
-                tvTotalPinjaman.text = "Error (Index?)"
+            // PERUBAHAN DI SINI
+            .addOnFailureListener { exception ->
+                // Mencetak error ke Logcat
+                Log.e("AdminDash", "Error loading active loans: ", exception)
+
+                // Menampilkan pesan error yang lebih jelas di UI
+                tvTotalPinjaman.text = "Error: Check Firestore Index"
+
+                // Cek Logcat! Biasanya ada link untuk membuat index.
             }
     }
 
