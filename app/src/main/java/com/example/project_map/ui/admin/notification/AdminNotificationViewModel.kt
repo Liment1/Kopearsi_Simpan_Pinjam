@@ -10,16 +10,18 @@ import kotlinx.coroutines.launch
 
 class AdminNotificationViewModel : ViewModel() {
 
+    // Ensure you have AdminNotificationRepository created
     private val repository = AdminNotificationRepository()
 
-    // Data List
+    // 1. Data List (Announcement History)
     private val _announcements = MutableLiveData<List<Announcement>>()
     val announcements: LiveData<List<Announcement>> = _announcements
 
-    // UI States
+    // 2. UI Loading State
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+    // 3. UI Messages (Toasts)
     private val _toastMessage = MutableLiveData<String?>()
     val toastMessage: LiveData<String?> = _toastMessage
 
@@ -29,6 +31,7 @@ class AdminNotificationViewModel : ViewModel() {
 
     private fun fetchHistory() {
         viewModelScope.launch {
+            // Assuming repository.getAnnouncementHistory returns a Flow
             repository.getAnnouncementHistory().collect { list ->
                 _announcements.value = list
             }
@@ -45,8 +48,10 @@ class AdminNotificationViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.createAnnouncement(title, message, isUrgent)
             _isLoading.value = false
+
             if (result.isSuccess) {
                 _toastMessage.value = "Pengumuman terkirim"
+                // Trigger any specific success actions here if needed
             } else {
                 _toastMessage.value = "Gagal: ${result.exceptionOrNull()?.message}"
             }

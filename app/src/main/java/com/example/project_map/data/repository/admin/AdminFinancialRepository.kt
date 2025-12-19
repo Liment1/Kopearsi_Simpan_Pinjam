@@ -1,26 +1,17 @@
-package com.example.project_map.ui.admin.report
+package com.example.project_map.data.repository.admin // Consider moving to data.repository.admin
 
+import com.example.project_map.data.model.FinancialTransaction
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-// 1. Create a simple data model for Transactions if you haven't already
-data class Transaction(
-    val id: String = "",
-    val type: String = "", // "Pemasukan" or "Pengeluaran"
-    val category: String = "", // "Simpanan Wajib", "Angsuran", "Pencairan Pinjaman"
-    val amount: Double = 0.0,
-    val date: java.util.Date? = null,
-    val description: String = ""
-)
-
 class AdminFinancialRepository {
     private val db = FirebaseFirestore.getInstance()
 
     // Stream for Cash Flow (All transactions sorted by date)
-    fun getCashFlowStream(): Flow<List<Transaction>> = callbackFlow {
+    fun getCashFlowStream(): Flow<List<FinancialTransaction>> = callbackFlow {
         val listener = db.collection("transactions")
             .orderBy("date", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
@@ -28,11 +19,19 @@ class AdminFinancialRepository {
                     close(error)
                     return@addSnapshotListener
                 }
-                val list = snapshot?.documents?.mapNotNull {
-                    it.toObject(Transaction::class.java)?.copy(id = it.id)
+
+                val list = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        // Using the separate FinancialTransaction class
+                        doc.toObject(FinancialTransaction::class.java)?.copy(id = doc.id)
+                    } catch (e: Exception) {
+                        null // Skip malformed documents
+                    }
                 } ?: emptyList()
+
                 trySend(list)
             }
+
         awaitClose { listener.remove() }
     }
 }

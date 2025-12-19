@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.admin.AdminLaporanKeuanganFragment">
+    tools:context=".ui.admin.report.AdminFinancialReportFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp">
                 <ImageButton
-                    android:id="@+id/btnPreviousPeriod"
+                    android:id="@+id/btnPrev"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:src="@drawable/ic_chevron_left"
@@ -63,7 +63,7 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
                 <ImageButton
-                    android:id="@+id/btnNextPeriod"
+                    android:id="@+id/btnNext"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:src="@drawable/ic_chevron_right"
@@ -100,7 +100,7 @@
                         android:id="@+id/tvSummaryTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ringkasan Oktober 2025"
+                        android:text="Ringkasan Keuangan"
                         android:textStyle="bold"/>
 
                     <TextView android:text="Total Pemasukan" android:layout_marginTop="12dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
@@ -133,7 +133,7 @@
                         android:text="Grafik Keuangan"
                         android:textStyle="bold"/>
                     <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/barChart"
+                        android:id="@+id/chartPemasukanPengeluaran"
                         android:layout_width="match_parent"
                         android:layout_height="250dp"
                         android:layout_marginTop="8dp"/>
@@ -158,24 +158,34 @@
                         android:textStyle="bold"/>
 
                     <TextView android:text="Rincian Pemasukan" android:layout_marginTop="12dp" android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
                     <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
                         <TextView android:text="Simpanan Anggota:" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
                         <TextView android:id="@+id/tvRincianSimpanan" android:text="Rp 0" android:gravity="end" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
+
                     <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
                         <TextView android:text="Pembayaran Angsuran:" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
-                        <TextView android:id="@+id/tvRincianAngsuranMasuk" android:text="Rp 0" android:gravity="end" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvRincianAngsuran" android:text="Rp 0" android:gravity="end" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="Denda Keterlambatan:" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvRincianDenda" android:text="Rp 0" android:gravity="end" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
 
                     <TextView android:text="Rincian Pengeluaran" android:layout_marginTop="12dp" android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
                     <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
                         <TextView android:text="Pinjaman Dicairkan:" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
                         <TextView android:id="@+id/tvRincianPinjamanKeluar" android:text="Rp 0" android:gravity="end" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
+
                     <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
                         <TextView android:text="Biaya Operasional:" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
                         <TextView android:id="@+id/tvRincianOperasional" android:text="Rp 0" android:gravity="end" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
