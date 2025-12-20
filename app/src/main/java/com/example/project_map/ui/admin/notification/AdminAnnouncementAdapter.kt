@@ -8,11 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.project_map.data.model.Announcement
+import com.example.project_map.data.model.Notification
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AdminAnnouncementAdapter(private var list: List<Announcement>) :
+class AdminAnnouncementAdapter(private var list: List<Notification>) :
     RecyclerView.Adapter<AdminAnnouncementAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -49,7 +49,7 @@ class AdminAnnouncementAdapter(private var list: List<Announcement>) :
 
     override fun getItemCount() = list.size
 
-    fun updateList(newList: List<Announcement>) {
+    fun updateList(newList: List<Notification>) {
         list = newList
         notifyDataSetChanged()
     }

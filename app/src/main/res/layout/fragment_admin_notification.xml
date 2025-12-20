@@ -104,7 +104,7 @@
                     android:layout_height="wrap_content"
                     android:text="Bagikan 90% Profit"
                     android:backgroundTint="#4CAF50"
-                    app:icon="@drawable/ic_savings"
+                    app:icon="@drawable/ic_wallet"
                     app:iconGravity="textStart"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>

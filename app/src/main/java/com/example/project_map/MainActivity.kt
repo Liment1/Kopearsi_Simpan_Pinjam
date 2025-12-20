@@ -13,11 +13,11 @@ import androidx.navigation.ui.NavigationUI
 import com.example.project_map.databinding.ActivityMainBinding
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     val db = Firebase.firestore
-    // Create a new user with a first and last name
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,5 +42,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        FirebaseMessaging.getInstance().subscribeToTopic("all_members")
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w("FCM", "Subscribe failed", task.exception)
+                }
+            }
     }
 }

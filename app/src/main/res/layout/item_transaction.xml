@@ -32,7 +32,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_savings"
+                android:src="@drawable/ic_wallet"
                 app:tint="@color/green_primary"/>
         </FrameLayout>
 

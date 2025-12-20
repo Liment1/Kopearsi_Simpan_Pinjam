@@ -1,234 +1,159 @@
 package com.example.project_map.ui.user.savings
 
-import android.Manifest
-import android.app.AlertDialog
-import android.app.ProgressDialog
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
+import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.example.project_map.R
-import com.example.project_map.data.model.Savings
-import com.google.android.material.chip.ChipGroup
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
+import com.example.project_map.databinding.FragmentUserSavingsBinding
+import com.example.project_map.ui.user.home.TransactionType
+import com.example.project_map.ui.user.home.UserRecentAdapter
+import com.example.project_map.ui.user.home.UserRecentItem
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class UserSavingsFragment : Fragment(R.layout.fragment_user_savings), SimpanUang.OnNominalEntered {
+class UserSavingsFragment : Fragment() {
 
+    private var _binding: FragmentUserSavingsBinding? = null
+    private val binding get() = _binding!!
     private val viewModel: UserSavingsViewModel by viewModels()
-    private lateinit var adapter: TransactionAdapter
-    private lateinit var progressDialog: ProgressDialog
 
-    // UI Refs
-    private lateinit var tvTotal: TextView
-    private lateinit var tvTotalPokok: TextView
-    private lateinit var tvTotalWajib: TextView
-    private lateinit var tvTotalSukarela: TextView
-    private lateinit var chipGroup: ChipGroup
-
-    private var currentNominal = 0
-
-    // Image Picker Logic
-    private val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
-            result.data?.data?.let { uri ->
-                showImageConfirmationDialog(uri)
-            }
-        }
-    }
-
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) openImagePicker()
-        else Toast.makeText(requireContext(), "Izin akses galeri ditolak", Toast.LENGTH_SHORT).show()
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentUserSavingsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        setupUI(view)
+        // History Setup
+        binding.rvHistory.layoutManager = LinearLayoutManager(context)
+
         setupObservers()
-    }
-
-    private fun setupUI(view: View) {
-        tvTotal = view.findViewById(R.id.tvTotalSimpanan)
-        tvTotalPokok = view.findViewById(R.id.tvTotalPokok)
-        tvTotalWajib = view.findViewById(R.id.tvTotalWajib)
-        tvTotalSukarela = view.findViewById(R.id.tvTotalSukarela)
-        chipGroup = view.findViewById(R.id.chipGroupFilter)
-
-        progressDialog = ProgressDialog(requireContext()).apply {
-            setMessage("Sedang memproses...")
-            setCancelable(false)
-        }
-
-        // Setup RecyclerView
-        val recycler = view.findViewById<RecyclerView>(R.id.recyclerView)
-        adapter = TransactionAdapter(emptyList()) { transaction ->
-            showTransactionDetail(transaction)
-        }
-        recycler.layoutManager = LinearLayoutManager(requireContext())
-        recycler.adapter = adapter
-
-        // Setup Chip Filter
-        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-            if (checkedIds.isEmpty()) return@setOnCheckedStateChangeListener
-            val filterType = when (checkedIds[0]) {
-                R.id.chipWajib -> "Simpanan Wajib"
-                R.id.chipPokok -> "Simpanan Pokok"
-                R.id.chipSukarela -> "Simpanan Sukarela"
-                else -> "Semua"
-            }
-            viewModel.applyFilter(filterType)
-        }
-
-        // Setup Button
-        view.findViewById<Button>(R.id.btnTambahSimpanan).setOnClickListener {
-            SimpanUang(this).show(parentFragmentManager, "SimpanBottomSheet")
-        }
+        setupActions()
     }
 
     private fun setupObservers() {
-        // Observe Balances
         viewModel.balances.observe(viewLifecycleOwner) { data ->
-            tvTotal.text = data["total"]
-            tvTotalPokok.text = data["pokok"]
-            tvTotalWajib.text = data["wajib"]
-            tvTotalSukarela.text = data["sukarela"]
+            binding.tvTotalBalance.text = data["totalFormatted"]
+            binding.cardPokok.tvTitle.text = "Simpanan Pokok"; binding.cardPokok.tvAmount.text = data["pokokFormatted"]
+            binding.cardWajib.tvTitle.text = "Simpanan Wajib"; binding.cardWajib.tvAmount.text = data["wajibFormatted"]
+            binding.cardSukarela.tvTitle.text = "Simpanan Sukarela"; binding.cardSukarela.tvAmount.text = data["sukarelaFormatted"]
         }
 
-        // Observe Transactions
-        viewModel.savingsList.observe(viewLifecycleOwner) { list ->
-            adapter.updateList(list)
+        viewModel.userStatus.observe(viewLifecycleOwner) { status ->
+            if (status == "Calon Anggota") {
+                binding.cardActivation.visibility = View.VISIBLE
+                binding.layoutActions.alpha = 0.5f
+                binding.btnDeposit.setOnClickListener { showRestrictedToast() }
+                binding.btnWithdraw.setOnClickListener { showRestrictedToast() }
+            } else {
+                binding.cardActivation.visibility = View.GONE
+                binding.layoutActions.alpha = 1.0f
+                binding.btnDeposit.setOnClickListener { showTransactionSheet(isDeposit = true) }
+                binding.btnWithdraw.setOnClickListener { showTransactionSheet(isDeposit = false) }
+            }
         }
 
-        // Observe Loading State
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            if (isLoading) progressDialog.show() else progressDialog.dismiss()
+        // History List
+        viewModel.history.observe(viewLifecycleOwner) { list ->
+            val sdf = SimpleDateFormat("dd MMM yyyy", Locale("in", "ID"))
+
+            val uiList = list.map { saving ->
+                val type = if (savings.type.contains("Penarikan")) TransactionType.WITHDRAWAL else TransactionType.SAVINGS
+
+                UserRecentItem(
+                    title = transaction.type,
+                    date = if (transaction.date != null) sdf.format(transaction.date) else "-",
+                    amount = transaction.amount.toString(),
+                    type = type
+                )
+            }
+            binding.rvHistory.adapter = UserRecentAdapter(uiList)
         }
 
-        // Observe Toast Messages
-        viewModel.toastMessage.observe(viewLifecycleOwner) { msg ->
-            if (msg.isNotEmpty()) Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        viewModel.actionResult.observe(viewLifecycleOwner) { result ->
+            if (result != null) {
+                if (result.isSuccess) Toast.makeText(context, result.getOrNull(), Toast.LENGTH_LONG).show()
+                else Toast.makeText(context, "Gagal: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
+                viewModel.resetResult()
+            }
         }
     }
 
-    // --- Interaction Logic (Passed from BottomSheet) ---
-
-    override fun onNominalEntered(nominal: Int) {
-        currentNominal = nominal
-        showBuktiTransferDialog(nominal)
+    private fun setupActions() {
+        binding.btnPayDirect.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Instruksi Pembayaran")
+                .setMessage("Transfer Rp 200.000 ke BCA 12345678 a.n Koperasi.")
+                .setPositiveButton("OK", null)
+                .show()
+        }
     }
 
-    private fun showBuktiTransferDialog(nominal: Int) {
-        // Just the dialog logic to trigger permission check
-        AlertDialog.Builder(requireContext())
-            .setTitle("Upload Bukti Transfer")
-            .setMessage("Upload bukti transfer?")
-            .setPositiveButton("Upload") { _, _ -> checkGalleryPermission() }
-            .setNegativeButton("Batal", null)
-            .show()
-    }
+    private fun showTransactionSheet(isDeposit: Boolean) {
+        val dialog = BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_transaction, null)
+        dialog.setContentView(view)
 
-    private fun checkGalleryPermission() {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            Manifest.permission.READ_MEDIA_IMAGES
-        else
-            Manifest.permission.READ_EXTERNAL_STORAGE
+        val tvTitle = view.findViewById<TextView>(R.id.tvSheetTitle)
+        val etAmount = view.findViewById<TextInputEditText>(R.id.etAmount)
+        val layoutBank = view.findViewById<View>(R.id.layoutBank) // Find layout wrapper or Edit Text
+        val etBank = view.findViewById<TextInputEditText>(R.id.etBank)
+        val layoutAccount = view.findViewById<View>(R.id.layoutAccount)
+        val etAccount = view.findViewById<TextInputEditText>(R.id.etAccount)
+        val btnSubmit = view.findViewById<View>(R.id.btnSubmit)
 
-        if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
-            openImagePicker()
+        if (isDeposit) {
+            tvTitle.text = "Isi Saldo (Deposit)"
+            layoutBank.visibility = View.GONE
+            layoutAccount.visibility = View.GONE
         } else {
-            requestPermissionLauncher.launch(permission)
+            tvTitle.text = "Penarikan Dana"
+            layoutBank.visibility = View.VISIBLE
+            layoutAccount.visibility = View.VISIBLE
         }
-    }
 
-    private fun openImagePicker() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        pickImage.launch(intent)
-    }
+        btnSubmit.setOnClickListener {
+            val amountStr = etAmount.text.toString()
+            if (amountStr.isEmpty()) return@setOnClickListener
 
-    private fun showImageConfirmationDialog(imageUri: Uri) {
-        val view = layoutInflater.inflate(R.layout.dialog_image_preview, null)
-        view.findViewById<ImageView>(R.id.ivPreview).setImageURI(imageUri)
+            if (isDeposit) {
+                viewModel.submitDeposit(amountStr.toDouble())
+            } else {
+                val bank = etBank.text.toString()
+                val acc = etAccount.text.toString()
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Konfirmasi")
-            .setView(view)
-            .setPositiveButton("Simpan") { _, _ ->
-                // IMPORTANT: We need to convert URI to File here because ViewModel
-                // shouldn't have access to Context/ContentResolver.
-                val safeFile = imageUriToTempFile(requireContext(), imageUri)
-                if (safeFile != null) {
-                    val safeUri = Uri.fromFile(safeFile)
-                    viewModel.uploadTransaction(currentNominal.toDouble(), "Simpanan Sukarela", safeUri)
+                if (bank.isNotEmpty() && acc.isNotEmpty()) {
+                    viewModel.submitWithdrawal(amountStr.toDouble(), bank, acc)
                 } else {
-                    Toast.makeText(context, "Gagal memproses gambar", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Lengkapi data bank", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
                 }
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+    private fun showRestrictedToast() {
+        Toast.makeText(context, "Selesaikan aktivasi keanggotaan terlebih dahulu.", Toast.LENGTH_SHORT).show()
     }
 
-    private fun imageUriToTempFile(context: Context, uri: Uri): File? {
-        return try {
-            val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-            val tempFile = File.createTempFile("temp_image", ".jpg", context.cacheDir)
-            val outputStream = FileOutputStream(tempFile)
-            inputStream?.copyTo(outputStream)
-            inputStream?.close()
-            outputStream.close()
-            tempFile
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    private fun showTransactionDetail(savings: Savings) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_transaction_detail, null)
-        val ivBukti = dialogView.findViewById<ImageView>(R.id.ivProof)
-        val tvType = dialogView.findViewById<TextView>(R.id.tvType)
-        val tvDate = dialogView.findViewById<TextView>(R.id.tvDate)
-
-        val dateFormat = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("in", "ID"))
-        tvType.text = savings.type
-        tvDate.text = if (savings.date != null) dateFormat.format(savings.date) else "-"
-
-        if (savings.type == "Simpanan Sukarela" &&
-            !savings.imageUri.isNullOrEmpty() &&
-            savings.imageUri!!.startsWith("http")) {
-
-            ivBukti.visibility = View.VISIBLE
-            ivBukti.load(savings.imageUri) {
-                placeholder(R.drawable.ic_launcher_background)
-                error(R.drawable.ic_launcher_background)
-            }
-        } else {
-            ivBukti.visibility = View.GONE
-        }
-
-        AlertDialog.Builder(requireContext())
-            .setView(dialogView)
-            .setPositiveButton("Tutup", null)
-            .show()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

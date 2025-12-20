@@ -100,12 +100,10 @@ class UserLoansFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        // FIX: Back Button Logic
         btnBack.setOnClickListener {
             findNavController().popBackStack()
         }
 
-        // FIX: Upload KTP Button Logic
         btnUploadKtp.setOnClickListener {
             showUploadOptions()
         }
@@ -130,7 +128,6 @@ class UserLoansFragment : Fragment() {
     }
 
     private fun setupSpinner() {
-        // FIX: Only show "Bulan"
         val units = listOf("Bulan")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, units)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)

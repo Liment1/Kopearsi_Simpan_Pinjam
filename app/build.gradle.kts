@@ -19,19 +19,6 @@ android {
     }
 
     defaultConfig {
-
-        // 1. Read the value from local.properties
-        val properties = Properties()
-        val localPropertiesFile = project.rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) {
-            properties.load(localPropertiesFile.inputStream())
-        }
-
-        // 2. Inject it into BuildConfig
-        // The format is: buildConfigField("Type", "Name", "Value")
-        val cloudName = properties.getProperty("CLOUDINARY_CLOUD_NAME") ?: ""
-        buildConfigField("String", "CLOUD_NAME", "\"$cloudName\"")
-
         applicationId = "com.example.project_map"
         minSdk = 24
         targetSdk = 36
@@ -66,7 +53,6 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.10.1")
-    implementation("com.cloudinary:cloudinary-android:2.5.0")
     implementation("io.coil-kt:coil:2.4.0")
     // ViewModel delegates
     implementation("androidx.fragment:fragment-ktx:1.6.1")

@@ -49,7 +49,7 @@
             <ImageView
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/ic_savings"
+                android:src="@drawable/ic_wallet"
                 app:tint="#4CAF50"
                 android:background="#E8F5E9"
                 android:padding="8dp"/>

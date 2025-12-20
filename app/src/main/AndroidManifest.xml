@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -21,11 +20,13 @@
             android:name=".ui.user.profile.syarat.UserSyaratKetentuanActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.user.profile.laporan.UserLaporanBulananActivity"
+            android:name=".ui.user.profile.report.UserMonthlyReportActivity"
             android:exported="false" />
         <activity
             android:name=".ui.user.profile.detail.UserDetailProfileActivity"
             android:exported="false" />
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true" >
@@ -40,7 +41,13 @@
             android:exported="false"
             android:label="Admin Dashboard"
             android:theme="@style/Theme.ProjectMap"/>
-
+        <service
+            android:name=".services.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

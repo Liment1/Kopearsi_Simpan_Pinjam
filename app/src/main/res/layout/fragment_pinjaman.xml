@@ -122,7 +122,7 @@
                 android:id="@+id/recyclerLoanHistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/item_loan_history_v2"
+                tools:listitem="@layout/item_loan_active"
                 tools:itemCount="4"/>
 
         </LinearLayout>

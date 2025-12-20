@@ -9,7 +9,7 @@ import android.widget.EditText
 import com.example.project_map.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class SimpanUang(private val listener: OnNominalEntered) : BottomSheetDialogFragment() {
+class UserMoneySavings(private val listener: OnNominalEntered) : BottomSheetDialogFragment() {
 
     interface OnNominalEntered {
         fun onNominalEntered(nominal: Int)

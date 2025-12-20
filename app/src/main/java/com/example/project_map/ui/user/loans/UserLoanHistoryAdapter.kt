@@ -29,7 +29,7 @@ class UserLoanHistoryAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_loan_history_v2, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_loan_active, parent, false)
         return ViewHolder(view)
     }
 

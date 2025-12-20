@@ -23,7 +23,7 @@ import java.util.Locale
 
 class AdminFinancialReportFragment : Fragment() {
 
-    private val viewModel: AdminFinancialViewModel by viewModels()
+    private val viewModel: AdminFinancialReportViewModel by viewModels()
 
     // UI Components matching XML
     private lateinit var tvCurrentPeriod: TextView
@@ -70,11 +70,11 @@ class AdminFinancialReportFragment : Fragment() {
         tvLabaRugi = view.findViewById(R.id.tvLabaRugi)
 
         // Chart
-        barChart = view.findViewById(R.id.chartRevenue)
+        barChart = view.findViewById(R.id.chartPemasukanPengeluaran)
 
         // Rincian Pemasukan
         tvRincianSimpanan = view.findViewById(R.id.tvRincianSimpanan)
-        tvRincianAngsuran = view.findViewById(R.id.recyclerViewAngsuran)
+        tvRincianAngsuran = view.findViewById(R.id.tvRincianAngsuran)
         tvRincianDenda = view.findViewById(R.id.tvRincianDenda)
 
         // Rincian Pengeluaran
@@ -105,10 +105,10 @@ class AdminFinancialReportFragment : Fragment() {
         // 2. Data & Chart
         viewModel.reportState.observe(viewLifecycleOwner) { state ->
             when (state) {
-                is AdminFinancialViewModel.ReportState.Loading -> {
+                is AdminFinancialReportViewModel.ReportState.Loading -> {
                     // Could show progress bar here
                 }
-                is AdminFinancialViewModel.ReportState.Success -> {
+                is AdminFinancialReportViewModel.ReportState.Success -> {
                     // Update Totals
                     tvTotalPemasukan.text = formatCurrency(state.income)
                     tvTotalPengeluaran.text = formatCurrency(state.expense)

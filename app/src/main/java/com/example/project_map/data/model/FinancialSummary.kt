@@ -1,4 +1,4 @@
-package com.example.project_map.ui.user.profile.laporan
+package com.example.project_map.ui.user.profile.report
 
 data class FinancialSummary(
     val totalSimpanan: String = "Rp 0",

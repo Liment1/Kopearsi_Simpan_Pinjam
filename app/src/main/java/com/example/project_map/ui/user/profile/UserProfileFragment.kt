@@ -16,7 +16,7 @@ import coil.transform.CircleCropTransformation
 import com.example.project_map.R
 import com.example.project_map.databinding.FragmentProfileBinding
 import com.example.project_map.ui.user.profile.detail.UserDetailProfileActivity
-import com.example.project_map.ui.user.profile.laporan.UserLaporanBulananActivity
+import com.example.project_map.ui.user.profile.report.UserMonthlyReportActivity
 import com.example.project_map.ui.user.profile.syarat.UserSyaratKetentuanActivity
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.jvm.java
@@ -64,7 +64,7 @@ class UserProfileFragment : Fragment() {
             startActivity(Intent(requireContext(), UserDetailProfileActivity::class.java))
         }
         binding.btnLaporanBulanan.setOnClickListener {
-            startActivity(Intent(requireContext(), UserLaporanBulananActivity::class.java))
+            startActivity(Intent(requireContext(), UserMonthlyReportActivity::class.java))
         }
         binding.btnSyaratKetentuan.setOnClickListener {
             startActivity(Intent(requireContext(), UserSyaratKetentuanActivity::class.java))

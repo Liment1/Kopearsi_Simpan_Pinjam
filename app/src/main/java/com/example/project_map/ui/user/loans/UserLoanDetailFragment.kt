@@ -67,7 +67,6 @@ class UserLoanDetailFragment : Fragment() {
         // 3. Button Click -> Pay Next Bill
         binding.btnBayarAngsuran.setOnClickListener {
             if (nextInstallmentToPay != null) {
-                // FIX: Reset state before going to payment page
                 viewModel.resetState()
 
                 val bundle = bundleOf(

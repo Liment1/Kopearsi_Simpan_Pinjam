@@ -1,12 +1,13 @@
 package com.example.project_map.data.model
 
+import com.google.firebase.Timestamp
 import java.util.Date
 
 data class FinancialTransaction(
-    val id: String = "",
-    val type: String = "",       // "Pemasukan" or "Pengeluaran"
-    val category: String = "",   // "Simpanan Wajib", "Angsuran", etc.
+    var id: String = "",
     val amount: Double = 0.0,
-    val date: Date? = null,
+    val type: String = "",       // "Pemasukan" or "Pengeluaran"
+    val category: String = "",   // "Simpanan Pokok", "Pinjaman", etc.
+    val date: Date? = null,      // Ensure Firestore uses Timestamp
     val description: String = ""
 )

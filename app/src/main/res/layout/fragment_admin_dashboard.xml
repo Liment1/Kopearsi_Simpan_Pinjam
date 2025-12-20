@@ -248,7 +248,7 @@
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/ic_savings"
+                        android:src="@drawable/ic_wallet"
                         app:tint="?attr/colorPrimary"/>
 
                     <TextView

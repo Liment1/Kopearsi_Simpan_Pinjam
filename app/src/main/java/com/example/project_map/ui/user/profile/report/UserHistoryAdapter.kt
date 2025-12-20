@@ -1,4 +1,4 @@
-package com.example.project_map.ui.user.profile.laporan
+package com.example.project_map.ui.user.profile.report
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,8 +7,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
 
-class UserRiwayatAdapter(private var items: List<UserRiwayatItem>) :
-    RecyclerView.Adapter<UserRiwayatAdapter.RiwayatViewHolder>() {
+class UserHistoryAdapter(private var items: List<UserItemHistory>) :
+    RecyclerView.Adapter<UserHistoryAdapter.RiwayatViewHolder>() {
 
     class RiwayatViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvDate: TextView = view.findViewById(R.id.tvRiwayatTanggal)
@@ -33,7 +33,7 @@ class UserRiwayatAdapter(private var items: List<UserRiwayatItem>) :
 
     override fun getItemCount() = items.size
 
-    fun updateData(newItems: List<UserRiwayatItem>) {
+    fun updateData(newItems: List<UserItemHistory>) {
         items = newItems
         notifyDataSetChanged()
     }

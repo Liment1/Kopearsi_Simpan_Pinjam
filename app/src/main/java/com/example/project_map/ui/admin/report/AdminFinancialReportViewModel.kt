@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-class AdminFinancialViewModel : ViewModel() {
+class AdminFinancialReportViewModel : ViewModel() {
 
     private val repository = AdminFinancialRepository()
     private var allTransactions: List<FinancialTransaction> = emptyList()

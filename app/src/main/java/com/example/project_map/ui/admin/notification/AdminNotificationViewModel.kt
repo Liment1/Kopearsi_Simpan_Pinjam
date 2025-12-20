@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.project_map.data.model.Announcement
+import com.example.project_map.data.model.Notification
 import com.example.project_map.data.repository.admin.AdminNotificationRepository
 import kotlinx.coroutines.launch
 
@@ -14,8 +14,8 @@ class AdminNotificationViewModel : ViewModel() {
     private val repository = AdminNotificationRepository()
 
     // 1. Data List (Announcement History)
-    private val _announcements = MutableLiveData<List<Announcement>>()
-    val announcements: LiveData<List<Announcement>> = _announcements
+    private val _announcements = MutableLiveData<List<Notification>>()
+    val announcements: LiveData<List<Notification>> = _announcements
 
     // 2. UI Loading State
     private val _isLoading = MutableLiveData<Boolean>()
@@ -50,10 +50,10 @@ class AdminNotificationViewModel : ViewModel() {
             _isLoading.value = false
 
             if (result.isSuccess) {
-                _toastMessage.value = "Pengumuman terkirim"
+//                _toastMessage.value = "Pengumuman terkirim"
                 // Trigger any specific success actions here if needed
             } else {
-                _toastMessage.value = "Gagal: ${result.exceptionOrNull()?.message}"
+//                _toastMessage.value = "Gagal: ${result.exceptionOrNull()?.message}"
             }
         }
     }

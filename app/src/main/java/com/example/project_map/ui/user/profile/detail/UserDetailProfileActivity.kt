@@ -126,7 +126,6 @@ class UserDetailProfileActivity : AppCompatActivity() {
                     if (state.imageUrl.isNotEmpty()) {
                         Toast.makeText(this, "Foto berhasil diubah", Toast.LENGTH_SHORT).show()
 
-                        // UPDATE VERSION TIMESTAMP (The Cache Fix)
                         imageCacheParams = "?v=${System.currentTimeMillis()}"
                         loadImageSafe(state.imageUrl)
                     } else {

@@ -1,4 +1,4 @@
-package com.example.project_map.ui.user.profile.laporan
+package com.example.project_map.ui.user.profile.report
 
 import android.os.Bundle
 import android.view.View
@@ -14,12 +14,12 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.card.MaterialCardView
 
 
-class UserLaporanBulananActivity : AppCompatActivity() {
+class UserMonthlyReportActivity : AppCompatActivity() {
 
     // MVVM: Inject ViewModel
-    private val viewModel: UserLaporanViewModel by viewModels()
+    private val viewModel: UserReportViewModel by viewModels()
 
-    private lateinit var userRiwayatAdapter: UserRiwayatAdapter
+    private lateinit var userHistoryAdapter: UserHistoryAdapter
 
     // UI Refs
     private lateinit var tvCurrentMonth: TextView
@@ -58,9 +58,9 @@ class UserLaporanBulananActivity : AppCompatActivity() {
         val btnNextMonth = findViewById<ImageButton>(R.id.btnNextMonth)
 
         // Init Adapter
-        userRiwayatAdapter = UserRiwayatAdapter(emptyList())
+        userHistoryAdapter = UserHistoryAdapter(emptyList())
         rvTransactions.layoutManager = LinearLayoutManager(this)
-        rvTransactions.adapter = userRiwayatAdapter
+        rvTransactions.adapter = userHistoryAdapter
 
         // Actions
         btnPreviousMonth.setOnClickListener { viewModel.changeMonth(-1) }
@@ -83,7 +83,7 @@ class UserLaporanBulananActivity : AppCompatActivity() {
 
         // 3. Observe List Data
         viewModel.transactionList.observe(this) { list ->
-            userRiwayatAdapter.updateData(list)
+            userHistoryAdapter.updateData(list)
         }
 
         // 4. Observe Empty State

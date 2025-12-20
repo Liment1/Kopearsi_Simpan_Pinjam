@@ -1,6 +1,6 @@
 package com.example.project_map.data.repository.admin
 
-import com.example.project_map.data.model.Announcement
+import com.example.project_map.data.model.Notification
 import com.example.project_map.data.model.ProfitDistributionRecord
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
@@ -19,7 +19,7 @@ class AdminNotificationRepository {
     private val db = FirebaseFirestore.getInstance()
 
     // 1. Get Announcement History (Real-time)
-    fun getAnnouncementHistory(): Flow<List<Announcement>> = callbackFlow {
+    fun getAnnouncementHistory(): Flow<List<Notification>> = callbackFlow {
         val listener = db.collection("announcements")
             .orderBy("date", Query.Direction.DESCENDING)
             .addSnapshotListener { value, error ->
@@ -27,7 +27,7 @@ class AdminNotificationRepository {
                     close(error)
                     return@addSnapshotListener
                 }
-                val list = value?.toObjects(Announcement::class.java) ?: emptyList()
+                val list = value?.toObjects(Notification::class.java) ?: emptyList()
                 trySend(list)
             }
         awaitClose { listener.remove() }
@@ -36,14 +36,14 @@ class AdminNotificationRepository {
     // 2. Send Manual Notification
     suspend fun createAnnouncement(title: String, message: String, isUrgent: Boolean): Result<Unit> {
         return try {
-            val announcement = Announcement(
+            val notification = Notification(
                 id = UUID.randomUUID().toString(),
                 title = title,
                 message = message,
-                date = Timestamp.now(),
+                date = Timestamp.Companion.now(),
                 isUrgent = isUrgent
             )
-            db.collection("announcements").document(announcement.id).set(announcement).await()
+            db.collection("announcements").document(notification.id).set(notification).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -104,7 +104,7 @@ class AdminNotificationRepository {
                 distributedAmount = totalToDistribute,
                 sharePerMember = sharePerMember,
                 totalMembers = totalMembers,
-                distributedAt = Timestamp.now()
+                distributedAt = Timestamp.Companion.now()
             )
             batch.set(historyRef, record)
 
@@ -113,14 +113,14 @@ class AdminNotificationRepository {
             val currencyFormat = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
             val formattedShare = currencyFormat.format(sharePerMember)
 
-            val announcement = Announcement(
+            val notification = Notification(
                 id = announcementId,
                 title = "Pembagian SHU ($monthName)",
                 message = "SHU sebesar 90% dari profit $monthName telah dibagikan. Anda menerima $formattedShare.",
-                date = Timestamp.now(),
+                date = Timestamp.Companion.now(),
                 isUrgent = true
             )
-            batch.set(db.collection("announcements").document(announcementId), announcement)
+            batch.set(db.collection("announcements").document(announcementId), notification)
 
             // E. Commit
             batch.commit().await()

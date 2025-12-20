@@ -18,7 +18,7 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class FragmentHistoriSimpanan : Fragment() {
+class FragmentAdminSavingsHistory : Fragment() {
 
     // Use delegation to get the ViewModel
     private val viewModel: SavingsHistoryViewModel by viewModels()
@@ -27,7 +27,7 @@ class FragmentHistoriSimpanan : Fragment() {
     private lateinit var adapter: SimpananAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_riwayat_simpanan, container, false)
+        return inflater.inflate(R.layout.fragment_admin_savings_history, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

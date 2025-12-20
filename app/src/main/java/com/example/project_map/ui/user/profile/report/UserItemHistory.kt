@@ -1,8 +1,8 @@
-package com.example.project_map.ui.user.profile.laporan
+package com.example.project_map.ui.user.profile.report
 
 import androidx.annotation.ColorInt
 
-data class UserRiwayatItem(
+data class UserItemHistory(
     val date: String,
     val description: String,
     val amount: String,

@@ -9,11 +9,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.project_map.databinding.FragmentAdminNotifikasiBinding
+import com.example.project_map.databinding.FragmentAdminNotificationBinding
 
-class AdminNotifikasiFragment : Fragment() {
+class AdminNotificationFragment : Fragment() {
 
-    private var _binding: FragmentAdminNotifikasiBinding? = null
+    private var _binding: FragmentAdminNotificationBinding? = null
     private val binding get() = _binding!!
 
     // MVVM
@@ -24,7 +24,7 @@ class AdminNotifikasiFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentAdminNotifikasiBinding.inflate(inflater, container, false)
+        _binding = FragmentAdminNotificationBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -34,11 +34,13 @@ class AdminNotifikasiFragment : Fragment() {
         setupRecyclerView()
         setupObservers()
 
-        // 1. Manual Notification
+        // --- CHANGE THIS BLOCK ---
         binding.btnSend.setOnClickListener {
             val title = binding.etTitle.text.toString().trim()
             val message = binding.etMessage.text.toString().trim()
             val isUrgent = binding.cbUrgent.isChecked
+
+            // Use ViewModel instead of local function
             viewModel.sendNotification(title, message, isUrgent)
         }
 

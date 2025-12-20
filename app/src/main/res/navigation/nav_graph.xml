@@ -41,7 +41,17 @@
         <action
             android:id="@+id/action_homeFragment_to_angsuranFragment"
             app:destination="@id/angsuranFragment" />
+
+        <action
+            android:id="@+id/action_homeFragment_to_notificationFragment"
+            app:destination="@id/notificationFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/notificationFragment"
+        android:name="com.example.project_map.ui.user.notification.UserNotificationFragment"
+        android:label="Notifikasi"
+        tools:layout="@layout/fragment_user_notification" />
 
     <fragment
         android:id="@+id/savingsFragment"

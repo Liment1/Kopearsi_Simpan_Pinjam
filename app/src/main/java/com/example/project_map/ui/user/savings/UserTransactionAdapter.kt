@@ -11,10 +11,10 @@ import com.example.project_map.R
 import com.example.project_map.data.model.Savings
 
 // Note: Input is now List<SavingsHistoryItem>
-class TransactionAdapter(
+class UserTransactionAdapter(
     private var items: List<UserSavingsHistoryItem>,
     private val onClick: (Savings) -> Unit
-) : RecyclerView.Adapter<TransactionAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<UserTransactionAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvKeterangan: TextView = view.findViewById(R.id.tvKeterangan)
@@ -37,7 +37,6 @@ class TransactionAdapter(
         holder.tvJumlah.text = item.amountString
         holder.tvDate.text = item.dateString
 
-        // --- COLOR FIX ---
         if (item.isExpense) {
             // Red color for Payments/Withdrawals
             holder.tvJumlah.setTextColor(holder.itemView.context.getColor(android.R.color.holo_red_dark))
@@ -49,11 +48,11 @@ class TransactionAdapter(
         if (!item.imageUrl.isNullOrEmpty()) {
             holder.ivIcon.load(item.imageUrl) {
                 crossfade(true)
-                placeholder(R.drawable.ic_savings) // Ensure you have this drawable
-                error(R.drawable.ic_savings)
+                placeholder(R.drawable.ic_wallet) // Ensure you have this drawable
+                error(R.drawable.ic_wallet)
             }
         } else {
-            holder.ivIcon.setImageResource(R.drawable.ic_savings)
+            holder.ivIcon.setImageResource(R.drawable.ic_wallet)
         }
 
         // 3. Handle Click (Pass the original transaction object back)

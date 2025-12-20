@@ -11,7 +11,7 @@ import retrofit2.Response
 
 object CreditScoreManager {
 
-    // Helper to get parameters (Historical or Default)
+
     private fun getCalculationParameters(userId: String): ScoreRequest {
         // TODO: Try to fetch real history from Firestore here.
         // val history = db.collection("transactions")...

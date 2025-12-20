@@ -1,4 +1,4 @@
-package com.example.project_map.ui.user.profile.laporan
+package com.example.project_map.ui.user.profile.report
 
 import android.graphics.Color
 import androidx.lifecycle.LiveData
@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class UserLaporanViewModel : ViewModel() {
+class UserReportViewModel : ViewModel() {
 
     private val repository = UserLaporanRepository()
     private val calendar = Calendar.getInstance()
@@ -25,8 +25,8 @@ class UserLaporanViewModel : ViewModel() {
     private val _financialSummary = MutableLiveData<FinancialSummary>()
     val financialSummary: LiveData<FinancialSummary> = _financialSummary
 
-    private val _transactionList = MutableLiveData<List<UserRiwayatItem>>()
-    val transactionList: LiveData<List<UserRiwayatItem>> = _transactionList
+    private val _transactionList = MutableLiveData<List<UserItemHistory>>()
+    val transactionList: LiveData<List<UserItemHistory>> = _transactionList
 
     private val _isEmpty = MutableLiveData<Boolean>()
     val isEmpty: LiveData<Boolean> = _isEmpty
@@ -70,7 +70,7 @@ class UserLaporanViewModel : ViewModel() {
                 val loansSnapshot = results[1] as QuerySnapshot
                 // val installmentsSnapshot = results[2] as QuerySnapshot (If implemented)
 
-                val uiList = mutableListOf<UserRiwayatItem>()
+                val uiList = mutableListOf<UserItemHistory>()
                 var totalSimpanan = 0.0
                 var totalPinjaman = 0.0
                 var totalAngsuran = 0.0 // Placeholder
@@ -91,7 +91,7 @@ class UserLaporanViewModel : ViewModel() {
                     if (isDeposit) totalSimpanan += amount else totalSimpanan -= amount
 
                     uiList.add(
-                        UserRiwayatItem(
+                        UserItemHistory(
                             date = if(item.date != null) displayFormat.format(item.date) else "-",
                             description = item.type,
                             amount = "$prefix${formatRupiah(amount)}",
@@ -106,7 +106,7 @@ class UserLaporanViewModel : ViewModel() {
                     totalPinjaman += loan.nominal
 
                     uiList.add(
-                        UserRiwayatItem(
+                        UserItemHistory(
                             date = if(loan.tanggalPengajuan != null) displayFormat.format(loan.tanggalPengajuan) else "-",
                             description = "Pinjaman: ${loan.tujuan}",
                             amount = "+ ${formatRupiah(loan.nominal)}",
