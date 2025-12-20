@@ -7,58 +7,40 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
-import kotlin.math.min
 
 class SemiCircleProgressBar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val progressPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val rectF = RectF()
-
-    var progress: Float = 0f
-        set(value) {
-            field = value.coerceIn(0f, 100f)
-            invalidate()
-        }
+    private var percent = 0
 
     init {
-        backgroundPaint.style = Paint.Style.STROKE
-        backgroundPaint.strokeWidth = 40f
-        backgroundPaint.color = Color.parseColor("#E0E0E0") // Light Gray
-        backgroundPaint.strokeCap = Paint.Cap.ROUND
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 20f // Adjust thickness
+        paint.strokeCap = Paint.Cap.ROUND
+    }
 
-        progressPaint.style = Paint.Style.STROKE
-        progressPaint.strokeWidth = 40f
-        progressPaint.color = Color.parseColor("#4CAF50") // Green
-        progressPaint.strokeCap = Paint.Cap.ROUND
+    // This is the function that was missing!
+    fun setPercent(progress: Int) {
+        this.percent = progress.coerceIn(0, 100)
+        invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val width = width.toFloat()
-        val height = height.toFloat()
-        val radius = min(width, height * 2) / 2 - 40f // Padding
+        val w = width.toFloat()
+        val h = height.toFloat()
 
-        val centerX = width / 2
-        val centerY = height - 40f // Align to bottom
+        rectF.set(20f, 20f, w - 20f, (h * 2) - 20f)
 
-        rectF.set(centerX - radius, centerY - radius, centerX + radius, centerY + radius)
+        paint.color = Color.LTGRAY
+        canvas.drawArc(rectF, 180f, 180f, false, paint)
 
-        // Draw Background Arch (180 degrees)
-        canvas.drawArc(rectF, 180f, 180f, false, backgroundPaint)
 
-        // Draw Progress Arch
-        val sweepAngle = (progress / 100f) * 180f
-
-        // Dynamic Color based on score
-        progressPaint.color = when {
-            progress < 50 -> Color.RED
-            progress < 75 -> Color.parseColor("#FFC107") // Amber
-            else -> Color.parseColor("#4CAF50") // Green
-        }
-
-        canvas.drawArc(rectF, 180f, sweepAngle, false, progressPaint)
+        paint.color = if (percent > 70) Color.parseColor("#43A047") else Color.parseColor("#F57C00")
+        val sweepAngle = (percent / 100f) * 180f
+        canvas.drawArc(rectF, 180f, sweepAngle, false, paint)
     }
 }

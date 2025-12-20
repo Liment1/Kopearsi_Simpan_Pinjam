@@ -69,16 +69,18 @@ class UserSavingsFragment : Fragment() {
         }
 
         // History List
+        // History List
         viewModel.history.observe(viewLifecycleOwner) { list ->
             val sdf = SimpleDateFormat("dd MMM yyyy", Locale("in", "ID"))
 
-            val uiList = list.map { saving ->
-                val type = if (savings.type.contains("Penarikan")) TransactionType.WITHDRAWAL else TransactionType.SAVINGS
+            val uiList = list.map { saving -> // Name the variable explicitly 'saving'
+                // Use 'saving' for all references
+                val type = if (saving.type.contains("Penarikan")) TransactionType.WITHDRAWAL else TransactionType.SAVINGS
 
                 UserRecentItem(
-                    title = transaction.type,
-                    date = if (transaction.date != null) sdf.format(transaction.date) else "-",
-                    amount = transaction.amount.toString(),
+                    title = saving.type,
+                    date = if (saving.date != null) sdf.format(saving.date) else "-",
+                    amount = saving.amount.toString(),
                     type = type
                 )
             }

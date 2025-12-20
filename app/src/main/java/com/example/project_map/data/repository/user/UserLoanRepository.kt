@@ -32,7 +32,7 @@ class UserLoanRepository {
     }
 
     // 2. Create Loan & Generate Installments
-    suspend fun createLoan(userId: String, userName: String, loan: Loan, durationMonths: Int) {
+    suspend fun createLoan(userId: String, userName: String, loan: Loan, durationMonths: Int, ktpUrl: Uri) {
         val batch = db.batch()
 
         val loanRef = db.collection("users").document(userId).collection("loans").document()
@@ -52,7 +52,7 @@ class UserLoanRepository {
                 bulanKe = i,
                 jumlahBayar = monthlyAmount,
                 jatuhTempo = calendar.time,
-                status = "Belum Bayar"
+                status = "Belum Bayar",
             )
             batch.set(instRef, installment)
         }

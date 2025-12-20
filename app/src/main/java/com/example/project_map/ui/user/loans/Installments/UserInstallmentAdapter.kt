@@ -1,4 +1,4 @@
-package com.example.project_map.ui.user.loans
+package com.example.project_map.ui.user.loans.Installments
 
 import android.graphics.Color
 import android.view.LayoutInflater

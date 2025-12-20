@@ -1,152 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA">
+    android:background="#F5F5F5">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <LinearLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="0dp">
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:paddingTop="16dp"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="Pinjaman Saya"
-            app:titleTextColor="#212121"
-            app:navigationIcon="@drawable/ic_arrow_back"/>
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="Kelola Pinjaman"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#333333"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                app:cardBackgroundColor="#1976D2">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="24dp">
-
-                    <TextView
-                        android:text="Total Kewajiban Saat Ini"
-                        android:textColor="#BBDEFB"
-                        android:textSize="14sp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                    <TextView
-                        android:id="@+id/tvTotalDebt"
-                        tools:text="Rp 5.000.000"
-                        android:textColor="@android:color/white"
-                        android:textSize="32sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#40FFFFFF"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="16dp"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:text="Limit Pinjaman"
-                            android:textColor="#90CAF9"
-                            android:textSize="12sp"
-                            android:layout_weight="1"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"/>
-
-                        <TextView
-                            android:id="@+id/tvLimit"
-                            android:text="Rp 15.000.000"
-                            android:textColor="@android:color/white"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <TextView
-                android:text="Pinjaman Aktif"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#212121"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="12dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvActiveLoans"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                tools:itemCount="2"
-                tools:listitem="@layout/item_loan_active"/>
+            android:orientation="horizontal"
+            android:weightSum="2">
 
             <LinearLayout
-                android:id="@+id/layoutEmpty"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center"
-                android:layout_marginTop="40dp"
-                android:visibility="gone">
-                <ImageView
-                    android:src="@drawable/ic_loan"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    app:tint="#BDBDBD"/>
+                android:gravity="center">
+
                 <TextView
-                    android:text="Tidak ada pinjaman aktif"
-                    android:textColor="#757575"
-                    android:layout_marginTop="16dp"
+                    android:id="@+id/tvDaftar"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="12dp"
+                    android:text="Pengajuan Baru"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#4CAF50"/>
+
+                <View
+                    android:id="@+id/indicatorDaftar"
+                    android:layout_width="match_parent"
+                    android:layout_height="3dp"
+                    android:background="#4CAF50"
+                    android:layout_marginHorizontal="16dp"/>
             </LinearLayout>
 
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fabNewLoan"
+                <TextView
+                    android:id="@+id/tvHistory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="12dp"
+                    android:text="Riwayat dan Status"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/darker_gray"/>
+
+                <View
+                    android:id="@+id/indicatorHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="3dp"
+                    android:background="#4CAF50"
+                    android:layout_marginHorizontal="16dp"
+                    android:visibility="invisible"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewLoans"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:listitem="@layout/item_admin_loan"/>
+
+    <TextView
+        android:id="@+id/tvEmptyState"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
-        android:text="Ajukan Pinjaman"
-        android:textColor="@android:color/white"
-        app:icon="@drawable/ic_add"
-        app:iconTint="@android:color/white"
-        app:backgroundTint="#1976D2"/>
+        android:text="Tidak ada data pinjaman"
+        android:textColor="#999999"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

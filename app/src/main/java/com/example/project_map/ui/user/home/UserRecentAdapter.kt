@@ -29,7 +29,7 @@ class UserRecentAdapter(private val items: List<UserRecentItem>) :
         // Dynamic Styling
         when (item.type) {
             TransactionType.SAVINGS -> {
-                holder.b.imgIcon.setImageResource(R.drawable.ic_savings)
+                holder.b.imgIcon.setImageResource(R.drawable.ic_wallet)
                 holder.b.imgIcon.setColorFilter(Color.parseColor("#2E7D32")) // Green
                 holder.b.tvAmount.setTextColor(Color.parseColor("#2E7D32"))
             }
@@ -39,7 +39,7 @@ class UserRecentAdapter(private val items: List<UserRecentItem>) :
                 holder.b.tvAmount.setTextColor(Color.parseColor("#1565C0"))
             }
             TransactionType.WITHDRAWAL -> {
-                holder.b.imgIcon.setImageResource(R.drawable.ic_savings) // Need icon
+                holder.b.imgIcon.setImageResource(R.drawable.ic_wallet) // Need icon
                 holder.b.imgIcon.setColorFilter(Color.parseColor("#C62828")) // Red
                 holder.b.tvAmount.setTextColor(Color.parseColor("#C62828"))
             }

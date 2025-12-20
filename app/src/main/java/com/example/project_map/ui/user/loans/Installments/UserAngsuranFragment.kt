@@ -1,4 +1,4 @@
-package com.example.project_map.ui.user.loans
+package com.example.project_map.ui.user.loans.Installments
 
 import android.app.Activity
 import android.content.Intent
@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.project_map.R
 import com.example.project_map.data.model.Installment
 import com.example.project_map.databinding.FragmentAngsuranBinding
+import com.example.project_map.ui.user.loans.UserLoanViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -26,7 +27,7 @@ class UserAngsuranFragment : Fragment() {
 
     private var currentInstallment: Installment? = null
     private var proofUri: Uri? = null
-    private var paymentMethod = "TRANSFER" // Default
+    private var paymentMethod = "TRANSFER"
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -51,20 +52,32 @@ class UserAngsuranFragment : Fragment() {
         val instId = arguments?.getString("installmentId")
         val amount = arguments?.getDouble("amount") ?: 0.0
 
-        currentInstallment = viewModel.installments.value?.find { it.id == instId }
-            ?: Installment(id = instId ?: "", loanId = loanId ?: "", jumlahBayar = amount, status = "Belum Bayar")
+        // SAFE GUARD: If installments list is null or empty in ViewModel, try to use passed args
+        val foundInstallment = viewModel.installments.value?.find { it.id == instId }
+
+        if (foundInstallment != null) {
+            currentInstallment = foundInstallment
+        } else {
+            // Fallback: Create a temporary object if we can't find it in the list (prevents crash)
+            currentInstallment = Installment(
+                id = instId ?: "",
+                loanId = loanId ?: "",
+                jumlahBayar = amount,
+                status = "Belum Bayar"
+            )
+        }
 
         // 2. Setup UI
         val fmt = NumberFormat.getCurrencyInstance(Locale("in", "ID")).apply { maximumFractionDigits = 0 }
         binding.tvAmountDue.text = fmt.format(amount)
 
-        // 3. Radio Button Logic (Toggle)
+        // 3. Radio Button Logic
         binding.rgMetodePembayaran.setOnCheckedChangeListener { _, checkedId ->
             if (checkedId == R.id.rbPotongSaldo) {
                 paymentMethod = "SALDO"
                 binding.btnUploadBukti.visibility = View.GONE
                 binding.tvUploadStatus.visibility = View.GONE
-                binding.tvInstructions.text = "Saldo simpanan Anda akan dipotong otomatis." // Make sure you have this TextView or reuse status
+                binding.tvInstructions.text = "Saldo simpanan Anda akan dipotong otomatis."
             } else {
                 paymentMethod = "TRANSFER"
                 binding.btnUploadBukti.visibility = View.VISIBLE
@@ -73,7 +86,10 @@ class UserAngsuranFragment : Fragment() {
         }
 
         binding.btnUploadBukti.setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "image/*" }
+            // FIX: Correct syntax for setting intent type
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "image/*" // <--- FIXED HERE
+            }
             pickImageLauncher.launch(intent)
         }
 
@@ -82,7 +98,9 @@ class UserAngsuranFragment : Fragment() {
             if (paymentMethod == "TRANSFER" && proofUri == null) {
                 Toast.makeText(context, "Mohon upload bukti transfer", Toast.LENGTH_SHORT).show()
             } else {
-                viewModel.payInstallment(currentInstallment!!, paymentMethod, proofUri)
+                currentInstallment?.let { inst ->
+                    viewModel.payInstallment(inst, paymentMethod, proofUri)
+                }
             }
         }
 
@@ -90,7 +108,6 @@ class UserAngsuranFragment : Fragment() {
         viewModel.loanState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is UserLoanViewModel.State.Idle -> {
-                    // Do nothing, waiting for user input
                     binding.btnBayar.text = "Konfirmasi Pembayaran"
                     binding.btnBayar.isEnabled = true
                 }
@@ -101,11 +118,13 @@ class UserAngsuranFragment : Fragment() {
                 is UserLoanViewModel.State.Success -> {
                     Toast.makeText(context, "Pembayaran Berhasil!", Toast.LENGTH_LONG).show()
                     findNavController().popBackStack()
+                    viewModel.resetState() // Reset state to avoid repeating success on back nav
                 }
                 is UserLoanViewModel.State.Error -> {
                     binding.btnBayar.text = "Konfirmasi Pembayaran"
                     binding.btnBayar.isEnabled = true
                     Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                    viewModel.resetState()
                 }
             }
         }

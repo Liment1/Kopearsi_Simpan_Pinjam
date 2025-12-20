@@ -96,7 +96,7 @@ class UserHomeFragment : Fragment() {
         }
 
         binding.menuPinjaman.root.setOnClickListener {
-            if (isVerified) findNavController().navigate(R.id.action_homeFragment_to_pinjamanFragment)
+            if (isVerified) findNavController().navigate(R.id.action_homeFragment_to_loansFragment)
             else showLockedToast()
         }
 

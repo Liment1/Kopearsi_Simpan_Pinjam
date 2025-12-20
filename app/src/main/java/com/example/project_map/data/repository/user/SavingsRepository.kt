@@ -1,104 +1,119 @@
 package com.example.project_map.data.repository.user
 
+import android.net.Uri
+import android.util.Log
 import com.example.project_map.data.model.Savings
-import com.example.project_map.data.model.Savings
-import com.example.project_map.data.model.WithdrawalRequest // Reuse or create DepositRequest
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import java.util.Date
-import kotlin.jvm.java
+import java.util.UUID
+
+// 1. Helper data class to transport both Status and Balances
+data class UserFinancialData(
+    val status: String,
+    val balances: Map<String, Double>
+)
 
 class SavingsRepository {
-    private val db = FirebaseFirestore.getInstance()
 
-    // 1. Get Savings History
-    fun getSavingsHistory(userId: String): Flow<List<Savings>> = callbackFlow {
-        val listener = db.collection("users").document(userId)
-            .collection("savings")
-            .orderBy("date", Query.Direction.DESCENDING)
-            .addSnapshotListener { value, error ->
-                if (error != null) {
-                    close(error)
+    private val db = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
+
+    // 2. Renamed to getUserStream and updated return type
+    fun getUserStream(userId: String, onUpdate: (UserFinancialData) -> Unit): ListenerRegistration {
+        return db.collection("users").document(userId)
+            .addSnapshotListener { document, e ->
+                if (e != null) {
+                    Log.e("SavingsRepo", "Savings listen failed", e)
                     return@addSnapshotListener
                 }
-                val list = value?.toObjects(Savings::class.java) ?: emptyList()
-                trySend(list)
+
+                if (document != null && document.exists()) {
+                    // Fetch Status (default to "Calon Anggota" if missing)
+                    val status = document.getString("status") ?: "Calon Anggota"
+
+                    val balances = mapOf(
+                        "total" to getSafeDouble(document, "totalSimpanan"),
+                        "pokok" to getSafeDouble(document, "simpananPokok"),
+                        "wajib" to getSafeDouble(document, "simpananWajib"),
+                        "sukarela" to getSafeDouble(document, "simpananSukarela")
+                    )
+
+                    onUpdate(UserFinancialData(status, balances))
+                } else {
+                    // Default for new/missing users
+                    onUpdate(UserFinancialData(
+                        "Calon Anggota",
+                        mapOf("total" to 0.0, "pokok" to 0.0, "wajib" to 0.0, "sukarela" to 0.0)
+                    ))
+                }
             }
-        awaitClose { listener.remove() }
     }
 
-    // 2. Request Deposit (Simpanan Sukarela)
-    suspend fun requestDeposit(userId: String, userName: String, amount: Double): Result<Unit> {
-        return try {
-            val ref = db.collection("users").document(userId).collection("deposits").document()
+    fun getSavingsHistory(userId: String, onUpdate: (List<Savings>) -> Unit): ListenerRegistration {
+        return db.collection("users").document(userId).collection("savings")
+            .orderBy("date", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.e("SavingsRepo", "Savings listen failed", e)
+                    return@addSnapshotListener
+                }
+                val list = snapshots?.toObjects(Savings::class.java) ?: emptyList()
+                onUpdate(list)
+            }
+    }
 
-            // We create a temporary object. You can create a specific DepositRequest model if preferred.
+    suspend fun requestDeposit(userId: String, userName: String, amount: Double): Result<String> {
+        return try {
             val request = hashMapOf(
-                "id" to ref.id,
                 "userId" to userId,
                 "userName" to userName,
                 "amount" to amount,
-                "type" to "Simpanan Sukarela",
+                "type" to "Deposit",
                 "status" to "Pending",
-                "date" to Date()
+                "date" to Date(),
+                "timestamp" to FieldValue.serverTimestamp()
             )
-
-            ref.set(request).await()
-            Result.success(Unit)
+            db.collection("deposit_requests").add(request).await()
+            Result.success("Deposit request submitted")
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    // 3. Request Withdrawal (Existing - Ensure it points to subcollection)
-    // ... imports
-
-    // Update the function signature to accept bankName
-    suspend fun requestWithdrawal(userId: String, userName: String, amount: Double, bankName: String, accountNumber: String): Result<Unit> {
+    suspend fun requestWithdrawal(userId: String, userName: String, amount: Double, bankName: String, accountNumber: String): Result<String> {
         return try {
-            val userRef = db.collection("users").document(userId)
-            val currentBalance = userRef.get().await().getDouble("totalSimpanan") ?: 0.0
-
-            if (currentBalance < amount) {
-                return Result.failure(Exception("Saldo tidak mencukupi."))
-            }
-
-            // Save to subcollection "withdrawals"
-            val ref = userRef.collection("withdrawals").document()
-
-            val request = WithdrawalRequest(
-                id = ref.id,
-                userId = userId,
-                userName = userName,
-                amount = amount,
-                bankName = bankName, // Save it
-                accountNumber = accountNumber,
-                status = "Pending",
-                requestDate = Date()
+            val request = hashMapOf(
+                "userId" to userId,
+                "userName" to userName,
+                "amount" to amount,
+                "bankName" to bankName,
+                "accountNumber" to accountNumber,
+                "type" to "Withdrawal",
+                "status" to "Pending",
+                "date" to Date(),
+                "timestamp" to FieldValue.serverTimestamp()
             )
-
-            ref.set(request).await()
-            Result.success(Unit)
+            db.collection("withdrawal_requests").add(request).await()
+            Result.success("Withdrawal request submitted")
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-    // ... (Keep existing getUserBalanceStream) ...
-    fun getUserBalanceStream(userId: String, onUpdate: (Map<String, Double>) -> Unit) {
-        db.collection("users").document(userId)
-            .addSnapshotListener { document, e ->
-                if (e != null || document == null || !document.exists()) return@addSnapshotListener
-                val data = mapOf(
-                    "total" to (document.getDouble("totalSimpanan") ?: 0.0),
-                    "pokok" to (document.getDouble("simpananPokok") ?: 0.0),
-                    "wajib" to (document.getDouble("simpananWajib") ?: 0.0),
-                    "sukarela" to (document.getDouble("simpananSukarela") ?: 0.0)
-                )
-                onUpdate(data)
-            }
+
+    // --- HELPER FUNCTIONS ---
+
+    private fun getSafeDouble(doc: DocumentSnapshot, field: String): Double {
+        val value = doc.get(field)
+        return when (value) {
+            is Number -> value.toDouble()
+            is String -> value.toDoubleOrNull() ?: 0.0
+            else -> 0.0
+        }
     }
 }

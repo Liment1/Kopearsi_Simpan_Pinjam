@@ -1,4 +1,4 @@
-package com.example.project_map.ui.user.loans
+package com.example.project_map.ui.user.loans.Installments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,6 +15,7 @@ import com.example.project_map.R
 import com.example.project_map.data.model.Installment
 import com.example.project_map.data.model.Loan
 import com.example.project_map.databinding.FragmentLoanDetailBinding
+import com.example.project_map.ui.user.loans.UserLoanViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
