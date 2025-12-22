@@ -32,18 +32,40 @@ class UserTransactionAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
+        val context = holder.itemView.context
 
         holder.tvKeterangan.text = item.type
         holder.tvJumlah.text = item.amountString
         holder.tvDate.text = item.dateString
 
-        if (item.isExpense) {
-            // Red color for Payments/Withdrawals
-            holder.tvJumlah.setTextColor(holder.itemView.context.getColor(android.R.color.holo_red_dark))
+        // --- NEW STATUS LOGIC ---
+        if (item.originalSavings.status == "Pending") {
+            // Case 1: PENDING (Yellow/Orange)
+            holder.tvDate.text = "Sedang Diproses" // Or keep date and add status text
+            holder.tvDate.setTextColor(context.getColor(android.R.color.holo_orange_dark))
+
+            // Optional: You can change the icon tint too
+            holder.ivIcon.setColorFilter(context.getColor(android.R.color.holo_orange_dark))
+
+        } else if (item.originalSavings.status == "Ditolak") {
+            // Case 2: REJECTED (Red)
+            holder.tvDate.text = "Ditolak"
+            holder.tvDate.setTextColor(context.getColor(android.R.color.holo_red_dark))
+
         } else {
-            // Green color for Savings/Deposits
-            holder.tvJumlah.setTextColor(holder.itemView.context.getColor(android.R.color.holo_green_dark))
+            // Case 3: SUCCESS (Default)
+            // Reset colors
+            holder.tvDate.setTextColor(context.getColor(android.R.color.darker_gray)) // Or your default color
+            holder.ivIcon.clearColorFilter()
         }
+
+        // Color for Amount (Expense vs Income)
+        if (item.isExpense) {
+            holder.tvJumlah.setTextColor(context.getColor(android.R.color.holo_red_dark))
+        } else {
+            holder.tvJumlah.setTextColor(context.getColor(android.R.color.holo_green_dark))
+        }
+
         // 2. Safe Image Loading with Coil
         if (!item.imageUrl.isNullOrEmpty()) {
             holder.ivIcon.load(item.imageUrl) {

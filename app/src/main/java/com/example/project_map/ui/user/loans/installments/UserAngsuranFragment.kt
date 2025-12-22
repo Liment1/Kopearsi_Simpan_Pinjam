@@ -1,4 +1,4 @@
-package com.example.project_map.ui.user.loans.Installments
+package com.example.project_map.ui.user.loans.installments
 
 import android.app.Activity
 import android.content.Intent
@@ -7,8 +7,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -16,6 +16,7 @@ import com.example.project_map.R
 import com.example.project_map.data.model.Installment
 import com.example.project_map.databinding.FragmentAngsuranBinding
 import com.example.project_map.ui.user.loans.UserLoanViewModel
+import com.google.android.material.snackbar.Snackbar
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -32,7 +33,8 @@ class UserAngsuranFragment : Fragment() {
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             proofUri = result.data?.data
-            binding.tvUploadStatus.text = "Bukti dipilih."
+            binding.tvUploadStatus.text = "Bukti berhasil dipilih."
+            binding.tvUploadStatus.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_green_dark))
             binding.tvUploadStatus.visibility = View.VISIBLE
         }
     }
@@ -52,13 +54,11 @@ class UserAngsuranFragment : Fragment() {
         val instId = arguments?.getString("installmentId")
         val amount = arguments?.getDouble("amount") ?: 0.0
 
-        // SAFE GUARD: If installments list is null or empty in ViewModel, try to use passed args
         val foundInstallment = viewModel.installments.value?.find { it.id == instId }
 
         if (foundInstallment != null) {
             currentInstallment = foundInstallment
         } else {
-            // Fallback: Create a temporary object if we can't find it in the list (prevents crash)
             currentInstallment = Installment(
                 id = instId ?: "",
                 loanId = loanId ?: "",
@@ -86,9 +86,8 @@ class UserAngsuranFragment : Fragment() {
         }
 
         binding.btnUploadBukti.setOnClickListener {
-            // FIX: Correct syntax for setting intent type
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "image/*" // <--- FIXED HERE
+                type = "image/*"
             }
             pickImageLauncher.launch(intent)
         }
@@ -96,7 +95,7 @@ class UserAngsuranFragment : Fragment() {
         // 4. Handle Pay Button
         binding.btnBayar.setOnClickListener {
             if (paymentMethod == "TRANSFER" && proofUri == null) {
-                Toast.makeText(context, "Mohon upload bukti transfer", Toast.LENGTH_SHORT).show()
+                showSnackbar("Mohon upload bukti transfer terlebih dahulu.", isError = true)
             } else {
                 currentInstallment?.let { inst ->
                     viewModel.payInstallment(inst, paymentMethod, proofUri)
@@ -116,18 +115,38 @@ class UserAngsuranFragment : Fragment() {
                     binding.btnBayar.isEnabled = false
                 }
                 is UserLoanViewModel.State.Success -> {
-                    Toast.makeText(context, "Pembayaran Berhasil!", Toast.LENGTH_LONG).show()
+                    // Success Feedback
+                    showSnackbar("Pembayaran Berhasil!", isError = false)
+
+                    // Delay slightly or pop back immediately
                     findNavController().popBackStack()
-                    viewModel.resetState() // Reset state to avoid repeating success on back nav
+                    viewModel.resetState()
                 }
                 is UserLoanViewModel.State.Error -> {
                     binding.btnBayar.text = "Konfirmasi Pembayaran"
                     binding.btnBayar.isEnabled = true
-                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+
+                    // Professional Error Feedback
+                    showSnackbar(state.message, isError = true)
                     viewModel.resetState()
                 }
             }
         }
+    }
+
+    // Helper Function for Professional Snackbar
+    private fun showSnackbar(message: String, isError: Boolean) {
+        val snackbar = Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
+
+        if (isError) {
+            snackbar.setBackgroundTint(ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark))
+            snackbar.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+        } else {
+            snackbar.setBackgroundTint(ContextCompat.getColor(requireContext(), android.R.color.holo_green_dark))
+            snackbar.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+        }
+
+        snackbar.show()
     }
 
     override fun onDestroyView() {

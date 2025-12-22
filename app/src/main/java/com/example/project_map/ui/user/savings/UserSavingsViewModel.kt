@@ -1,6 +1,7 @@
 package com.example.project_map.ui.user.savings
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -29,6 +30,10 @@ class UserSavingsViewModel(application: Application) : AndroidViewModel(applicat
     private val _actionResult = MutableLiveData<Result<String>?>()
     val actionResult: LiveData<Result<String>?> = _actionResult
 
+    // Added missing Loading state used by Fragment
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
     init {
         loadData()
     }
@@ -36,52 +41,55 @@ class UserSavingsViewModel(application: Application) : AndroidViewModel(applicat
     private fun loadData() {
         val uid = auth.currentUser?.uid ?: return
 
-        // 1. Updated to use the new getUserStream
         repository.getUserStream(uid) { data ->
-            // Update Status
             _userStatus.value = data.status
 
-            // Update Balances with Formatting
             val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
             formatter.maximumFractionDigits = 0
 
-            // 2. FIX: Map keys to add "Formatted" suffix so UI can find them
             val formattedMap = data.balances.mapKeys { "${it.key}Formatted" }
                 .mapValues { formatter.format(it.value) }
 
             _balances.value = formattedMap
         }
 
-        // History Stream
         repository.getSavingsHistory(uid) { list ->
             _history.value = list
         }
     }
 
-    fun submitDeposit(amount: Double) {
+    // FIX: Updated to accept Uri
+    fun submitDeposit(amount: Double, proofUri: Uri) {
         val uid = auth.currentUser?.uid ?: return
         val name = auth.currentUser?.displayName ?: "Anggota"
 
+        _isLoading.value = true
         viewModelScope.launch {
-            val result = repository.requestDeposit(uid, name, amount)
+            // Pass the URI to the repository
+            val result = repository.requestDeposit(uid, name, amount, proofUri)
+
             if (result.isSuccess) _actionResult.value = Result.success("Permintaan Deposit berhasil.")
             else _actionResult.value = Result.failure(result.exceptionOrNull()!!)
+
+            _isLoading.value = false
         }
     }
 
-    // 3. Added Missing Function
     fun submitWithdrawal(amount: Double, bankName: String, accountNumber: String) {
         val uid = auth.currentUser?.uid ?: return
         val name = auth.currentUser?.displayName ?: "Anggota"
 
+        _isLoading.value = true
         viewModelScope.launch {
             val result = repository.requestWithdrawal(uid, name, amount, bankName, accountNumber)
+
             if (result.isSuccess) _actionResult.value = Result.success("Permintaan Penarikan berhasil.")
             else _actionResult.value = Result.failure(result.exceptionOrNull()!!)
+
+            _isLoading.value = false
         }
     }
 
-    // 4. Added Missing Function
     fun resetResult() {
         _actionResult.value = null
     }

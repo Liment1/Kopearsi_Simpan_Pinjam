@@ -39,9 +39,8 @@
             android:id="@+id/action_homeFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
         <action
-            android:id="@+id/action_homeFragment_to_angsuranFragment"
-            app:destination="@id/angsuranFragment" />
-
+            android:id="@+id/action_homeFragment_to_loanForm"
+            app:destination="@id/LoanForm" />
         <action
             android:id="@+id/action_homeFragment_to_notificationFragment"
             app:destination="@id/notificationFragment" />
@@ -64,11 +63,9 @@
         android:name="com.example.project_map.ui.user.loans.UserLoansFragment"
         android:label="Daftar Pinjaman"
         tools:layout="@layout/fragment_user_loans">
-
         <action
             android:id="@+id/action_loansFragment_to_LoanForm"
             app:destination="@id/LoanForm" />
-
         <action
             android:id="@+id/action_loansFragment_to_loanDetailFragment"
             app:destination="@id/loanDetailFragment" />
@@ -76,15 +73,15 @@
 
     <fragment
         android:id="@+id/LoanForm"
-        android:name="com.example.project_map.ui.user.loans.UserLoanForm"
+        android:name="com.example.project_map.ui.user.loans.LoanFormFragment"
         android:label="Ajukan Pinjaman"
         tools:layout="@layout/fragment_loan_form">
     </fragment>
 
     <fragment
         android:id="@+id/loanDetailFragment"
-        android:name="com.example.project_map.ui.user.loans.Installments.UserLoanDetailFragment"
-        android:label="Rincian Pinjaman"
+        android:name="com.example.project_map.ui.user.loans.installments.LoanDetailFragment"
+        android:label="Loan Detail"
         tools:layout="@layout/fragment_loan_detail">
         <argument
             android:name="loanId"
@@ -94,6 +91,24 @@
             app:destination="@id/angsuranFragment" />
     </fragment>
 
+    <fragment
+        android:id="@+id/angsuranFragment"
+        android:name="com.example.project_map.ui.user.loans.installments.UserAngsuranFragment"
+        android:label="Pembayaran Angsuran"
+        tools:layout="@layout/fragment_angsuran">
+
+        <argument
+            android:name="loanId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="installmentId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/loginFragment"
@@ -131,37 +146,28 @@
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile">
         <action
+            android:id="@+id/action_profileFragment_to_userDetailProfileFragment"
+            app:destination="@id/userDetailProfileFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_userMonthlyReportFragment"
+            app:destination="@id/userMonthlyReportFragment" />
+        <action
             android:id="@+id/action_profileFragment_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
 
-
+    <fragment
+        android:id="@+id/userDetailProfileFragment"
+        android:name="com.example.project_map.ui.user.profile.detail.UserDetailProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_detail_profile"/>
 
     <fragment
-        android:id="@+id/UserloanDetailFragment"
-        android:name="com.example.project_map.ui.user.loans.Installments.UserLoanDetailFragment"
-        android:label="Rincian Pinjaman"
-        tools:layout="@layout/fragment_loan_detail">
-        <argument
-            android:name="loanId"
-            app:argType="string" />
-        <action
-            android:id="@+id/action_UserloanDetailFragment_to_angsuranFragment"
-            app:destination="@id/angsuranFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/angsuranFragment"
-        android:name="com.example.project_map.ui.user.loans.Installments.UserAngsuranFragment"
-        android:label="Pembayaran Angsuran"
-        tools:layout="@layout/fragment_angsuran">
-        <argument
-            android:name="loanId"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
-    </fragment>
+        android:id="@+id/userMonthlyReportFragment"
+        android:name="com.example.project_map.ui.user.profile.report.UserMonthlyReportFragment"
+        android:label="Monthly Report"
+        tools:layout="@layout/fragment_monthly_report"/>
 
 </navigation>

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F5F5F5"
     tools:context=".ui.admin.dashboard.AdminDashboardFragment">
 
     <LinearLayout
@@ -18,6 +19,7 @@
             android:text="Dashboard Admin"
             android:textSize="24sp"
             android:textStyle="bold"
+            android:textColor="@color/black"
             android:layout_marginBottom="16dp"/>
 
         <GridLayout
@@ -42,13 +44,15 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Simpanan"/>
+                        android:text="Total Simpanan"
+                        android:textColor="#757575"/>
                     <TextView
                         android:id="@+id/tvTotalSimpananValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         tools:text="Rp 150.000.000"
                         android:textStyle="bold"
+                        android:textColor="@color/green_primary"
                         android:textSize="16sp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -68,13 +72,15 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Pinjaman"/>
+                        android:text="Total Pinjaman"
+                        android:textColor="#757575"/>
                     <TextView
                         android:id="@+id/tvTotalPinjamanValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         tools:text="Rp 75.000.000"
                         android:textStyle="bold"
+                        android:textColor="#D32F2F"
                         android:textSize="16sp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -94,13 +100,15 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Saldo Kas Koperasi"/>
+                        android:text="Saldo Kas Koperasi"
+                        android:textColor="#757575"/>
                     <TextView
                         android:id="@+id/tvSaldoKasValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         tools:text="Rp 80.500.000"
                         android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:textSize="16sp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -120,13 +128,15 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Laba Bersih"/>
+                        android:text="Laba Bersih"
+                        android:textColor="#757575"/>
                     <TextView
                         android:id="@+id/tvLabaBersihValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         tools:text="Rp 5.500.000"
                         android:textStyle="bold"
+                        android:textColor="@color/green_primary"
                         android:textSize="16sp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -135,47 +145,54 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Grafik Perkembangan (Tahun Ini)"
+            android:text="Grafik Perkembangan (Laba Bersih)"
             android:textSize="18sp"
             android:textStyle="bold"
+            android:textColor="@color/black"
             android:layout_marginBottom="8dp"/>
-        <com.github.mikephil.charting.charts.BarChart
+
+        <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/chartRevenue"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            android:layout_marginBottom="16dp"/>
-
+            android:layout_marginBottom="24dp"/>
 
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:columnCount="2"
-            android:rowCount="4"> <androidx.cardview.widget.CardView
-            android:id="@+id/cardDataAnggota"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:layout_margin="4dp"
-            app:cardElevation="2dp"
-            app:cardCornerRadius="8dp">
-            <LinearLayout
-                android:layout_width="match_parent"
+            android:rowCount="4">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardDataAnggota"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:gravity="center">
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_group"
-                    app:tint="?attr/colorPrimary"/>
-                <TextView
-                    android:layout_width="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Data Anggota"
-                    android:layout_marginTop="8dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_group"
+                        app:tint="@color/green_primary"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Data Anggota"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardPengajuanPinjaman"
@@ -184,7 +201,10 @@
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
                 app:cardElevation="2dp"
-                app:cardCornerRadius="8dp">
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -192,14 +212,46 @@
                     android:padding="16dp"
                     android:gravity="center">
                     <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@drawable/ic_loan"
-                        app:tint="?attr/colorPrimary"/>
+                        app:tint="@color/green_primary"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Pengajuan Pinjaman"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardPermintaanPenarikan"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_savings"
+                        app:tint="@color/green_primary"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Permintaan Penarikan"
+                        android:textStyle="bold"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -211,7 +263,10 @@
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
                 app:cardElevation="2dp"
-                app:cardCornerRadius="8dp">
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -219,14 +274,15 @@
                     android:padding="16dp"
                     android:gravity="center">
                     <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@drawable/ic_payment"
-                        app:tint="?attr/colorPrimary"/>
+                        app:tint="@color/green_primary"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Angsuran Berjalan"
+                        android:textStyle="bold"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -238,7 +294,10 @@
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
                 app:cardElevation="2dp"
-                app:cardCornerRadius="8dp">
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -246,16 +305,16 @@
                     android:padding="16dp"
                     android:gravity="center">
                     <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@drawable/ic_wallet"
-                        app:tint="?attr/colorPrimary"/>
-
+                        app:tint="@color/green_primary"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="History Simpanan" />
+                        android:text="Riwayat Simpanan"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -266,7 +325,10 @@
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
                 app:cardElevation="2dp"
-                app:cardCornerRadius="8dp">
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -274,14 +336,15 @@
                     android:padding="16dp"
                     android:gravity="center">
                     <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@drawable/ic_report"
-                        app:tint="?attr/colorPrimary"/>
+                        app:tint="@color/green_primary"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Laporan Keuangan"
+                        android:textStyle="bold"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -293,7 +356,10 @@
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
                 app:cardElevation="2dp"
-                app:cardCornerRadius="8dp">
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -301,14 +367,15 @@
                     android:padding="16dp"
                     android:gravity="center">
                     <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@drawable/ic_notification"
-                        app:tint="?attr/colorPrimary"/>
+                        app:tint="@color/green_primary"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Kirim Notifikasi"
+                        android:textStyle="bold"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -319,40 +386,31 @@
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
-                app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
+                app:cardCornerRadius="12dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp"
                     android:gravity="center">
-
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@android:drawable/ic_menu_manage"
-                        app:tint="#607D8B"
-                        android:layout_marginBottom="8dp"/>
-
+                        app:tint="@color/green_primary"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Pengaturan Admin"
+                        android:textStyle="bold"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1" />
-
         </GridLayout>
-
     </LinearLayout>
 </ScrollView>

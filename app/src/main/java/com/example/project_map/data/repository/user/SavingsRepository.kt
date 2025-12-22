@@ -13,7 +13,6 @@ import kotlinx.coroutines.tasks.await
 import java.util.Date
 import java.util.UUID
 
-// 1. Helper data class to transport both Status and Balances
 data class UserFinancialData(
     val status: String,
     val balances: Map<String, Double>
@@ -24,7 +23,6 @@ class SavingsRepository {
     private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
 
-    // 2. Renamed to getUserStream and updated return type
     fun getUserStream(userId: String, onUpdate: (UserFinancialData) -> Unit): ListenerRegistration {
         return db.collection("users").document(userId)
             .addSnapshotListener { document, e ->
@@ -34,23 +32,17 @@ class SavingsRepository {
                 }
 
                 if (document != null && document.exists()) {
-                    // Fetch Status (default to "Calon Anggota" if missing)
                     val status = document.getString("status") ?: "Calon Anggota"
-
                     val balances = mapOf(
                         "total" to getSafeDouble(document, "totalSimpanan"),
                         "pokok" to getSafeDouble(document, "simpananPokok"),
                         "wajib" to getSafeDouble(document, "simpananWajib"),
                         "sukarela" to getSafeDouble(document, "simpananSukarela")
                     )
-
                     onUpdate(UserFinancialData(status, balances))
                 } else {
-                    // Default for new/missing users
-                    onUpdate(UserFinancialData(
-                        "Calon Anggota",
-                        mapOf("total" to 0.0, "pokok" to 0.0, "wajib" to 0.0, "sukarela" to 0.0)
-                    ))
+                    onUpdate(UserFinancialData("Calon Anggota",
+                        mapOf("total" to 0.0, "pokok" to 0.0, "wajib" to 0.0, "sukarela" to 0.0)))
                 }
             }
     }
@@ -59,54 +51,106 @@ class SavingsRepository {
         return db.collection("users").document(userId).collection("savings")
             .orderBy("date", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    Log.e("SavingsRepo", "Savings listen failed", e)
-                    return@addSnapshotListener
-                }
                 val list = snapshots?.toObjects(Savings::class.java) ?: emptyList()
                 onUpdate(list)
             }
     }
 
-    suspend fun requestDeposit(userId: String, userName: String, amount: Double): Result<String> {
+    // --- DIRECT DEPOSIT (Immediate Balance Increase) ---
+    suspend fun requestDeposit(userId: String, userName: String, amount: Double, fileUri: Uri): Result<String> {
         return try {
-            val request = hashMapOf(
-                "userId" to userId,
-                "userName" to userName,
-                "amount" to amount,
-                "type" to "Deposit",
-                "status" to "Pending",
-                "date" to Date(),
-                "timestamp" to FieldValue.serverTimestamp()
-            )
-            db.collection("deposit_requests").add(request).await()
-            Result.success("Deposit request submitted")
+            // 1. Upload Image Proof
+            val filename = "${UUID.randomUUID()}.jpg"
+            val ref = storage.reference.child("deposit_proofs/$userId/$filename")
+            ref.putFile(fileUri).await()
+            val downloadUrl = ref.downloadUrl.await().toString()
+
+            // 2. Prepare References
+            val userRef = db.collection("users").document(userId)
+            val newSavingsRef = userRef.collection("savings").document() // New ID
+
+            // 3. Run Transaction (Update Balance + Create History)
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(userRef)
+
+                // Get current balances
+                val currentSukarela = snapshot.getDouble("simpananSukarela") ?: 0.0
+                val currentTotal = snapshot.getDouble("totalSimpanan") ?: 0.0
+
+                // Calculate new balances
+                val newSukarela = currentSukarela + amount
+                val newTotal = currentTotal + amount
+
+                // A. Update User Balance
+                transaction.update(userRef, "simpananSukarela", newSukarela)
+                transaction.update(userRef, "totalSimpanan", newTotal)
+
+                // B. Create History Entry
+                val historyData = hashMapOf(
+                    "id" to newSavingsRef.id,
+                    "userId" to userId,
+                    "userName" to userName,
+                    "amount" to amount,
+                    "type" to "Simpanan Sukarela",
+                    "status" to "Selesai",
+                    "proofUrl" to downloadUrl,
+                    "date" to Date(),
+                    "timestamp" to FieldValue.serverTimestamp()
+                )
+                transaction.set(newSavingsRef, historyData)
+            }.await()
+
+            Result.success("Deposit berhasil. Saldo telah bertambah.")
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
+    // --- DIRECT WITHDRAWAL (Immediate Balance Decrease) ---
     suspend fun requestWithdrawal(userId: String, userName: String, amount: Double, bankName: String, accountNumber: String): Result<String> {
         return try {
-            val request = hashMapOf(
-                "userId" to userId,
-                "userName" to userName,
-                "amount" to amount,
-                "bankName" to bankName,
-                "accountNumber" to accountNumber,
-                "type" to "Withdrawal",
-                "status" to "Pending",
-                "date" to Date(),
-                "timestamp" to FieldValue.serverTimestamp()
-            )
-            db.collection("withdrawal_requests").add(request).await()
-            Result.success("Withdrawal request submitted")
+            val userRef = db.collection("users").document(userId)
+            val newSavingsRef = userRef.collection("savings").document()
+
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(userRef)
+
+                val currentSukarela = snapshot.getDouble("simpananSukarela") ?: 0.0
+                val currentTotal = snapshot.getDouble("totalSimpanan") ?: 0.0
+
+                // Check sufficient funds (Optional safety)
+                if (currentSukarela < amount) {
+                    throw Exception("Saldo Sukarela tidak mencukupi.")
+                }
+
+                val newSukarela = currentSukarela - amount
+                val newTotal = currentTotal - amount
+
+                // A. Update User Balance
+                transaction.update(userRef, "simpananSukarela", newSukarela)
+                transaction.update(userRef, "totalSimpanan", newTotal)
+
+                // B. Create History Entry
+                val historyData = hashMapOf(
+                    "id" to newSavingsRef.id,
+                    "userId" to userId,
+                    "userName" to userName,
+                    "amount" to amount,
+                    "bankName" to bankName,
+                    "accountNumber" to accountNumber,
+                    "type" to "Penarikan",
+                    "status" to "Selesai", // Immediately Completed
+                    "date" to Date(),
+                    "timestamp" to FieldValue.serverTimestamp()
+                )
+                transaction.set(newSavingsRef, historyData)
+            }.await()
+
+            Result.success("Penarikan berhasil. Saldo telah berkurang.")
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-
-    // --- HELPER FUNCTIONS ---
 
     private fun getSafeDouble(doc: DocumentSnapshot, field: String): Double {
         val value = doc.get(field)

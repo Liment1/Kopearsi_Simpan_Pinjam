@@ -1,140 +1,126 @@
 package com.example.project_map.ui.user.loans
 
+import android.app.Application
 import android.net.Uri
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_map.data.model.Installment
 import com.example.project_map.data.model.Loan
 import com.example.project_map.data.repository.user.UserLoanRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
-import java.util.Date
 import java.util.Locale
 
-class UserLoanViewModel : ViewModel() {
+class UserLoanViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = UserLoanRepository()
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
-    private val currentUserId get() = auth.currentUser?.uid
+    private var loansListener: ListenerRegistration? = null
 
-    // --- DASHBOARD STATES ---
+    // --- State ---
+    sealed class State {
+        object Idle : State()
+        object Loading : State()
+        object Success : State()
+        data class Error(val message: String) : State()
+    }
+    private val _loanState = MutableLiveData<State>(State.Idle)
+    val loanState: LiveData<State> = _loanState
+
+    // --- Data Streams ---
     private val _activeLoans = MutableLiveData<List<Loan>>()
     val activeLoans: LiveData<List<Loan>> = _activeLoans
 
-    private val _totalDebt = MutableLiveData<String>()
+    private val _totalDebt = MutableLiveData<String>("Rp 0")
     val totalDebt: LiveData<String> = _totalDebt
 
-    // --- DETAIL & INSTALLMENT STATES (Missing Part) ---
-    private val _installments = MutableLiveData<List<Installment>>() // <--- ADDED
-    val installments: LiveData<List<Installment>> = _installments    // <--- ADDED
+    private val _installments = MutableLiveData<List<Installment>>()
+    val installments: LiveData<List<Installment>> = _installments
 
-    private val _loanDetails = MutableLiveData<Loan?>()
-    val loanDetails: LiveData<Loan?> = _loanDetails
+    private val _activeLoan = MutableLiveData<Loan?>()
+    val activeLoan: LiveData<Loan?> = _activeLoan
 
-    // --- APPLY/PAY STATES ---
+    private val _actionResult = MutableLiveData<Result<String>?>()
+    val actionResult: LiveData<Result<String>?> = _actionResult
+
+    // --- NEW: Credit Score LiveData ---
     private val _creditScore = MutableLiveData<Double?>()
     val creditScore: LiveData<Double?> = _creditScore
 
-    private val _loanState = MutableLiveData<State<Unit>>()
-    val loanState: LiveData<State<Unit>> = _loanState
-
     init {
-        fetchActiveLoans()
+        startLoanStream()
     }
 
-    // 1. Dashboard: Listen to Active Loans
-    private fun fetchActiveLoans() {
-        val uid = currentUserId ?: return
-
-        db.collection("users").document(uid).collection("loans")
-            .whereIn("status", listOf("Disetujui", "Berjalan", "Proses")) // Filter active ones
-            .addSnapshotListener { value, error ->
-                if (error != null) return@addSnapshotListener
-
-                val list = value?.toObjects(Loan::class.java) ?: emptyList()
-                _activeLoans.value = list
-
-                // Calculate Total Debt (Sum of sisaAngsuran)
-                val total = list.sumOf { it.sisaAngsuran }
-                val format = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
-                format.maximumFractionDigits = 0
-                _totalDebt.value = format.format(total)
-            }
-    }
-
-    // 2. Apply: Fetch Score
-    fun fetchScore() {
-        val uid = currentUserId ?: return
-        viewModelScope.launch {
-            val score = repository.getCreditScore(uid)
-            _creditScore.value = score
+    private fun startLoanStream() {
+        val uid = auth.currentUser?.uid ?: return
+        loansListener = repository.getActiveLoansStream(uid) { loans ->
+            _activeLoans.value = loans
+            val total = loans.sumOf { it.sisaAngsuran }
+            val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+            formatter.maximumFractionDigits = 0
+            _totalDebt.value = formatter.format(total)
         }
     }
 
-    // 3. Apply: Submit Loan
-    fun submitLoan(
-        jenis: String, peruntukan: String, lama: Int, satuan: String, nominal: Double,  ktpUri: Uri?
-    ) {
-        val uid = currentUserId ?: return
-        val name = auth.currentUser?.displayName ?: "User"
+    // --- NEW: Function to Refresh Score ---
+    fun refreshCreditScore() {
+        val uid = auth.currentUser?.uid ?: return
 
-        // Validation inside ViewModel
-        if (ktpUri == null) {
-            _loanState.value = State.Error("Foto KTP wajib diunggah")
-            return
-        }
-
+        // Optional: Set loading state if you want to show a spinner specifically for this
         _loanState.value = State.Loading
 
-        val bunga = nominal * 0.05
-        val total = nominal + bunga
-
-        val loan = Loan(
-            nominal = nominal,
-            tenor = "$lama $satuan",
-            tujuan = "$jenis - $peruntukan", // Combine Type and Purpose
-            status = "Proses",
-            bunga = 0.05,
-            sisaAngsuran = total,
-            totalDibayar = 0.0,
-            tanggalPengajuan = Date()
-            // Ensure your Loan model has a 'ktpUrl' field, or add it.
-        )
-
         viewModelScope.launch {
             try {
-                // You will need to update repository.createLoan to handle the Uri
-                // If repository doesn't support it yet, you might need to upload it here or inside repo
-                repository.createLoan(uid, name, loan, lama, ktpUri)
-                _loanState.value = State.Success(Unit)
+                // Calls the repository function that wraps CreditScoreManager
+                val score = repository.getCreditScore(uid)
+                _creditScore.value = score
+                _loanState.value = State.Idle
             } catch (e: Exception) {
-                _loanState.value = State.Error(e.message ?: "Gagal mengajukan")
+                _loanState.value = State.Error("Gagal mengambil skor kredit")
             }
         }
     }
 
-    // --- NEW: Load Installments for a specific loan ---
-    fun loadInstallments(loanId: String) {
-        val uid = currentUserId ?: return
+    fun fetchInstallments(loanId: String) {
+        val uid = auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            val list = repository.getInstallments(uid, loanId)
+            _installments.value = list
+            val loan = repository.getLoan(uid, loanId)
+            _activeLoan.value = loan
+        }
+    }
+
+    fun submitLoan(jenis: String, peruntukan: String, amount: Double, tenor: Int, satuan: String, ktpUri: Uri) {
+        val uid = auth.currentUser?.uid ?: return
+        val name = auth.currentUser?.displayName ?: "Anggota"
+
         viewModelScope.launch {
             try {
-                // Call repository to get list
-                val list = repository.getInstallments(uid, loanId)
-                _installments.value = list
+                val loan = Loan(
+                    userId = uid,
+                    namaPeminjam = name,
+                    nominal = amount,
+                    tenor = "$tenor $satuan",
+                    tujuan = "$jenis - $peruntukan",
+                    sisaAngsuran = amount + (amount * 0.05),
+                    totalDibayar = 0.0,
+                    status = "Proses"
+                )
+                repository.createLoan(uid, name, loan, tenor, ktpUri)
+                _actionResult.value = Result.success("Berhasil")
             } catch (e: Exception) {
-                // Handle error
+                _actionResult.value = Result.failure(e)
             }
         }
     }
 
-    // 4. Pay: Process Payment
     fun payInstallment(installment: Installment, method: String, proofUri: Uri?) {
-        val uid = currentUserId ?: return
+        val uid = auth.currentUser?.uid ?: return
         _loanState.value = State.Loading
 
         viewModelScope.launch {
@@ -142,37 +128,22 @@ class UserLoanViewModel : ViewModel() {
                 if (method == "SALDO") {
                     repository.payInstallmentViaBalance(uid, installment)
                 } else {
-                    if (proofUri == null) throw Exception("Bukti transfer wajib diupload")
+                    if (proofUri == null) throw Exception("Mohon sertakan bukti transfer.")
                     repository.payInstallment(uid, installment, proofUri)
                 }
-                _loanState.value = State.Success(Unit)
-                // Refresh list after payment
-                loadInstallments(installment.loanId)
+                _loanState.value = State.Success
+                fetchInstallments(installment.loanId)
             } catch (e: Exception) {
-                val errorMsg = if (e.message?.contains("Saldo") == true) "Saldo tidak mencukupi!" else e.message
-                _loanState.value = State.Error(errorMsg ?: "Pembayaran gagal")
+                _loanState.value = State.Error(e.message ?: "Terjadi kesalahan")
             }
         }
     }
 
-    fun loadLoanDetails(loanId: String) {
-        val uid = currentUserId ?: return
-        viewModelScope.launch {
-            try {
-                val loan = repository.getLoan(uid, loanId)
-                _loanDetails.value = loan
-            } catch (e: Exception) { }
-        }
-    }
+    fun resetState() { _loanState.value = State.Idle }
+    fun resetResult() { _actionResult.value = null }
 
-    fun resetState() {
-        _loanState.value = State.Idle
-    }
-
-    sealed class State<out T> {
-        object Idle : State<Nothing>()
-        object Loading : State<Nothing>()
-        data class Success<T>(val data: T) : State<T>()
-        data class Error(val message: String) : State<Nothing>()
+    override fun onCleared() {
+        super.onCleared()
+        loansListener?.remove()
     }
 }

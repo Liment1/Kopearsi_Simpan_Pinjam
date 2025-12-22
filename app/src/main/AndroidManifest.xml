@@ -4,6 +4,7 @@
     package="com.example.project_map" >
 
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -19,12 +20,12 @@
         <activity
             android:name=".ui.user.profile.syarat.UserSyaratKetentuanActivity"
             android:exported="false" />
-        <activity
-            android:name=".ui.user.profile.report.UserMonthlyReportActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.user.profile.detail.UserDetailProfileActivity"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".ui.user.profile.report.UserMonthlyReportFragment"-->
+<!--            android:exported="false" />-->
+<!--        <activity-->
+<!--            android:name=".ui.user.profile.detail.UserDetailProfileFragment"-->
+<!--            android:exported="false" />-->
 
 
         <activity

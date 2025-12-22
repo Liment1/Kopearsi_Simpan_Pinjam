@@ -9,20 +9,20 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_map.R
 import com.example.project_map.data.model.Savings
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.snackbar.Snackbar
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class FragmentAdminSavingsHistory : Fragment() {
 
-    // Use delegation to get the ViewModel
     private val viewModel: SavingsHistoryViewModel by viewModels()
-
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: SimpananAdapter
 
@@ -33,36 +33,34 @@ class FragmentAdminSavingsHistory : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Initialize Views
         recyclerView = view.findViewById(R.id.recyclerViewSimpanan)
         val chipGroup = view.findViewById<ChipGroup>(R.id.chipGroupJenis)
 
-        // 2. Setup RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = SimpananAdapter(emptyList())
+        adapter = SimpananAdapter(emptyList()) { savings ->
+            val bundle = Bundle().apply {
+                putString("transactionId", savings.id)
+                putString("userId", savings.userId)
+            }
+            try {
+                findNavController().navigate(R.id.action_adminSavingsHistoryFragment_to_adminSavingsDetailFragment, bundle)
+            } catch (e: Exception) {
+                Snackbar.make(view, "Navigasi belum diatur", Snackbar.LENGTH_SHORT).show()
+            }
+        }
         recyclerView.adapter = adapter
 
-        // 3. Observe ViewModel
         viewModel.filteredSavingss.observe(viewLifecycleOwner) { list ->
             adapter.updateList(list)
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            // Show/Hide progress bar if you have one in your layout
-            // e.g., progressBar.visibility = if(isLoading) View.VISIBLE else View.GONE
+            // Show/Hide progress bar if you have one
         }
 
-        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMsg ->
-            if (errorMsg != null) {
-                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        // 4. Setup Chip Filters
         if (chipGroup != null) {
             chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
                 if (checkedIds.isEmpty()) return@setOnCheckedStateChangeListener
-
                 val filterType = when(checkedIds[0]) {
                     R.id.chipPokok -> "Simpanan Pokok"
                     R.id.chipWajib -> "Simpanan Wajib"
@@ -74,13 +72,14 @@ class FragmentAdminSavingsHistory : Fragment() {
         }
     }
 
-    // --- Adapter (Kept Inner for Simplicity, or move to separate file) ---
-    inner class SimpananAdapter(private var data: List<Savings>) :
-        RecyclerView.Adapter<SimpananAdapter.ViewHolder>() {
+    inner class SimpananAdapter(
+        private var data: List<Savings>,
+        private val onItemClick: (Savings) -> Unit
+    ) : RecyclerView.Adapter<SimpananAdapter.ViewHolder>() {
 
         inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            val tvKeterangan: TextView = itemView.findViewById(R.id.tvKeterangan)
-            val tvTanggal: TextView = itemView.findViewById(R.id.tvTanggal)
+            val tvName: TextView = itemView.findViewById(R.id.tvKeterangan) // Using Top Text for Name
+            val tvDetails: TextView = itemView.findViewById(R.id.tvTanggal) // Using Bottom Text for Type/Date
             val tvJumlah: TextView = itemView.findViewById(R.id.tvJumlah)
             val ivProof: ImageView = itemView.findViewById(R.id.ivProof)
         }
@@ -95,18 +94,20 @@ class FragmentAdminSavingsHistory : Fragment() {
             val format = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
             format.maximumFractionDigits = 0
 
-            holder.tvKeterangan.text = item.type
+            // 1. Show Name
+            holder.tvName.text = if (item.userName.isNotEmpty()) item.userName else "Member #${item.userId.take(5)}"
+
+            // 2. Show Type & Date
+            val sdf = SimpleDateFormat("dd MMM", Locale("in", "ID"))
+            val dateStr = if(item.date != null) sdf.format(item.date) else "-"
+            holder.tvDetails.text = "${item.type} • $dateStr"
+
             holder.tvJumlah.text = "+ ${format.format(item.amount)}"
 
-            val sdf = SimpleDateFormat("dd MMM yyyy", Locale("in", "ID"))
-            holder.tvTanggal.text = if(item.date != null) sdf.format(item.date) else "-"
+            // 3. Icon visibility
+            holder.ivProof.visibility = if (item.type == "Simpanan Sukarela" || item.proofUrl.isNotEmpty()) View.VISIBLE else View.GONE
 
-            if (item.type == "Simpanan Sukarela") {
-                holder.ivProof.visibility = View.VISIBLE
-                // Use Glide or Picasso here to load item.imageUri if it exists
-            } else {
-                holder.ivProof.visibility = View.GONE
-            }
+            holder.itemView.setOnClickListener { onItemClick(item) }
         }
 
         override fun getItemCount() = data.size

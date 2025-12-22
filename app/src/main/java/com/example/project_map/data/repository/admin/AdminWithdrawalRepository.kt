@@ -1,88 +1,125 @@
 package com.example.project_map.data.repository.admin
 
-import android.R.attr.description
-import android.R.attr.type
-import com.example.project_map.data.model.FinancialTransaction
-import com.example.project_map.data.model.Savings
 import com.example.project_map.data.model.WithdrawalRequest
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.Transaction
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Date
 
 class AdminWithdrawalRepository {
     private val db = FirebaseFirestore.getInstance()
 
-    // 1. Stream Pending Requests
     fun getPendingWithdrawals(): Flow<List<WithdrawalRequest>> = callbackFlow {
         val listener = db.collection("withdrawal_requests")
             .whereEqualTo("status", "Pending")
-            .orderBy("requestDate", Query.Direction.ASCENDING) // Oldest first
             .addSnapshotListener { value, error ->
                 if (error != null) {
                     close(error)
                     return@addSnapshotListener
                 }
-                val list = value?.toObjects(WithdrawalRequest::class.java) ?: emptyList()
-                trySend(list)
+
+                val requests = value?.toObjects(WithdrawalRequest::class.java) ?: emptyList()
+
+                // Attach ID manually (if @DocumentId didn't catch it for some reason)
+                value?.documents?.forEachIndexed { index, doc ->
+                    requests[index].id = doc.id
+                }
+
+                // --- HYDRATION: Fetch Name & Image for each request ---
+                // We launch this in background so UI doesn't freeze
+                CoroutineScope(Dispatchers.IO).launch {
+                    requests.forEach { req ->
+                        try {
+                            val userDoc = db.collection("users").document(req.userId).get().await()
+                            // Update the object in memory
+                            req.userName = userDoc.getString("name") ?: "Tanpa Nama"
+                            req.userAvatarUrl = userDoc.getString("avatarUrl") ?: ""
+                        } catch (e: Exception) {
+                            req.userName = "User Error"
+                        }
+                    }
+                    // Send the "Fixed" list to the ViewModel
+                    trySend(requests)
+                }
             }
         awaitClose { listener.remove() }
     }
 
-    // 2. Approve Withdrawal (Atomic Transaction)
-    suspend fun approveWithdrawal(request: WithdrawalRequest): Result<Unit> {
+    suspend fun approveWithdrawal(req: WithdrawalRequest): Result<Unit> {
         return try {
-            val userRef = db.collection("users").document(request.userId)
-            val requestRef = userRef.collection("withdrawals").document(request.id) // Subcollection path
-            val historyRef = userRef.collection("savings").document()
+            val batch = db.batch()
 
-            db.runTransaction { transaction ->
-                val userDoc = transaction.get(userRef)
-                val currentBalance = userDoc.getDouble("totalSimpanan") ?: 0.0
+            // Move to History
+            val historyRef = db.collection("users").document(req.userId).collection("savings").document()
+            val historyData = hashMapOf(
+                "userId" to req.userId,
+                "userName" to req.userName,
+                "amount" to req.amount,
+                "type" to "Penarikan Tunai",
+                "status" to "Selesai",
+                "date" to Date(),
+                "description" to "Transfer ke ${req.bankName} (${req.accountNumber})"
+            )
+            batch.set(historyRef, historyData)
 
-                if (currentBalance < request.amount) {
-                    throw Exception("Saldo user tidak mencukupi.")
-                }
+            // Delete Request
+            batch.delete(db.collection("withdrawal_requests").document(req.id))
 
-                // 1. Deduct Balance
-                transaction.update(userRef, "totalSimpanan", FieldValue.increment(-request.amount))
+            // Notify
+            val notifRef = db.collection("notifications").document()
+            batch.set(notifRef, hashMapOf(
+                "userId" to req.userId,
+                "title" to "Penarikan Disetujui",
+                "message" to "Dana Rp ${req.amount.toInt()} telah ditransfer.",
+                "timestamp" to System.currentTimeMillis()
+            ))
 
-                // 2. Create Transaction History
-                val transLog = FinancialTransaction(
-                    id = historyRef.id,
-                    amount = request.amount,
-                    date = Date(),
-                    type = "Penarikan Dana",
-                    category = "Penarikan",
-                    // Simple description without bank name
-                    description = "Penarikan ke Rekening ${request.accountNumber}"
-                )
-                transaction.set(historyRef, transLog)
-
-                // 3. Update Status
-                transaction.update(requestRef, "status", "Approved")
-            }.await()
-
+            batch.commit().await()
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        } catch (e: Exception) { Result.failure(e) }
     }
 
-    // 3. Reject Withdrawal
-    suspend fun rejectWithdrawal(requestId: String): Result<Unit> {
+    suspend fun rejectWithdrawal(req: WithdrawalRequest, reason: String): Result<Unit> {
         return try {
-            db.collection("withdrawal_requests").document(requestId)
-                .update("status", "Rejected")
-                .await()
+            val userRef = db.collection("users").document(req.userId)
+            val requestRef = db.collection("withdrawal_requests").document(req.id)
+            val historyRef = db.collection("users").document(req.userId).collection("savings").document()
+
+            db.runTransaction { transaction ->
+                // REFUND (Add money back)
+                transaction.update(userRef, "simpananSukarela", FieldValue.increment(req.amount))
+                transaction.update(userRef, "totalSimpanan", FieldValue.increment(req.amount))
+
+                // Create History (Rejected)
+                transaction.set(historyRef, hashMapOf(
+                    "userId" to req.userId,
+                    "userName" to req.userName,
+                    "amount" to req.amount,
+                    "type" to "Penarikan Tunai",
+                    "status" to "Ditolak",
+                    "date" to Date(),
+                    "description" to "Ditolak: $reason"
+                ))
+
+                // Delete Request
+                transaction.delete(requestRef)
+            }.await()
+
+            // Notify (Outside transaction)
+            db.collection("notifications").add(hashMapOf(
+                "userId" to req.userId,
+                "title" to "Penarikan Ditolak",
+                "message" to "Dana dikembalikan. Alasan: $reason",
+                "timestamp" to System.currentTimeMillis()
+            ))
+
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        } catch (e: Exception) { Result.failure(e) }
     }
 }

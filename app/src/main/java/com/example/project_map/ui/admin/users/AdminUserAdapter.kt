@@ -17,7 +17,6 @@ class AdminUserAdapter(
 
     class AnggotaViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvInitial: TextView = view.findViewById(R.id.tvInitial)
-
         val tvNama: TextView = view.findViewById(R.id.tvNamaAnggota)
         val tvId: TextView = view.findViewById(R.id.tvIdAnggota)
         val tvStatus: TextView = view.findViewById(R.id.tvStatusAnggota)
@@ -33,33 +32,29 @@ class AdminUserAdapter(
         val anggota = anggotaList[position]
 
         holder.tvNama.text = anggota.name
-        // Use memberCode if available, otherwise fallback to ID or empty
         holder.tvId.text = if (anggota.memberCode.isNotEmpty()) anggota.memberCode else "ID: ${anggota.id.take(6)}"
         holder.tvStatus.text = anggota.status
 
-        // 1. Logic for Initial (First letter of name)
+        // 1. Initial Logic
         val initial = anggota.name.firstOrNull()?.toString()?.uppercase() ?: "?"
         holder.tvInitial.text = initial
 
-        // 2. Modern Status Styling (Pill Colors)
-        // Ensure tvStatusAnggota has 'bg_status_active' set in XML as default background
+        // 2. Status Styling
         val statusBg = holder.tvStatus.background as? GradientDrawable
-
         when (anggota.status) {
             "Aktif", "Anggota Aktif" -> {
-                statusBg?.setColor(Color.parseColor("#E8F5E9")) // Light Green
-                holder.tvStatus.setTextColor(Color.parseColor("#2E7D32")) // Dark Green
+                statusBg?.setColor(Color.parseColor("#E8F5E9"))
+                holder.tvStatus.setTextColor(Color.parseColor("#2E7D32"))
             }
             "Calon Anggota" -> {
-                statusBg?.setColor(Color.parseColor("#FFF8E1")) // Light Yellow
-                holder.tvStatus.setTextColor(Color.parseColor("#F9A825")) // Dark Yellow
+                statusBg?.setColor(Color.parseColor("#FFF8E1"))
+                holder.tvStatus.setTextColor(Color.parseColor("#F9A825"))
             }
             "Tidak Aktif", "Dikeluarkan" -> {
-                statusBg?.setColor(Color.parseColor("#FFEBEE")) // Light Red
-                holder.tvStatus.setTextColor(Color.parseColor("#C62828")) // Dark Red
+                statusBg?.setColor(Color.parseColor("#FFEBEE"))
+                holder.tvStatus.setTextColor(Color.parseColor("#C62828"))
             }
             else -> {
-                // Default Grey
                 statusBg?.setColor(Color.parseColor("#F5F5F5"))
                 holder.tvStatus.setTextColor(Color.GRAY)
             }
@@ -69,4 +64,10 @@ class AdminUserAdapter(
     }
 
     override fun getItemCount() = anggotaList.size
+
+    // --- ADDED THIS FUNCTION TO FIX THE ERROR ---
+    fun submitList(newList: List<UserData>) {
+        anggotaList = newList
+        notifyDataSetChanged()
+    }
 }

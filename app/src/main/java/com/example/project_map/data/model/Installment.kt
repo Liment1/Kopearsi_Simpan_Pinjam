@@ -1,18 +1,20 @@
 package com.example.project_map.data.model
 
+import com.google.firebase.firestore.Exclude
 import java.util.Date
 
-// This MUST be named 'Installment' to match your Repository and ViewModel imports
 data class Installment(
-    val id: String = "",
-    val loanId: String = "",
-    val bulanKe: Int = 0,       // Matches repository logic
+    var id: String = "",
+    var loanId: String = "",
+
+    val bulanKe: Int = 1,
     val jumlahBayar: Double = 0.0,
     val jatuhTempo: Date? = null,
-
-    // Status: "Belum Bayar", "Menunggu Konfirmasi", "Lunas", "Telat"
     val status: String = "Belum Bayar",
-
     val tanggalBayar: Date? = null,
-    val buktiBayarUrl: String = ""
+    val buktiBayarUrl: String = "",
+
+    // These are filled manually by the Repository
+    @get:Exclude var peminjamName: String = "",
+    @get:Exclude var userId: String = ""
 )

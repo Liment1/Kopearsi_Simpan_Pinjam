@@ -16,7 +16,7 @@ import java.util.*
 
 class AdminLoanAdapter(
     private var loans: List<Loan>,
-    private val onActionClick: (Loan, String) -> Unit
+    private val onActionClick: (Loan, String) -> Unit // Actions: "terima", "tolak", "detail"
 ) : RecyclerView.Adapter<AdminLoanAdapter.LoanViewHolder>() {
 
     class LoanViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -48,35 +48,36 @@ class AdminLoanAdapter(
         holder.txtTujuan.text = loan.tujuan
         holder.txtStatus.text = loan.status
 
-        // Status Styling Logic
-        // Ensure you have a generic drawable or set background color directly
-        // Here we assume txtStatus has a shape background we can tint
-        val statusBg = holder.txtStatus.background as? GradientDrawable
+        // --- ADDED CLICK LISTENER FOR DETAIL ---
+        holder.itemView.setOnClickListener {
+            onActionClick(loan, "detail")
+        }
 
+        // Status Styling
+        val statusBg = holder.txtStatus.background as? GradientDrawable
         when (loan.status) {
             "Proses" -> {
-                statusBg?.setColor(Color.parseColor("#FFF8E1")) // Yellow bg
-                holder.txtStatus.setTextColor(Color.parseColor("#FBC02D")) // Dark Yellow text
+                statusBg?.setColor(Color.parseColor("#FFF8E1"))
+                holder.txtStatus.setTextColor(Color.parseColor("#FBC02D"))
                 holder.layoutActions.visibility = View.VISIBLE
             }
             "Disetujui", "Pinjaman Berjalan" -> {
-                statusBg?.setColor(Color.parseColor("#E8F5E9")) // Green bg
-                holder.txtStatus.setTextColor(Color.parseColor("#388E3C")) // Green text
+                statusBg?.setColor(Color.parseColor("#E8F5E9"))
+                holder.txtStatus.setTextColor(Color.parseColor("#388E3C"))
                 holder.layoutActions.visibility = View.GONE
             }
             "Ditolak" -> {
-                statusBg?.setColor(Color.parseColor("#FFEBEE")) // Red bg
-                holder.txtStatus.setTextColor(Color.parseColor("#D32F2F")) // Red text
+                statusBg?.setColor(Color.parseColor("#FFEBEE"))
+                holder.txtStatus.setTextColor(Color.parseColor("#D32F2F"))
                 holder.layoutActions.visibility = View.GONE
             }
             "Lunas" -> {
-                statusBg?.setColor(Color.parseColor("#E0F7FA")) // Cyan bg
-                holder.txtStatus.setTextColor(Color.parseColor("#0097A7")) // Cyan text
+                statusBg?.setColor(Color.parseColor("#E0F7FA"))
+                holder.txtStatus.setTextColor(Color.parseColor("#0097A7"))
                 holder.layoutActions.visibility = View.GONE
             }
         }
 
-        // Show Rejection Reason if applicable
         if (loan.status == "Ditolak" && loan.alasanPenolakan.isNotEmpty()) {
             holder.txtAlasan.visibility = View.VISIBLE
             holder.txtAlasan.text = "Alasan: ${loan.alasanPenolakan}"
@@ -84,9 +85,14 @@ class AdminLoanAdapter(
             holder.txtAlasan.visibility = View.GONE
         }
 
-        // Button Listeners
         holder.btnTerima.setOnClickListener { onActionClick(loan, "terima") }
         holder.btnTolak.setOnClickListener { onActionClick(loan, "tolak") }
+
+        // Fallback if name is still missing
+        holder.txtNama.text = if (loan.namaPeminjam.isNotEmpty()) loan.namaPeminjam else "Nama Tidak Ditemukan"
+
+        // Ensure text color is visible (e.g., Black/Dark Grey)
+        holder.txtNama.setTextColor(Color.BLACK)
     }
 
     override fun getItemCount(): Int = loans.size

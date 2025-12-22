@@ -125,7 +125,7 @@
                         android:padding="12dp"
                         app:tint="#2E7D32"/>
                     <TextView
-                        android:text="Deposit"
+                        android:text="Simpanan Sukarela"
                         android:layout_marginTop="8dp"
                         android:textStyle="bold"
                         android:layout_width="wrap_content"

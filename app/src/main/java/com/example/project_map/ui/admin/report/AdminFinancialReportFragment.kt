@@ -1,12 +1,15 @@
 package com.example.project_map.ui.admin.report
 
 import android.graphics.Color
+import android.graphics.pdf.PdfDocument
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -18,6 +21,8 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.button.MaterialButtonToggleGroup
+import java.io.File
+import java.io.FileOutputStream
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -55,6 +60,10 @@ class AdminFinancialReportFragment : Fragment() {
         initializeViews(view)
         setupListeners()
         setupObservers()
+
+        view.findViewById<View>(R.id.fabExportPdf).setOnClickListener {
+            exportToPdf()
+        }
     }
 
     private fun initializeViews(view: View) {
@@ -186,5 +195,35 @@ class AdminFinancialReportFragment : Fragment() {
         val format = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
         format.maximumFractionDigits = 0
         return format.format(value)
+    }
+
+    private fun exportToPdf() {
+        val pdfDocument = PdfDocument()
+        val pageInfo = PdfDocument.PageInfo.Builder(1080, 1920, 1).create()
+        val page = pdfDocument.startPage(pageInfo)
+        val canvas = page.canvas
+
+        // Draw the view onto the PDF canvas
+        // We capture the whole ScrollView or the main layout
+        val content = view?.findViewById<View>(R.id.contentLayout) // Ensure your XML root or content has this ID
+        content?.draw(canvas)
+
+        pdfDocument.finishPage(page)
+
+        // Save to Downloads folder
+        val file = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            "Laporan_Keuangan.pdf"
+        )
+
+        try {
+            pdfDocument.writeTo(FileOutputStream(file))
+            Toast.makeText(context, "PDF Disimpan di Downloads", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Gagal export PDF: ${e.message}", Toast.LENGTH_SHORT).show()
+        } finally {
+            pdfDocument.close()
+        }
     }
 }

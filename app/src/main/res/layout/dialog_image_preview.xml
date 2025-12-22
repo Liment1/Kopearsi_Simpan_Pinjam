@@ -1,14 +1,17 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="16dp"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="20dp"
+    app:cardCornerRadius="16dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView
-        android:id="@+id/ivPreview"
+        android:id="@+id/ivFullImage"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/placeholder_image" />
+        android:layout_height="400dp"
+        android:scaleType="fitCenter"
+        android:background="#000000"
+        android:src="@drawable/ic_launcher_background"/>
 
-</LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -92,13 +92,6 @@
         android:elevation="8dp"
         android:gravity="center">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnExportPDF"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Export Laporan PDF"
-            app:icon="@android:drawable/ic_menu_save"
-            app:cornerRadius="12dp"/>
     </LinearLayout>
 
 </LinearLayout>

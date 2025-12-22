@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.example.project_map.data.model.Loan
 import com.example.project_map.data.model.Savings
 import com.example.project_map.data.repository.user.UserLaporanRepository
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.QuerySnapshot
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -16,6 +17,7 @@ import java.util.Locale
 class UserReportViewModel : ViewModel() {
 
     private val repository = UserLaporanRepository()
+    private val auth = FirebaseAuth.getInstance() // 1. Init Auth
     private val calendar = Calendar.getInstance()
 
     // Observables
@@ -35,7 +37,7 @@ class UserReportViewModel : ViewModel() {
         updateDateAndFetch()
     }
 
-    // Called by Activity when pressing Next/Prev buttons
+    // Called by UI to switch months
     fun changeMonth(offset: Int) {
         calendar.add(Calendar.MONTH, offset)
         updateDateAndFetch()
@@ -52,52 +54,74 @@ class UserReportViewModel : ViewModel() {
         startDate.set(Calendar.HOUR_OF_DAY, 0)
         startDate.set(Calendar.MINUTE, 0)
         startDate.set(Calendar.SECOND, 0)
+        startDate.set(Calendar.MILLISECOND, 0)
 
         val endDate = calendar.clone() as Calendar
         endDate.set(Calendar.DAY_OF_MONTH, endDate.getActualMaximum(Calendar.DAY_OF_MONTH))
         endDate.set(Calendar.HOUR_OF_DAY, 23)
         endDate.set(Calendar.MINUTE, 59)
         endDate.set(Calendar.SECOND, 59)
+        endDate.set(Calendar.MILLISECOND, 999)
 
         fetchData(startDate.time, endDate.time)
     }
 
     private fun fetchData(startDate: java.util.Date, endDate: java.util.Date) {
-        // Call Repository
-        repository.getMonthlyReportData(startDate, endDate)
+        // 2. Get Current User ID
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            _isEmpty.value = true
+            return
+        }
+
+        // 3. Call Repository WITH userId
+        repository.getMonthlyReportData(uid, startDate, endDate)
             .addOnSuccessListener { results ->
                 val savingsSnapshot = results[0] as QuerySnapshot
                 val loansSnapshot = results[1] as QuerySnapshot
-                // val installmentsSnapshot = results[2] as QuerySnapshot (If implemented)
 
                 val uiList = mutableListOf<UserItemHistory>()
                 var totalSimpanan = 0.0
                 var totalPinjaman = 0.0
-                var totalAngsuran = 0.0 // Placeholder
+                var totalAngsuran = 0.0
 
                 val displayFormat = SimpleDateFormat("dd MMM, HH:mm", Locale("in", "ID"))
 
                 // --- Process Savings ---
                 for (doc in savingsSnapshot) {
                     val item = doc.toObject(Savings::class.java)
-                    // Assuming 'amount' is Double and 'type' is String
                     val amount = item.amount
 
-                    // Logic: Green for Deposit, Red for Withdrawal
-                    val isDeposit = item.type.contains("Simpanan", ignoreCase = true)
-                    val color = if (isDeposit) Color.parseColor("#388E3C") else Color.parseColor("#D32F2F")
-                    val prefix = if (isDeposit) "+ " else "- "
+                    // Logic: Green for Deposit, Red for Withdrawal/Installment Payment
+                    // Assuming "Pembayaran Angsuran" is logged in Savings as a transaction
+                    val isInstallment = item.type.contains("Angsuran", ignoreCase = true)
 
-                    if (isDeposit) totalSimpanan += amount else totalSimpanan -= amount
-
-                    uiList.add(
-                        UserItemHistory(
-                            date = if(item.date != null) displayFormat.format(item.date) else "-",
-                            description = item.type,
-                            amount = "$prefix${formatRupiah(amount)}",
-                            color = color
+                    if (isInstallment) {
+                        totalAngsuran += amount
+                        uiList.add(
+                            UserItemHistory(
+                                date = if(item.date != null) displayFormat.format(item.date) else "-",
+                                description = item.type,
+                                amount = "- ${formatRupiah(amount)}",
+                                color = Color.parseColor("#F57C00") // Orange for Angsuran
+                            )
                         )
-                    )
+                    } else {
+                        val isDeposit = !item.type.contains("Penarikan", ignoreCase = true)
+                        val color = if (isDeposit) Color.parseColor("#388E3C") else Color.parseColor("#D32F2F")
+                        val prefix = if (isDeposit) "+ " else "- "
+
+                        if (isDeposit) totalSimpanan += amount else totalSimpanan -= amount
+
+                        uiList.add(
+                            UserItemHistory(
+                                date = if(item.date != null) displayFormat.format(item.date) else "-",
+                                description = item.type,
+                                amount = "$prefix${formatRupiah(amount)}",
+                                color = color
+                            )
+                        )
+                    }
                 }
 
                 // --- Process Loans ---
@@ -116,10 +140,6 @@ class UserReportViewModel : ViewModel() {
                 }
 
                 // --- Finalize UI ---
-                // Sort by Date (We need raw date for sorting, parsing string is risky,
-                // but simpler for now is to insert at top or just rely on List logic.
-                // Ideally, Models should track raw date. Here we just add them.)
-
                 _financialSummary.value = FinancialSummary(
                     totalSimpanan = formatRupiah(totalSimpanan),
                     totalPinjaman = formatRupiah(totalPinjaman),
@@ -127,10 +147,10 @@ class UserReportViewModel : ViewModel() {
                 )
 
                 _isEmpty.value = uiList.isEmpty()
-                _transactionList.value = uiList.reversed() // Show newest first if added sequentially
+                // Sort reversed to show newest first (assuming Firestore returned ordered or sequential inserts)
+                _transactionList.value = uiList.reversed()
             }
             .addOnFailureListener {
-                // Handle error (optional: _isEmpty.value = true)
                 _isEmpty.value = true
             }
     }

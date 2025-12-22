@@ -5,37 +5,52 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/adminDashboardFragment"
+            android:id="@+id/nav_admin_dashboard"
             android:icon="@android:drawable/ic_menu_view"
             android:title="Dashboard" />
 
         <item
-            android:id="@+id/adminDataAnggotaFragment"
-            android:icon="@android:drawable/ic_menu_myplaces"
+            android:id="@+id/nav_admin_data_anggota"
+            android:icon="@drawable/ic_group"
             android:title="Data Anggota" />
 
         <item
-            android:id="@+id/fragmentPinjamanAdmin"
-            android:icon="@android:drawable/ic_input_get"
-            android:title="Kelola Pinjaman" />
+            android:id="@+id/nav_admin_pengajuan_pinjaman"
+            android:icon="@drawable/ic_loan"
+            android:title="Pengajuan Pinjaman" />
 
         <item
-            android:id="@+id/fragmentTransaksiSimpanan"
-            android:icon="@android:drawable/ic_menu_save"
+            android:id="@+id/nav_admin_angsuran_berjalan"
+            android:icon="@drawable/ic_payment"
+            android:title="Angsuran Berjalan" />
+
+        <item
+            android:id="@+id/nav_admin_riwayat_simpanan"
+            android:icon="@drawable/ic_wallet"
             android:title="Riwayat Simpanan" />
 
         <item
-            android:id="@+id/adminNotifikasiFragment"
-            android:icon="@android:drawable/ic_popup_reminder"
+            android:id="@+id/nav_admin_permintaan_penarikan"
+            android:icon="@drawable/ic_savings"
+            android:title="Permintaan Penarikan" />
+
+        <item
+            android:id="@+id/nav_admin_laporan_keuangan"
+            android:icon="@drawable/ic_report"
+            android:title="Laporan Keuangan" />
+
+        <item
+            android:id="@+id/nav_admin_notifikasi"
+            android:icon="@drawable/ic_notification"
             android:title="Kirim Notifikasi" />
 
         <item
-            android:id="@+id/adminPengaturanFragment"
+            android:id="@+id/nav_admin_pengaturan"
             android:icon="@android:drawable/ic_menu_manage"
-            android:title="Pengaturan" />
+            android:title="Pengaturan Admin" />
     </group>
 
-    <item android:title="Kembali ke Login">
+    <item android:title="Akun">
         <menu>
             <item
                 android:id="@+id/action_logout"

@@ -6,84 +6,80 @@
     android:id="@+id/rootCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="8dp"
     android:layout_marginHorizontal="4dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="3dp"
-    app:strokeColor="#E0E0E0"
-    app:strokeWidth="1dp">
+    app:cardElevation="2dp"
+    app:strokeColor="@android:color/transparent"
+    app:strokeWidth="1dp"
+    app:cardBackgroundColor="@android:color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <ImageView
-            android:id="@+id/ivTimelineIcon"
+        <FrameLayout
+            android:id="@+id/iconContainer"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/ic_timeline_pending"
-            app:tint="#D32F2F"
+            android:background="@drawable/bg_circle_light_green"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_timeline_pending"
+                android:layout_gravity="center"
+                app:tint="@color/green_primary"/>
+        </FrameLayout>
 
         <TextView
-            android:id="@+id/tvInstallmentNumber"
+            android:id="@+id/tvInstallmentTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="#1"
+            tools:text="Angsuran Ke-1"
             android:textStyle="bold"
-            android:textSize="14sp"
-            android:textColor="#9E9E9E"
+            android:textSize="16sp"
+            android:textColor="@color/black"
             android:layout_marginStart="16dp"
-            app:layout_constraintStart_toEndOf="@id/ivTimelineIcon"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toEndOf="@id/iconContainer"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
-            android:id="@+id/tvTotalPaid"
+            android:id="@+id/tvDueDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="Rp 100.000"
-            android:textColor="@android:color/black"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@id/tvInstallmentNumber"
-            app:layout_constraintStart_toStartOf="@id/tvInstallmentNumber"/>
-
-        <TextView
-            android:id="@+id/tvInstallmentType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/tvTotalPaid"
-            app:layout_constraintTop_toBottomOf="@id/tvTotalPaid"
-            tools:text="Belum Dibayar"
-            tools:textColor="#D32F2F" />
-
-        <TextView
-            android:id="@+id/tvPaymentDate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            tools:text="Jatuh Tempo: 20 Des 2025"
             android:textSize="12sp"
             android:textColor="#757575"
-            app:layout_constraintStart_toStartOf="@id/tvInstallmentType"
-            app:layout_constraintTop_toBottomOf="@id/tvInstallmentType"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="Jatuh Tempo: 20 Mar 2025" />
+            app:layout_constraintStart_toStartOf="@id/tvInstallmentTitle"
+            app:layout_constraintTop_toBottomOf="@id/tvInstallmentTitle"/>
 
         <TextView
-            android:id="@+id/tvOtherFees"
+            android:id="@+id/tvAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
+            tools:text="Rp 500.000"
+            android:textStyle="bold"
+            android:textColor="@color/green_primary"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Biaya Lain"/>
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Belum Lunas"
+            android:textColor="@android:color/white"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            app:chipBackgroundColor="#F44336"
+            app:chipMinHeight="24dp"
+            android:enabled="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvAmount"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </com.google.android.material.card.MaterialCardView>

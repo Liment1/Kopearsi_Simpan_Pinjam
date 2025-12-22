@@ -6,16 +6,12 @@ import androidx.lifecycle.ViewModel
 import com.example.project_map.data.model.Savings
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import kotlin.jvm.java
 
 class SavingsHistoryViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
 
-    // Holds the raw data from Firestore
     private val _allSavingss = mutableListOf<Savings>()
-
-    // Exposes the filtered list to the UI
     private val _filteredSavingss = MutableLiveData<List<Savings>>()
     val filteredSavingss: LiveData<List<Savings>> = _filteredSavingss
 
@@ -29,7 +25,6 @@ class SavingsHistoryViewModel : ViewModel() {
         fetchAllSavings()
     }
 
-    // Fetch all savings from every user (Admin View)
     private fun fetchAllSavings() {
         _isLoading.value = true
         db.collectionGroup("savings")
@@ -37,25 +32,58 @@ class SavingsHistoryViewModel : ViewModel() {
             .get()
             .addOnSuccessListener { result ->
                 _allSavingss.clear()
+                val tempSavings = mutableListOf<Savings>()
+
                 for (doc in result) {
                     try {
-                        val trans = doc.toObject(Savings::class.java)
-                        _allSavingss.add(trans)
+                        val item = doc.toObject(Savings::class.java)
+                        item.id = doc.id
+                        tempSavings.add(item)
                     } catch (e: Exception) {
-                        // Skip malformed data
+                        e.printStackTrace()
                     }
                 }
-                // Initial filter is "All"
-                applyFilter("Semua")
-                _isLoading.value = false
+
+                // FIX: If userName is empty, fetch it from 'users' collection
+                fetchMissingNames(tempSavings) { updatedList ->
+                    _allSavingss.addAll(updatedList)
+                    applyFilter("Semua")
+                    _isLoading.value = false
+                }
             }
             .addOnFailureListener { e ->
-                _errorMessage.value = "Gagal memuat data: ${e.message}"
+                _errorMessage.value = "Gagal memuat: ${e.message}"
                 _isLoading.value = false
             }
     }
 
-    // Filter logic resides in ViewModel
+    private fun fetchMissingNames(list: List<Savings>, onComplete: (List<Savings>) -> Unit) {
+        val usersToFetch = list.filter { it.userName.isEmpty() && it.userId.isNotEmpty() }.map { it.userId }.distinct()
+
+        if (usersToFetch.isEmpty()) {
+            onComplete(list)
+            return
+        }
+
+        // Batch fetch isn't directly supported for IDs easily, so we do it one by one or 'in' query (limit 10)
+        // For simplicity here, we assume a small number or fetch individually.
+        // Better approach: Store userName in Savings document when creating it.
+
+        var completed = 0
+        usersToFetch.forEach { uid ->
+            db.collection("users").document(uid).get().addOnSuccessListener { userDoc ->
+                val name = userDoc.getString("name") ?: "Unknown"
+                // Update all savings with this UID
+                list.filter { it.userId == uid }.forEach { it.userName = name }
+
+                completed++
+                if (completed == usersToFetch.size) {
+                    onComplete(list)
+                }
+            }
+        }
+    }
+
     fun applyFilter(type: String) {
         if (type == "Semua") {
             _filteredSavingss.value = _allSavingss

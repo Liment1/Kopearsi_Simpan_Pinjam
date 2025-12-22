@@ -11,7 +11,7 @@ import com.google.gson.annotations.SerializedName
 data class ScoreRequest(
     @SerializedName("user_id") val userId: String,
 
-    @SerializedName("LIMIT_BAL") val limitBal: Int,
+    @SerializedName("LIMIT_BAL") val limitBal: Double,
     @SerializedName("SEX") val sex: Int,
     @SerializedName("EDUCATION") val education: Int,
     @SerializedName("MARRIAGE") val marriage: Int,

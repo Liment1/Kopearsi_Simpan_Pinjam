@@ -39,14 +39,15 @@ class AdminActivity : AppCompatActivity() {
 
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.adminDashboardFragment,
-                R.id.adminDataAnggotaFragment,
-                R.id.fragmentPinjamanAdmin,
-                R.id.fragmentTransaksiSimpanan,
-                R.id.adminAngsuranFragment,
-                R.id.adminLaporanKeuanganFragment,
-                R.id.adminNotifikasiFragment,
-                R.id.adminPengaturanFragment
+                R.id.nav_admin_dashboard,
+                R.id.nav_admin_data_anggota,
+                R.id.nav_admin_pengajuan_pinjaman,
+                R.id.nav_admin_riwayat_simpanan,
+                R.id.nav_admin_angsuran_berjalan,
+                R.id.nav_admin_laporan_keuangan,
+                R.id.nav_admin_notifikasi,
+                R.id.nav_admin_pengaturan,
+                R.id.nav_admin_permintaan_penarikan
             ), drawerLayout
         )
 

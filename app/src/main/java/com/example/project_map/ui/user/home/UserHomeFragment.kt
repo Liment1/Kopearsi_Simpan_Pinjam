@@ -44,7 +44,7 @@ class UserHomeFragment : Fragment() {
         // Use binding object for included layouts
         bindMenu(binding.menuSimpanan, R.drawable.ic_wallet, "Simpanan")
         bindMenu(binding.menuPinjaman, R.drawable.ic_loan, "Pinjaman")
-        bindMenu(binding.menuAngsuran, R.drawable.ic_installments, "Angsuran")
+        bindMenu(binding.menuAngsuran, R.drawable.ic_installments, "Ajukan Pinjaman")
         bindMenu(binding.menuProfil, R.drawable.ic_person, "Profil")
     }
 
@@ -101,7 +101,7 @@ class UserHomeFragment : Fragment() {
         }
 
         binding.menuAngsuran.root.setOnClickListener {
-            if (isVerified) findNavController().navigate(R.id.action_homeFragment_to_angsuranFragment)
+            if (isVerified) findNavController().navigate(R.id.action_homeFragment_to_loanForm)
             else showLockedToast()
         }
 

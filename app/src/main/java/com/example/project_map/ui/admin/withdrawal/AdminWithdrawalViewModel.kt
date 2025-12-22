@@ -36,6 +36,7 @@ class AdminWithdrawalViewModel : ViewModel() {
     fun approve(request: WithdrawalRequest) {
         _isLoading.value = true
         viewModelScope.launch {
+            // Updated to match new repo signature (pass whole object)
             val result = repository.approveWithdrawal(request)
             _isLoading.value = false
             if (result.isSuccess) _message.value = "Penarikan Disetujui"
@@ -43,12 +44,14 @@ class AdminWithdrawalViewModel : ViewModel() {
         }
     }
 
-    fun reject(request: WithdrawalRequest) {
+    // FIX: Added 'reason' parameter and updated repository call
+    fun reject(request: WithdrawalRequest, reason: String) {
         _isLoading.value = true
         viewModelScope.launch {
-            val result = repository.rejectWithdrawal(request.id)
+            // FIX: Pass the whole 'request' object, not just 'id'
+            val result = repository.rejectWithdrawal(request, reason)
             _isLoading.value = false
-            if (result.isSuccess) _message.value = "Penarikan Ditolak"
+            if (result.isSuccess) _message.value = "Penarikan Ditolak & Dana Dikembalikan"
             else _message.value = "Gagal: ${result.exceptionOrNull()?.message}"
         }
     }

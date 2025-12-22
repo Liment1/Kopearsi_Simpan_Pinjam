@@ -1,156 +1,112 @@
 package com.example.project_map.ui.admin.users
 
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.TextView
+import android.view.Window
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.project_map.R
+import com.bumptech.glide.Glide
 import com.example.project_map.data.model.UserData
-import com.example.project_map.data.repository.admin.MemberFinancials
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.project_map.databinding.DialogAdminEditUserBinding
+import com.example.project_map.databinding.FragmentAdminUserBinding
 import com.google.android.material.snackbar.Snackbar
-import java.text.NumberFormat
-import java.util.Locale
+import com.google.android.material.tabs.TabLayout
 
 class AdminUserFragment : Fragment() {
 
+    private var _binding: FragmentAdminUserBinding? = null
+    private val binding get() = _binding!!
     private val viewModel: AdminUserViewModel by viewModels()
     private lateinit var adminUserAdapter: AdminUserAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_admin_user, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentAdminUserBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val rvAnggota = view.findViewById<RecyclerView>(R.id.rvAnggota)
-        val fabTambahAnggota = view.findViewById<FloatingActionButton>(R.id.fabTambahAnggota)
-
-        // 1. Setup Adapter
         adminUserAdapter = AdminUserAdapter(emptyList()) { anggota ->
-            // On Item Click: Open Dialog Logic
-            showFinancialSummaryDialog(anggota)
+            showTabbedEditDialog(anggota)
         }
-        rvAnggota.layoutManager = LinearLayoutManager(requireContext())
-        rvAnggota.adapter = adminUserAdapter
 
-        // 2. Observe Data
+        binding.rvAnggota.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvAnggota.adapter = adminUserAdapter
+
         viewModel.members.observe(viewLifecycleOwner) { list ->
-            // Update adapter data (You might need to add a 'updateList' function to your Adapter,
-            // or re-instantiate if you didn't add that method yet.
-            // Better practice: Add `updateList` to Adapter).
-            // For now, re-using constructor logic:
-            rvAnggota.adapter = AdminUserAdapter(list) { showFinancialSummaryDialog(it) }
+            adminUserAdapter.submitList(list)
         }
 
-        viewModel.message.observe(viewLifecycleOwner) { msg ->
-            if (msg != null) {
-                Snackbar.make(view, msg, Snackbar.LENGTH_SHORT).show()
-                viewModel.onMessageShown()
-            }
-        }
-
-        fabTambahAnggota.setOnClickListener {
+        binding.fabTambahAnggota.setOnClickListener {
             Toast.makeText(context, "Fitur tambah anggota manual belum tersedia", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // --- Dialog Logic ---
+    private fun showTabbedEditDialog(user: UserData) {
+        val dialog = Dialog(requireContext())
+        val dBinding = DialogAdminEditUserBinding.inflate(layoutInflater)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(dBinding.root)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-    private fun showFinancialSummaryDialog(anggota: UserData) {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_financial_summary, null)
-        val tvNama = dialogView.findViewById<TextView>(R.id.tvNamaAnggota)
-        val tvSimpanan = dialogView.findViewById<TextView>(R.id.tvTotalSimpananValue)
-        val tvPinjaman = dialogView.findViewById<TextView>(R.id.tvTotalPinjamanValue)
-        val btnEdit = dialogView.findViewById<Button>(R.id.btnEditData)
+        // 1. Setup Data - Personal
+        dBinding.etName.setText(user.name)
+        if (user.avatarUrl.isNotEmpty()) {
+            Glide.with(this).load(user.avatarUrl).into(dBinding.ivProfilePreview)
+        }
 
-        tvNama.text = anggota.name
-        tvSimpanan.text = "Loading..."
-        tvPinjaman.text = "Loading..."
+        // 2. Setup Data - Financial (Read Only Score)
+        dBinding.tvScoreValue.text = "${user.creditScore} / 850"
 
-        // Trigger Data Load
-        viewModel.loadMemberFinancials(anggota.id)
+        // Use ProgressBar instead of Slider
+        dBinding.progressCreditScore.progress = user.creditScore
 
-        val dialog = AlertDialog.Builder(requireContext())
-            .setView(dialogView)
-            .create()
+        dBinding.etSimpananPokok.setText(user.simpananPokok.toInt().toString())
+        dBinding.etSimpananWajib.setText(user.simpananWajib.toInt().toString())
 
-        // Observe just once for this specific dialog session would be tricky directly.
-        // Instead, we observe the LiveData globally in onViewCreated, OR we use a simple observer here that we remove later.
-        // Simplest MVVM approach for Dialogs: Observe inside the dialog creation scope.
-
-        val observer = androidx.lifecycle.Observer<MemberFinancials?> { financials ->
-            if (financials != null) {
-                tvSimpanan.text = formatCurrency(financials.totalSavings)
-                tvPinjaman.text = formatCurrency(financials.outstandingLoan)
+        // 3. Tab Logic
+        dBinding.tabLayoutUser.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                when (tab?.position) {
+                    0 -> { // Personal
+                        dBinding.layoutPersonal.visibility = View.VISIBLE
+                        dBinding.layoutFinancial.visibility = View.GONE
+                    }
+                    1 -> { // Financial
+                        dBinding.layoutPersonal.visibility = View.GONE
+                        dBinding.layoutFinancial.visibility = View.VISIBLE
+                    }
+                }
             }
-        }
-        viewModel.selectedMemberFinancials.observe(viewLifecycleOwner, observer)
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
 
-        dialog.setOnDismissListener {
-            viewModel.selectedMemberFinancials.removeObserver(observer)
-        }
+        // 4. Save Action
+        dBinding.btnSaveUser.setOnClickListener {
+            val newName = dBinding.etName.text.toString()
+            // Note: We DO NOT get the score from the UI anymore. It's read-only.
 
-        btnEdit.setOnClickListener {
+            val newPokok = dBinding.etSimpananPokok.text.toString().toDoubleOrNull() ?: 0.0
+            val newWajib = dBinding.etSimpananWajib.text.toString().toDoubleOrNull() ?: 0.0
+
+            // Call ViewModel (Function updated to not accept score)
+            viewModel.updateMemberComplete(user.id, newName, newPokok, newWajib)
+
             dialog.dismiss()
-            showEditAnggotaDialog(anggota)
+            Snackbar.make(binding.root, "Data anggota diperbarui", Snackbar.LENGTH_SHORT).show()
         }
+
+        dBinding.btnCancel.setOnClickListener { dialog.dismiss() }
         dialog.show()
-    }
-
-    private fun showEditAnggotaDialog(anggota: UserData) {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_form_anggota, null)
-        val etNama = dialogView.findViewById<EditText>(R.id.etNamaForm)
-        val etPhone = dialogView.findViewById<EditText>(R.id.etPhoneForm)
-        val spinnerStatus = dialogView.findViewById<Spinner>(R.id.spinnerStatus)
-        val etEmail = dialogView.findViewById<EditText>(R.id.etEmailForm)
-
-        // Setup UI
-        dialogView.findViewById<View>(R.id.layoutPasswordLama)?.visibility = View.GONE
-        etNama.setText(anggota.name)
-        etPhone.setText(anggota.phone)
-        etEmail.setText(anggota.email)
-        etEmail.isEnabled = false
-
-        val statusList = listOf("Anggota Aktif", "Calon Anggota", "Diblokir", "Tidak Aktif")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, statusList)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerStatus.adapter = adapter
-        spinnerStatus.setSelection(statusList.indexOf(anggota.status).coerceAtLeast(0))
-
-        AlertDialog.Builder(requireContext())
-            .setTitle("Edit Anggota: ${anggota.name}")
-            .setView(dialogView)
-            .setPositiveButton("Simpan") { _, _ ->
-                viewModel.updateMember(
-                    anggota.id,
-                    etNama.text.toString(),
-                    etPhone.text.toString(),
-                    spinnerStatus.selectedItem.toString()
-                )
-            }
-            .setNegativeButton("Batal", null)
-            .show()
-    }
-
-    private fun formatCurrency(value: Double): String {
-        val format = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
-        format.maximumFractionDigits = 0
-        return format.format(value)
     }
 }

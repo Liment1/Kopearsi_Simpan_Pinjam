@@ -7,28 +7,25 @@
     android:padding="24dp"
     android:background="@android:color/white">
 
-    <View
-        android:layout_width="40dp"
-        android:layout_height="4dp"
-        android:background="#E0E0E0"
-        android:layout_gravity="center"
-        android:layout_marginBottom="24dp"/>
-
     <TextView
         android:id="@+id/tvSheetTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Transaksi"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="#212121"/>
+        android:textColor="@color/black"
+        android:layout_marginBottom="16dp"/>
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layoutAmountInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:hint="Nominal (Rp)"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        app:errorEnabled="true"
+        android:layout_marginBottom="8dp">
+
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etAmount"
             android:layout_width="match_parent"
@@ -36,39 +33,101 @@
             android:inputType="numberDecimal"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/layoutBank"
+    <LinearLayout
+        android:id="@+id/layoutDeposit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:hint="Nama Bank / E-Wallet"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etBank"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bukti Pembayaran"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+
+        <Button
+            android:id="@+id/btnUploadProof"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapWords"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:text="Unggah Bukti Transfer"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:icon="@drawable/ic_arrow_upward"
+            android:layout_marginBottom="8dp"/>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/layoutAccount"
+        <ImageView
+            android:id="@+id/ivProofPreview"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:background="#EEEEEE"
+            android:layout_marginBottom="8dp"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/layoutWithdrawal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:hint="Nomor Rekening"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etAccount"
+        android:orientation="vertical"
+        android:visibility="visible"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bank Tujuan"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerBank"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutManualBank"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:hint="Nama Bank Lainnya"
+            app:errorEnabled="true"
+            android:visibility="gone">
 
-    <com.google.android.material.button.MaterialButton
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etManualBank"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutAccountInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:hint="Nomor Rekening"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etAccount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"/>
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <Button
         android:id="@+id/btnSubmit"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_marginTop="24dp"
         android:text="Kirim"
-        app:cornerRadius="12dp"/>
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#4CAF50"/>
+
 </LinearLayout>
