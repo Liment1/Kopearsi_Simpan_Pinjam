@@ -9,7 +9,7 @@ data class Loan(
     val nominal: Double = 0.0,
     val tenor: String = "",
     val tujuan: String = "",
-    val status: String = "Proses", // Proses, Disetujui, Ditolak, Lunas
+    val status: String = "Proses",
     val bunga: Double = 0.05,
     val sisaAngsuran: Double = 0.0,
     val totalDibayar: Double = 0.0,

@@ -30,14 +30,11 @@ class AdminFinancialReportFragment : Fragment() {
 
     private val viewModel: AdminFinancialReportViewModel by viewModels()
 
-    // UI Components matching XML
     private lateinit var tvCurrentPeriod: TextView
     private lateinit var tvTotalPemasukan: TextView
     private lateinit var tvTotalPengeluaran: TextView
     private lateinit var tvLabaRugi: TextView
     private lateinit var barChart: BarChart
-
-    // Rincian Pemasukan
     private lateinit var tvRincianSimpanan: TextView
     private lateinit var tvRincianAngsuran: TextView
     private lateinit var tvRincianDenda: TextView

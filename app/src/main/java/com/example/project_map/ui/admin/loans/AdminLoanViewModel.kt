@@ -41,7 +41,6 @@ class AdminLoanViewModel : ViewModel() {
         viewModelScope.launch {
             repository.getAllLoansStream()
                 .catch { e ->
-                    // --- ERROR HANDLING RESTORED ---
                     _isLoading.value = false
                     _message.value = "Gagal memuat: ${e.message}"
                     Log.e("AdminLoanVM", "Error in flow", e)
@@ -49,7 +48,6 @@ class AdminLoanViewModel : ViewModel() {
                 .collect { list ->
                     Log.d("AdminLoanVM", "Received ${list.size} loans. Checking for missing names...")
 
-                    // --- FIX: FILL MISSING NAMES ---
                     // Since 'namaPeminjam' is empty in your DB, we fetch it from 'users'
                     val updatedList = list.map { loan ->
                         if (loan.namaPeminjam.isEmpty() && loan.userId.isNotEmpty()) {
@@ -71,7 +69,6 @@ class AdminLoanViewModel : ViewModel() {
 
     fun approveLoan(loan: Loan) {
         viewModelScope.launch {
-            // FIX: Pass loan.userId here
             val result = repository.approveLoan(loan.id, loan.userId)
             if (result.isSuccess) _message.value = "Pinjaman disetujui"
             else _message.value = "Gagal: ${result.exceptionOrNull()?.message}"
@@ -80,7 +77,6 @@ class AdminLoanViewModel : ViewModel() {
 
     fun rejectLoan(loan: Loan, reason: String) {
         viewModelScope.launch {
-            // FIX: Pass loan.userId here
             val result = repository.rejectLoan(loan.id, loan.userId, reason)
             if (result.isSuccess) _message.value = "Pinjaman ditolak"
             else _message.value = "Gagal: ${result.exceptionOrNull()?.message}"

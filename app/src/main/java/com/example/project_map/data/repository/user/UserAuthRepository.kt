@@ -10,7 +10,6 @@ class UserAuthRepository {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
-    // Reusing the Result class from Login, adding a generic Success
     sealed class AuthResult {
         object Success : AuthResult()
         data class Error(val message: String) : AuthResult()

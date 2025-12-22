@@ -21,9 +21,6 @@ class UserLoanRepository {
     private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
 
-    // ... createLoan, payInstallment, payInstallmentViaBalance remain the same ...
-    // (I am keeping the other functions hidden for brevity, but they exist as before)
-
     suspend fun createLoan(userId: String, userName: String, loan: Loan, durationMonths: Int, ktpUrl: Uri) {
         val batch = db.batch()
         val loanRef = db.collection("users").document(userId).collection("loans").document()

@@ -29,7 +29,7 @@ class SplashFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         rootLayout = view.findViewById(R.id.splashRoot)
-        progressBar = view.findViewById(R.id.progressBar) // Ensure this ID exists in XML
+        progressBar = view.findViewById(R.id.progressBar)
 
         // 1. Setup Click Listener
         rootLayout?.setOnClickListener {
@@ -47,7 +47,6 @@ class SplashFragment : Fragment() {
 
             when (state) {
                 is SplashNavigation.ToAdmin -> {
-                    // Toast Removed. Direct navigation.
                     val intent = Intent(requireActivity(), AdminActivity::class.java)
                     startActivity(intent)
                     requireActivity().finish()

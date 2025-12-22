@@ -12,12 +12,10 @@ import java.util.Date
 class AdminFinancialRepository {
     private val db = FirebaseFirestore.getInstance()
 
-    // Combine "Savings" (Income) and "Loans" (Expense) into one stream
     fun getCashFlowStream(): Flow<List<FinancialTransaction>> = callbackFlow {
         val combinedList = mutableListOf<FinancialTransaction>()
 
         // 1. Listen to SAVINGS (Pemasukan)
-        // Note: Make sure you have created the Index for collectionGroup "savings" (date Descending)
         val savingsListener = db.collectionGroup("savings")
             .orderBy("date", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
@@ -26,15 +24,12 @@ class AdminFinancialRepository {
                     return@addSnapshotListener
                 }
 
-                // Clear old savings from the list logic would be complex here for a merged list.
-                // For simplicity in this fix, we rebuild the list on every update.
                 val savings = snapshot?.documents?.mapNotNull { doc ->
                     try {
                         FinancialTransaction(
                             id = doc.id,
                             amount = doc.getDouble("amount") ?: 0.0,
-                            type = "Pemasukan", // Savings are Income for the Co-op? Or Liability?
-                            // Usually "Simpanan" is money coming IN to the system.
+                            type = "Pemasukan",
                             category = doc.getString("type") ?: "Simpanan",
                             date = doc.getDate("date"),
                             description = doc.getString("description") ?: ""
@@ -46,7 +41,6 @@ class AdminFinancialRepository {
             }
 
         // 2. Listen to LOANS (Pengeluaran - Money leaving the co-op)
-        // Note: Make sure you have the Index for collectionGroup "loans" (tanggalPengajuan Descending)
         val loansListener = db.collectionGroup("loans")
             .orderBy("tanggalPengajuan", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->

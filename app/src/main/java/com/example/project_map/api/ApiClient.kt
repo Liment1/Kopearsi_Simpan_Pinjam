@@ -39,9 +39,8 @@ data class ScoreRequest(
     @SerializedName("PAY_AMT6") val payAmt6: Double
 )
 
-// 2. Update Response to handle Double score (83.01)
 data class CreditScoreResponse(
-    val score: Double, // Changed from Int to Double
+    val score: Double,
     val keputusan: String,
     val status: String
 )

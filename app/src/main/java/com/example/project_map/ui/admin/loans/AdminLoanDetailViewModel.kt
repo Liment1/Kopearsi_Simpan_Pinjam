@@ -54,7 +54,6 @@ class AdminLoanDetailViewModel : ViewModel() {
         }
     }
 
-    // FIX: New function to handle Rejection with Reason
     fun rejectLoan(loanId: String, userId: String, reason: String) {
         viewModelScope.launch {
             val result = repository.rejectLoan(loanId, userId, reason)

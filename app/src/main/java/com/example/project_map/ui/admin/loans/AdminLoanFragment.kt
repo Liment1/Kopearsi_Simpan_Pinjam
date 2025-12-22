@@ -40,7 +40,6 @@ class AdminLoanFragment : Fragment(R.layout.fragment_admin_loan) {
 
         recycler.layoutManager = LinearLayoutManager(requireContext())
 
-        // --- UPDATED ADAPTER CALLBACK ---
         adapter = AdminLoanAdapter(emptyList()) { loan, action ->
             when (action) {
                 "terima" -> showApprovalDialog(loan)

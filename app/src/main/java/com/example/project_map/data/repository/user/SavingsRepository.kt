@@ -56,7 +56,6 @@ class SavingsRepository {
             }
     }
 
-    // --- DIRECT DEPOSIT (Immediate Balance Increase) ---
     suspend fun requestDeposit(userId: String, userName: String, amount: Double, fileUri: Uri): Result<String> {
         return try {
             // 1. Upload Image Proof

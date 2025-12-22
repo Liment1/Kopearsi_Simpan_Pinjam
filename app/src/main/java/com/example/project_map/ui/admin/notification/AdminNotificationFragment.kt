@@ -16,7 +16,6 @@ class AdminNotificationFragment : Fragment() {
     private var _binding: FragmentAdminNotificationBinding? = null
     private val binding get() = _binding!!
 
-    // MVVM
     private val viewModel: AdminNotificationViewModel by viewModels()
     private lateinit var adapter: AdminAnnouncementAdapter
 
@@ -34,13 +33,11 @@ class AdminNotificationFragment : Fragment() {
         setupRecyclerView()
         setupObservers()
 
-        // --- CHANGE THIS BLOCK ---
         binding.btnSend.setOnClickListener {
             val title = binding.etTitle.text.toString().trim()
             val message = binding.etMessage.text.toString().trim()
             val isUrgent = binding.cbUrgent.isChecked
 
-            // Use ViewModel instead of local function
             viewModel.sendNotification(title, message, isUrgent)
         }
 
@@ -66,10 +63,8 @@ class AdminNotificationFragment : Fragment() {
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.btnSend.isEnabled = !isLoading
             binding.btnDistributeProfit.isEnabled = !isLoading
-            // Ideally show a ProgressBar here
         }
 
-        // Toast Messages
         viewModel.toastMessage.observe(viewLifecycleOwner) { msg ->
             if (msg != null) {
                 Toast.makeText(context, msg, Toast.LENGTH_LONG).show()

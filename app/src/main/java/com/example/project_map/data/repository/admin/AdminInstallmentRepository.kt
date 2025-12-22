@@ -14,7 +14,6 @@ class AdminInstallmentRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
-    // CHANGED: Listen to "Lunas" items, ordered by Payment Date (Newest first)
     fun listenToPaidInstallments(
         onSuccess: (List<Installment>) -> Unit,
         onError: (Exception) -> Unit

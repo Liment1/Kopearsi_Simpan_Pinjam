@@ -6,8 +6,8 @@ import java.util.Date
 data class FinancialTransaction(
     var id: String = "",
     val amount: Double = 0.0,
-    val type: String = "",       // "Pemasukan" or "Pengeluaran"
-    val category: String = "",   // "Simpanan Pokok", "Pinjaman", etc.
-    val date: Date? = null,      // Ensure Firestore uses Timestamp
+    val type: String = "",
+    val category: String = "",
+    val date: Date? = null,
     val description: String = ""
 )

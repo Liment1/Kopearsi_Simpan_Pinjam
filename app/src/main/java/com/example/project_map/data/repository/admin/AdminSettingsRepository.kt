@@ -26,7 +26,6 @@ class AdminSettingsRepository {
         try {
             docRef.update(updates).await()
         } catch (e: Exception) {
-            // If update fails (e.g., doc doesn't exist), try setting it
             docRef.set(updates).await()
         }
     }

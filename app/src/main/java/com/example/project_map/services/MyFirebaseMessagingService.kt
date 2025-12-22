@@ -17,7 +17,7 @@ import com.google.firebase.messaging.RemoteMessage
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
-    // 1. CRITICAL: Save the token whenever it is generated
+    // 1. Save the token whenever it is generated
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCM", "New token generated: $token")
@@ -28,14 +28,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        // Check if message contains a notification payload
         remoteMessage.notification?.let {
             showNotification(it.title ?: "Koperasi", it.body ?: "")
         }
     }
 
     private fun showNotification(title: String, messageBody: String) {
-        // MATCHES index.js: "loan_updates_channel"
         val channelId = "loan_updates_channel"
         val notificationId = System.currentTimeMillis().toInt()
 

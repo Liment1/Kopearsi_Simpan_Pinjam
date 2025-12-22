@@ -9,19 +9,16 @@ class AdminRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
-    // --- FEATURE 1: Admin Sets Simpanan Pokok & Wajib ---
+    // Admin Sets Simpanan Pokok & Wajib
     suspend fun updateUserSavingsTypes(userId: String, pokok: Double, wajib: Double) {
         val updates = mapOf(
             "simpananPokok" to pokok,
             "simpananWajib" to wajib
-            // Note: This updates the types specifically.
-            // 'totalSimpanan' should ideally be recalculated: pokok + wajib + sukarela
         )
         db.collection("users").document(userId).update(updates).await()
     }
 
-    // --- FEATURE 2: Process Withdrawal (The "Mega" Transaction) ---
-    // This runs EVERYTHING automatically when Admin clicks "Approve"
+    // Process Withdrawal
     suspend fun approveWithdrawal(requestId: String, userId: String, amount: Double) {
         val requestRef = db.collection("withdrawal_requests").document(requestId)
         val userRef = db.collection("users").document(userId)

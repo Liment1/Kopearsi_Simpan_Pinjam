@@ -7,8 +7,8 @@ data class MonthlyFinancialReport(
     val month: String = "",
     val year: Int = 0,
     val totalRevenue: Double = 0.0,
-    val totalExpense: Double = 0.0, // <-- Was missing
+    val totalExpense: Double = 0.0,
     val netProfit: Double = 0.0,
-    val generatedAt: Timestamp? = null, // <-- Was missing
+    val generatedAt: Timestamp? = null,
     val distributed: Boolean = false
 )

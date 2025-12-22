@@ -4,7 +4,7 @@ data class UserRecentItem(
     val title: String,
     val date: String,
     val amount: String,
-    val type: TransactionType // New Enum
+    val type: TransactionType
 )
 
 enum class TransactionType {

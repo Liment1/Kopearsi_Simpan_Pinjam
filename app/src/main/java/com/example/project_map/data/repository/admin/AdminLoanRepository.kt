@@ -78,19 +78,15 @@ class AdminLoanRepository {
         }
     }
 
-    // FIX: Pass userId to these functions
     suspend fun approveLoan(loanId: String, userId: String) = updateLoanStatus(loanId, userId, "Disetujui")
 
     suspend fun rejectLoan(loanId: String, userId: String, reason: String): Result<Unit> {
         return try {
             val loanRef = db.collection("users").document(userId).collection("loans").document(loanId)
 
-            // FIX: Transaction now updates Status AND creates Notification
             db.runTransaction { transaction ->
-                // 1. Update Loan Status
                 transaction.update(loanRef, mapOf("status" to "Ditolak", "alasanPenolakan" to reason))
 
-                // 2. Create Notification Document
                 val notifRef = db.collection("notifications").document()
                 val notif = hashMapOf(
                     "userId" to userId,

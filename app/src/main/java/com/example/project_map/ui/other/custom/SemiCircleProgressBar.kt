@@ -19,11 +19,10 @@ class SemiCircleProgressBar @JvmOverloads constructor(
 
     init {
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 30f // Increased slightly for a better "rounded" look
-        paint.strokeCap = Paint.Cap.ROUND // Keeps the ends rounded
+        paint.strokeWidth = 30f
+        paint.strokeCap = Paint.Cap.ROUND
     }
 
-    // FIX 1: Renamed to match LoanFormFragment call
     fun setPercentage(progress: Int) {
         this.percent = progress.coerceIn(0, 100)
         invalidate() // Redraw the view
@@ -36,17 +35,12 @@ class SemiCircleProgressBar @JvmOverloads constructor(
         val w = width.toFloat()
         val h = height.toFloat()
 
-        // FIX 2: Force Perfect Circle Aspect Ratio
-        // We calculate the maximum radius that fits in the view dimensions
-        // Radius is constrained by either the full Height or half the Width.
         val maxRadiusByHeight = h - padding
         val maxRadiusByWidth = (w - (2 * padding)) / 2
 
         val radius = min(maxRadiusByHeight, maxRadiusByWidth)
 
-        // Center the arc horizontally
         val centerX = w / 2
-        // Position the arc so the bottom sits at the view's bottom (minus padding)
         val centerY = h - padding / 2
 
         rectF.set(

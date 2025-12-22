@@ -2,6 +2,7 @@ package com.example.project_map.data.repository.admin
 
 import com.example.project_map.data.model.UserData
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -15,6 +16,38 @@ data class MemberFinancials(
 class AdminUserRepository {
 
     private val db = FirebaseFirestore.getInstance()
+
+    // Menggunakan callback untuk realtime updates karena addSnapshotListener harus di-detach
+    fun getMembersRealtime(onData: (List<UserData>) -> Unit, onError: (String) -> Unit): ListenerRegistration {
+        return db.collection("users")
+            .whereEqualTo("admin", false)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    onError(error.message ?: "Unknown error")
+                    return@addSnapshotListener
+                }
+
+                val list = ArrayList<UserData>()
+                for (doc in value!!) {
+                    val user = doc.toObject(UserData::class.java)
+                    user.id = doc.id
+                    list.add(user)
+                }
+                onData(list)
+            }
+    }
+
+    fun updateMember(id: String, name: String, pokok: Double, wajib: Double, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val updates = mapOf(
+            "name" to name,
+            "simpananPokok" to pokok,
+            "simpananWajib" to wajib
+        )
+        db.collection("users").document(id)
+            .update(updates)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
+    }
     private val usersCollection = db.collection("users")
 
     // 1. Get All Members (Real-time)
@@ -78,4 +111,6 @@ class AdminUserRepository {
             Result.failure(e)
         }
     }
+
+
 }

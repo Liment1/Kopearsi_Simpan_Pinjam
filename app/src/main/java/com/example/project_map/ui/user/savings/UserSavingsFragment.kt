@@ -36,11 +36,8 @@ class UserSavingsFragment : Fragment() {
     private var _binding: FragmentUserSavingsBinding? = null
     private val binding get() = _binding!!
     private val viewModel: UserSavingsViewModel by viewModels()
-
-    // --- UI Components ---
     private var loadingDialog: AlertDialog? = null
 
-    // --- Image Picker Logic ---
     private var selectedImageUri: Uri? = null
     private var ivPreviewRef: ImageView? = null
     private var btnUploadRef: Button? = null

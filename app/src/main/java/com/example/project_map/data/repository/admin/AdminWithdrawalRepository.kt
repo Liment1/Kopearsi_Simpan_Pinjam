@@ -26,25 +26,20 @@ class AdminWithdrawalRepository {
 
                 val requests = value?.toObjects(WithdrawalRequest::class.java) ?: emptyList()
 
-                // Attach ID manually (if @DocumentId didn't catch it for some reason)
                 value?.documents?.forEachIndexed { index, doc ->
                     requests[index].id = doc.id
                 }
 
-                // --- HYDRATION: Fetch Name & Image for each request ---
-                // We launch this in background so UI doesn't freeze
                 CoroutineScope(Dispatchers.IO).launch {
                     requests.forEach { req ->
                         try {
                             val userDoc = db.collection("users").document(req.userId).get().await()
-                            // Update the object in memory
                             req.userName = userDoc.getString("name") ?: "Tanpa Nama"
                             req.userAvatarUrl = userDoc.getString("avatarUrl") ?: ""
                         } catch (e: Exception) {
                             req.userName = "User Error"
                         }
                     }
-                    // Send the "Fixed" list to the ViewModel
                     trySend(requests)
                 }
             }
@@ -92,7 +87,6 @@ class AdminWithdrawalRepository {
             val historyRef = db.collection("users").document(req.userId).collection("savings").document()
 
             db.runTransaction { transaction ->
-                // REFUND (Add money back)
                 transaction.update(userRef, "simpananSukarela", FieldValue.increment(req.amount))
                 transaction.update(userRef, "totalSimpanan", FieldValue.increment(req.amount))
 
