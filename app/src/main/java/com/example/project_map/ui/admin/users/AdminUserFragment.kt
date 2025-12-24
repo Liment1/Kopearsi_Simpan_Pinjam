@@ -45,9 +45,7 @@ class AdminUserFragment : Fragment() {
             adminUserAdapter.submitList(list)
         }
 
-        binding.fabTambahAnggota.setOnClickListener {
-            Toast.makeText(context, "Fitur tambah anggota manual belum tersedia", Toast.LENGTH_SHORT).show()
-        }
+
     }
 
     private fun showTabbedEditDialog(user: UserData) {

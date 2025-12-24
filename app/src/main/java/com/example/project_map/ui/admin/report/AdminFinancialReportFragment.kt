@@ -24,6 +24,8 @@ import com.google.android.material.button.MaterialButtonToggleGroup
 import java.io.File
 import java.io.FileOutputStream
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class AdminFinancialReportFragment : Fragment() {
@@ -196,31 +198,85 @@ class AdminFinancialReportFragment : Fragment() {
 
     private fun exportToPdf() {
         val pdfDocument = PdfDocument()
-        val pageInfo = PdfDocument.PageInfo.Builder(1080, 1920, 1).create()
+        // Ukuran A4 (72 DPI) = 595 x 842 unit
+        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
         val page = pdfDocument.startPage(pageInfo)
         val canvas = page.canvas
+        val paint = android.graphics.Paint()
+        val titlePaint = android.graphics.Paint()
 
-        // Draw the view onto the PDF canvas
-        // We capture the whole ScrollView or the main layout
-        val content = view?.findViewById<View>(R.id.contentLayout) // Ensure your XML root or content has this ID
-        content?.draw(canvas)
+        // 1. Header Laporan
+        titlePaint.apply {
+            color = Color.BLACK
+            textSize = 18f
+            isFakeBoldText = true
+        }
+        canvas.drawText("LAPORAN KEUANGAN KOPERASI", 40f, 50f, titlePaint)
+
+        paint.textSize = 12f
+        canvas.drawText("Periode: ${tvCurrentPeriod.text}", 40f, 75f, paint)
+        canvas.drawLine(40f, 90f, 555f, 90f, paint)
+
+        // 2. Data Ringkasan (Mengambil data dari ViewModel/UI)
+        paint.textSize = 14f
+        canvas.drawText("Ringkasan Umum", 40f, 120f, titlePaint)
+
+        paint.textSize = 12f
+        canvas.drawText("Total Pemasukan: ${tvTotalPemasukan.text}", 40f, 150f, paint)
+        canvas.drawText("Total Pengeluaran: ${tvTotalPengeluaran.text}", 40f, 175f, paint)
+
+        // Warna untuk Laba/Rugi
+        val netProfitText = tvLabaRugi.text.toString()
+        paint.color = if (!netProfitText.contains("-")) Color.GREEN else Color.RED
+        canvas.drawText("Laba/Rugi Bersih: $netProfitText", 40f, 200f, paint)
+        paint.color = Color.BLACK // Reset warna
+
+        // 3. Rincian Transaksi
+        canvas.drawText("Rincian Pemasukan", 40f, 240f, titlePaint)
+        canvas.drawText("- Simpanan: ${tvRincianSimpanan.text}", 50f, 265f, paint)
+        canvas.drawText("- Angsuran: ${tvRincianAngsuran.text}", 50f, 285f, paint)
+
+        canvas.drawText("Rincian Pengeluaran", 40f, 320f, titlePaint)
+        canvas.drawText("- Pinjaman Keluar: ${tvRincianPinjamanKeluar.text}", 50f, 345f, paint)
+        canvas.drawText("- Operasional: ${tvRincianOperasional.text}", 50f, 365f, paint)
+
+        // 4. Footer
+        paint.textSize = 10f
+        paint.color = Color.GRAY
+        val timestamp = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+        canvas.drawText("Dicetak pada: $timestamp", 40f, 800f, paint)
 
         pdfDocument.finishPage(page)
+        val fileName = "Laporan_Keuangan_${System.currentTimeMillis()}.pdf"
+        val resolver = requireContext().contentResolver
 
-        // Save to Downloads folder
-        val file = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            "Laporan_Keuangan.pdf"
-        )
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            val contentValues = android.content.ContentValues().apply {
+                put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
+                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS)
+            }
 
-        try {
-            pdfDocument.writeTo(FileOutputStream(file))
-            Toast.makeText(context, "PDF Disimpan di Downloads", Toast.LENGTH_LONG).show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(context, "Gagal export PDF: ${e.message}", Toast.LENGTH_SHORT).show()
-        } finally {
-            pdfDocument.close()
+            val uri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+            try {
+                if (uri != null) {
+                    resolver.openOutputStream(uri)?.use { outputStream ->
+                        pdfDocument.writeTo(outputStream)
+                    }
+                    Toast.makeText(context, "PDF tersimpan di folder Downloads", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(context, "Gagal simpan PDF: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            // LOGIKA UNTUK ANDROID 9 KE BAWAH (API < 29)
+            val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName)
+            try {
+                pdfDocument.writeTo(FileOutputStream(file))
+                Toast.makeText(context, "PDF tersimpan di folder Downloads", Toast.LENGTH_LONG).show()
+            } catch (e: Exception) {
+                Toast.makeText(context, "Gagal simpan PDF: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
