@@ -11,7 +11,7 @@ Koperasi Simpan Pinjam is a native Android application designed to modernize the
 
 The system is built on a robust MVVM architecture, utilizing Firebase for backend services and integrating with external ML models for intelligent credit scoring.
 
-## 📱 App Demo
+## App Demo
 
 Experience the core flows of the application, including Instant Loan Approval and Real-Time Savings updates.
 
